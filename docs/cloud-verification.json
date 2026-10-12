@@ -1,0 +1,100 @@
+{
+  "url": "https://elemental-arena-production.up.railway.app",
+  "checkedAt": "2026-10-12T06:39:51.552Z",
+  "httpChecks": [
+    {
+      "route": "/api/health",
+      "status": 200
+    },
+    {
+      "route": "/api/admin/metrics",
+      "status": 401
+    },
+    {
+      "route": "/.env",
+      "status": 404
+    },
+    {
+      "route": "/.runtime/game-process.json",
+      "status": 404
+    },
+    {
+      "route": "/assets/arena.png",
+      "status": 200
+    },
+    {
+      "route": "/assets/avatar-fire.png",
+      "status": 200
+    },
+    {
+      "route": "/api/auth/guest",
+      "origin": "untrusted",
+      "status": 403
+    }
+  ],
+  "visual": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "errors": [],
+      "width": 1440,
+      "documentWidth": 1440,
+      "missingImages": [],
+      "playtestLabel": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "errors": [],
+      "width": 390,
+      "documentWidth": 390,
+      "missingImages": [],
+      "playtestLabel": true
+    }
+  ],
+  "browserFlows": {
+    "count": 7,
+    "status": "passed",
+    "duration": "4.1 minutes",
+    "adminFixture": "skipped on cloud; verified against local MySQL in earlier suite"
+  },
+  "cookieFlags": {
+    "status": 200,
+    "secure": true,
+    "httpOnly": true,
+    "sameSiteLax": true
+  },
+  "databaseRestart": {
+    "status": "passed",
+    "healthAfterRestart": 200,
+    "preservedTestData": true,
+    "evidence": "Private cleanup job found and removed all 10 recorded accounts after the database restart"
+  },
+  "independentOfLaptop": {
+    "http": 200,
+    "checkedWhileLocalGameStopped": true
+  },
+  "migrationRepair": {
+    "status": "passed on Linux",
+    "historyPreserved": true,
+    "safetyTestsPassed": 7
+  },
+  "cleanup": {
+    "temporaryAccountsRemoved": 10,
+    "finishedTestMatchesRemoved": 6,
+    "privateJobRemoved": false,
+    "privateJobState": "Completed one-shot cleanup; deletion was declined by approval prompt",
+    "privateJobCurrentCpu": 0,
+    "privateJobCurrentMemoryGB": 0
+  },
+  "finalHealth": {
+    "cloud": 200,
+    "local": 200
+  },
+  "testAccountsRemainingInLeaderboard": 0,
+  "outsideLeaderboardEntriesPreserved": 1
+}

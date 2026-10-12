@@ -46,5 +46,18 @@
     "email": "requires provider adapter",
     "payments": "disabled",
     "ads": "disabled"
+  },
+  "deploymentSafetyTests": {
+    "proxyIdentity": 5,
+    "migrationCompatibility": 7,
+    "status": "passed"
+  },
+  "cloud": {
+    "url": "https://elemental-arena-production.up.railway.app",
+    "build": "passed",
+    "browserFlows": 7,
+    "duration": "4.1 minutes",
+    "health": 200,
+    "details": "docs/cloud-verification.json"
   }
 }

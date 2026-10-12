@@ -25,7 +25,7 @@ The platform never sells stronger powers, cups, extra ranked turns, or competiti
 | Tournaments | Real single-elimination brackets; registration, manual or scheduled start, synchronized matches, advancement, draw replay, champion view and exactly-once champion coins | No other bracket formats are claimed |
 | Administration | Role-protected metrics, queue/economy/integrity views, players, reports, matches, tournaments, seasons, cosmetics, missions, announcements and audit records | Create the initial administrator through the local operator command |
 | Accessibility | Keyboard controls, named inputs, modal focus management, reduced motion, contrast, responsive layouts and mobile navigation | Broader assistive-technology testing remains part of public release QA |
-| Operations | Managed isolated MySQL, repeatable setup/seed/migrations, local launch/stop, persistent Node runtime, health checks and Docker configuration | Docker and credential-dependent external services require verification in their target environment |
+| Operations | Managed isolated MySQL, repeatable setup/seed/migrations, local launch/stop, persistent Node runtime, health checks and Docker configuration | Linux Docker build and Railway app/private MySQL verified; provider integrations and commercial operations remain |
 
 ## Automated evidence
 
@@ -54,4 +54,18 @@ Browser cleanup only touches exact fixture IDs written to `.runtime/e2e-test-use
 
 ## External launch work
 
-The laptop build can provide a substantial working game without pretending that third-party services are configured. Public launch additionally needs an actual hosting environment, HTTPS, backups, monitoring, sender/email credentials, Google OAuth credentials if enabled, and real operator moderation. Payment and advertising integrations need the intended provider and region; until then, the UI must describe their availability honestly. Multi-server deployment additionally needs a Socket.IO adapter and shared queues, presence, rate limits and match coordination.
+The cloud playtest is deployed on Railway with HTTPS and private MySQL. Commercial launch additionally needs tested backups/restore, ongoing monitoring, sender/email credentials, Google OAuth credentials if enabled, and real operator moderation. Payment and advertising integrations need the intended provider and region; until then, the UI must describe their availability honestly. Multi-server deployment additionally needs a Socket.IO adapter and shared queues, presence, rate limits and match coordination.
+
+## Railway cloud playtest — 12 October 2026
+
+[Play Elemental Arena](https://elemental-arena-production.up.railway.app). The application is pinned to verified source commit `a57614dcc984d506feed5a5be00ff8348e2267b7`; a normal GitHub push does not silently replace the live coordinator. It runs independently of the laptop. Railway account and trial limits still apply.
+
+The Linux container build succeeded. Fresh database setup exposed two Windows-origin table-name casing errors. An exact-checksum guarded compatibility bootstrap completed their equivalent canonical DDL in the empty Linux database, preserved the historical migration SQL and checksums, and completed all five migrations. Seven safety tests cover source/history mismatch, nonempty data, unrelated failures, incompatible schema and interrupted completion. Five proxy identity tests also pass.
+
+All seven browser flows passed through Railway HTTPS in 4.1 minutes: ranked powers/cups/replay, AI practice and cosmetics/settings, social/private/reconnect/rematch, genuinely offline Classic, invitations/spectating/privacy controls, interactive tutorials, and human Quick Match. Cloud administration fixture promotion was disabled; administration and tournament operations remain covered by the earlier real local MySQL suite. No payment, email or Google provider is represented as live.
+
+Cloud desktop/mobile checks reported no browser errors, missing image assets or horizontal overflow. Health returned HTTP 200, unauthenticated admin returned HTTP 401, a rejected Origin returned HTTP 403, and local environment/runtime paths returned HTTP 404. Secure/HTTP-only/SameSite=Lax cookie flags were checked. The database was restarted with its persistent volume; all ten recorded test accounts remained and were subsequently removed with six finished test matches by the guarded private cleanup job. An outside account was preserved. No E2E account remains on the leaderboard.
+
+The app uses one replica, a 1 GB cap and no sleeping. MySQL has no public domain/TCP proxy, a 750 MB cap, a 128 MB buffer pool, limit of 60 connections and a 500 MB persistent volume. The completed private `qa-cleanup` service remains because its deletion approval was declined; it has no public endpoint and its restart policy is Never.
+
+Both final cloud and local health returned HTTP 200. The temporary laptop tunnel is closed, its prior local origin/proxy settings are restored, and the laptop production build is updated. Detailed evidence is in `cloud-verification.json`; screenshots are `screenshots/cloud-lobby-1440.png` and `screenshots/cloud-lobby-390.png`.

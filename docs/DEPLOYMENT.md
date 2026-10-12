@@ -54,3 +54,15 @@ Confirm that logs show migrations applied, the catalog seeded, and `arena_ready`
 Run broad automated browser verification against an isolated staging environment, not a database containing unrelated public players. The local test suite can target a staging origin using `E2E_BASE_URL`; that origin must be allowed by the server's `APP_ORIGIN`. Remove only recorded fixture IDs using the guarded cleanup script. Do not run MySQL backend fixtures against the public production database.
 
 Create the initial administrator through `node src/server/create-admin.mjs` in a private Railway operator shell, using chosen operator credentials. Registration never creates administrators. Before a durable public release, configure database backups, restore verification, ongoing monitoring, actual moderation and measured multiplayer load/balance testing. This document describes the deployable configuration; the Railway environment itself is verified only after its build and live checks succeed.
+
+## Current verified playtest
+
+Public game: https://elemental-arena-production.up.railway.app
+
+Repository: https://github.com/Abish133/Tick-tack-toe
+
+Project: `acc26b6a-93ae-4a71-9ff4-6530b8422722`; environment: `75a274f4-9d00-4dfa-89c8-708f9a25f8d0`. App service: `213443c6-55e7-40cf-8074-90f48b83461a`; private MySQL service: `9302a8c8-b29d-4d94-9fa8-4fb6717f8620`. Verified app deployment: `4077000f-8afb-4151-ae4d-d4d1cbd0a149`, source commit `a57614dcc984d506feed5a5be00ff8348e2267b7`.
+
+Both persistent services use one replica in `iad`. The app limit is 1 GB/1 CPU; MySQL is 750 MB/1 CPU with a 128 MB buffer pool and 60 connections, backed by a 500 MB volume. Health timeout is 180 seconds; sleeping is disabled. Authentication secrets and database credentials stay in private Railway variables. The source is pinned so ordinary pushes do not start a second coordinator. Stop the existing app before deliberately deploying a new version until distributed ownership is implemented.
+
+The optional private cleanup job runs `node scripts/cleanup-e2e-job.mjs`, with `E2E_CLEANUP_JOB=confirmed`, exact recorded ID arrays in `E2E_USER_IDS_JSON`/`E2E_TOURNAMENT_IDS_JSON`, and a private database reference. It creates no HTTP listener, must have no public domain and uses restart policy Never. Its guard refuses non-fixture users, unfinished matches and outside opponents. The completed `qa-cleanup` service remains because deletion was not approved; no volume is attached to it.
