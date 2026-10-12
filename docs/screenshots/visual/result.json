@@ -1,0 +1,29 @@
+{
+  "checks": [
+    "profile desktop no overflow",
+    "profile mobile no overflow",
+    "public-profile desktop no overflow",
+    "public-profile mobile no overflow",
+    "leaderboard desktop no overflow",
+    "leaderboard mobile no overflow",
+    "weekly-leaderboard desktop no overflow",
+    "weekly-leaderboard mobile no overflow",
+    "privacy-settings desktop no overflow",
+    "privacy-settings mobile no overflow",
+    "cosmetics desktop no overflow",
+    "cosmetics mobile no overflow",
+    "season-journey desktop no overflow",
+    "season-journey mobile no overflow",
+    "admin-overview desktop no overflow",
+    "admin-overview mobile no overflow",
+    "admin-missions desktop no overflow",
+    "admin-missions mobile no overflow",
+    "admin-announcements desktop no overflow",
+    "admin-announcements mobile no overflow",
+    "replay desktop no overflow",
+    "replay mobile no overflow",
+    "replay-analysis desktop no overflow",
+    "replay-analysis mobile no overflow"
+  ],
+  "issues": []
+}

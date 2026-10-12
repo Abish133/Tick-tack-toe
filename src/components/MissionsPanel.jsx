@@ -1,0 +1,15 @@
+'use client';
+import {useCallback,useEffect,useState} from 'react';
+import {Gift,Coins,Check,Target,Clock3,LoaderCircle,CalendarDays} from 'lucide-react';
+import styles from './ArenaExtras.module.css';
+
+export default function MissionsPanel({api,user,refresh,onError,onNotice}) {
+ const [data,setData]=useState(null),[busy,setBusy]=useState('');
+ const load=useCallback(()=>api('/missions').then(setData).catch(e=>onError(e.message)),[api,onError]);
+ useEffect(()=>{if(user)load();},[user?.id,load]);
+ async function claim(endpoint,body,key){setBusy(key);try{const result=await api(endpoint,'POST',body);await Promise.all([refresh(),load()]);onNotice(`${result.coins} cosmetic coins added to your wallet.`);}catch(e){onError(e.message);}finally{setBusy('');}}
+ if(!data)return <div className="loading-state"><LoaderCircle className="spin"/>Loading your rewards…</div>;
+ const day=data.daily?.day||1,claimed=data.daily?.claimedToday;
+ const groups=[['Daily missions',data.missions||[],data.dailyResetAt],['Weekly missions',data.weeklyMissions||[],data.weeklyResetAt]];
+ return <div className={styles.rewards}><section className={`panel ${styles.calendar}`}><div className={styles.sectionTitle}><Gift size={28}/><div><span className="eyebrow">YOUR DAILY SPARK</span><h2>A gift for showing up</h2></div></div><p>Earn cosmetic coins. Each claim advances your seven-day collection; missing a day never removes a reward.</p><div className={styles.days}>{(data.daily?.rewards||[40,50,60,70,80,90,120]).map((coins,i)=><div className={`${styles.day} ${i+1===day?styles.today:''}`} key={i}><span>DAY {i+1}</span>{i+1===day&&claimed?<Check size={22}/>:<Coins size={22}/>}<strong>{coins}</strong>{i+1===day&&<small>{claimed?'CLAIMED':'NEXT REWARD'}</small>}</div>)}</div><button className="button primary" disabled={!!busy||claimed} onClick={()=>claim('/rewards/daily',{},'daily')}><Gift size={17}/>{claimed?'Claimed today':'Claim daily reward'}</button><small className={styles.help}><CalendarDays size={13}/>A new login reward becomes available at 00:00 UTC.</small></section>{groups.map(([title,missions,reset])=><section className={`panel ${styles.missions}`} key={title}><div className={styles.sectionTitle}><Target size={21}/><h2>{title}</h2>{reset&&<small><Clock3 size={12}/>Resets {new Date(reset).toLocaleString()}</small>}</div>{missions.length?missions.map(m=><article className={styles.mission} key={m.id}><div><h3>{m.name}</h3><strong>{Math.min(m.target,m.progress||0)} / {m.target}</strong></div><p>{m.description}</p><div className="progress-track"><span style={{width:`${Math.min(100,(m.progress||0)/m.target*100)}%`}}/></div><footer><span><Coins size={14}/>{m.coins} coins</span><button className="button secondary" disabled={!!busy||m.claimed||(m.progress||0)<m.target} onClick={()=>claim('/missions/claim',{missionId:m.id},m.id)}>{m.claimed?<><Check size={14}/>Claimed</>:(m.progress||0)>=m.target?'Claim reward':'Keep playing'}</button></footer></article>):<p className="muted">No missions are active for this period.</p>}</section>)}</div>;
+}

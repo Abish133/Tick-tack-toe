@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.env
+.env.local
+.env.*
+!.env.example
+docs/test-link.json
+.runtime/
+test-results/
+playwright-report/
+*.log
+*.pid

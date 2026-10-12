@@ -1,0 +1,50 @@
+{
+  "reviewDate": "2026-10-12",
+  "productionBuild": "passed",
+  "coreTests": {
+    "engine": 22,
+    "backend": 32,
+    "replayAnalysis": 5,
+    "total": 59,
+    "status": "passed"
+  },
+  "browserFlows": {
+    "count": 7,
+    "status": "passed",
+    "duration": "2.2 minutes"
+  },
+  "visualChecks": {
+    "count": 24,
+    "jsErrors": 0,
+    "missingAssets": 0,
+    "horizontalOverflow": 0
+  },
+  "laptopLauncher": {
+    "immediateStopStart": "passed",
+    "savedData": "preserved"
+  },
+  "cleanup": {
+    "temporaryAccountsRemoved": 51,
+    "finishedTestMatchesRemoved": 32
+  },
+  "health": {
+    "http": 200,
+    "database": "mysql"
+  },
+  "release": {
+    "powersReleased": 6,
+    "powerConcepts": 22,
+    "equippedPowers": 3,
+    "turnSeconds": 20,
+    "targetMatchMinutes": [
+      2,
+      5
+    ]
+  },
+  "externalFeatures": {
+    "google": "requires credentials",
+    "email": "requires provider adapter",
+    "payments": "disabled",
+    "ads": "disabled"
+  }
+}

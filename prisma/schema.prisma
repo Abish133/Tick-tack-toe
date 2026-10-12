@@ -1,0 +1,523 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String?  @unique @db.VarChar(191)
+  passwordHash String?  @db.VarChar(255)
+  name         String   @unique @db.VarChar(40)
+  role         String   @default("PLAYER") @db.VarChar(20)
+  guest        Boolean  @default(false)
+  suspended    Boolean  @default(false)
+  verifiedAt   DateTime?
+  activeMatchId String?
+  activeMatch Match? @relation("UserActiveMatch",fields:[activeMatchId],references:[id],onDelete:SetNull)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  sessions     Session[]
+  accounts     Account[]
+  verificationTokens VerificationToken[]
+  profile      PlayerProfile?
+  settings     PlayerSettings?
+  stats        PlayerStats?
+  rating       PlayerRating?
+  wallet       CurrencyWallet?
+  powers       PlayerPower[]
+  loadout      PowerLoadout?
+  participants MatchParticipant[]
+  inventory    PlayerInventory[]
+  purchases    ShopPurchase[]
+  claims       RewardClaim[]
+  missionProgress PlayerMissionProgress[]
+  achievements PlayerAchievement[]
+  ratings      RatingHistory[]
+  seasons      SeasonParticipation[]
+  notifications Notification[]
+  tournamentEntries TournamentParticipant[]
+  audits       AuditLog[]
+  sentRequests FriendRequest[] @relation("RequestSender")
+  receivedRequests FriendRequest[] @relation("RequestReceiver")
+  friendsA     Friendship[] @relation("FriendA")
+  friendsB     Friendship[] @relation("FriendB")
+  blocks       BlockedUser[] @relation("Blocker")
+  blockedBy    BlockedUser[] @relation("Blocked")
+  reports      PlayerReport[] @relation("Reporter")
+  reportsAgainst PlayerReport[] @relation("Reported")
+  @@index([createdAt])
+}
+
+model Account {
+  id String @id @default(cuid())
+  userId String
+  provider String @db.VarChar(30)
+  providerAccountId String @db.VarChar(191)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@unique([provider,providerAccountId])
+}
+
+model Session {
+  id String @id @default(cuid())
+  tokenHash String @unique @db.VarChar(64)
+  userId String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@index([userId,expiresAt])
+}
+
+model VerificationToken {
+  id String @id @default(cuid())
+  userId String
+  tokenHash String @unique @db.VarChar(64)
+  purpose String @db.VarChar(30)
+  expiresAt DateTime
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+}
+
+model PlayerProfile {
+  userId String @id
+  avatar String @default("avatar-void") @db.VarChar(80)
+  title String @default("Rookie Strategist") @db.VarChar(80)
+  region String @default("GLOBAL") @db.VarChar(20)
+  bio String @default("") @db.VarChar(200)
+  xp Int @default(0)
+  level Int @default(1)
+  equippedBoard String @default("board-void") @db.VarChar(80)
+  equippedMark String @default("marks-neon") @db.VarChar(80)
+  equippedEffect String? @db.VarChar(80)
+  equippedFrame String? @db.VarChar(80)
+  equippedBanner String? @db.VarChar(80)
+  equippedArena String? @db.VarChar(80)
+  equippedEmote String? @db.VarChar(80)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+}
+
+model PlayerSettings {
+  userId String @id
+  sound Boolean @default(true)
+  music Boolean @default(false)
+  reducedMotion Boolean @default(false)
+  highContrast Boolean @default(false)
+  allowSpectators Boolean @default(true)
+  notifications Boolean @default(true)
+  allowFriendRequests Boolean @default(true)
+  showOnline Boolean @default(true)
+  profileVisibility String @default("public") @db.VarChar(10)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+}
+
+model PlayerStats {
+  userId String @id
+  played Int @default(0)
+  wins Int @default(0)
+  losses Int @default(0)
+  draws Int @default(0)
+  rankedPlayed Int @default(0)
+  aiPlayed Int @default(0)
+  powersUsed Int @default(0)
+  streak Int @default(0)
+  bestStreak Int @default(0)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+}
+
+model PlayerRating {
+  userId String @id
+  cups Int @default(0)
+  peakCups Int @default(0)
+  rankedWins Int @default(0)
+  rankedLosses Int @default(0)
+  rankedDraws Int @default(0)
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@index([cups,updatedAt])
+}
+
+model RankDivision {
+  id String @id @db.VarChar(30)
+  name String @db.VarChar(30)
+  minCups Int @unique
+  color String @db.VarChar(20)
+}
+
+model Season {
+  id String @id @db.VarChar(80)
+  name String @db.VarChar(80)
+  startsAt DateTime
+  endsAt DateTime
+  active Boolean @default(true)
+  participants SeasonParticipation[]
+  matches Match[]
+  snapshots LeaderboardSnapshot[]
+}
+
+model SeasonParticipation {
+  id String @id @default(cuid())
+  seasonId String
+  userId String
+  cups Int @default(0)
+  wins Int @default(0)
+  played Int @default(0)
+  xp Int @default(0)
+  season Season @relation(fields:[seasonId],references:[id],onDelete:Cascade)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@unique([seasonId,userId])
+  @@index([seasonId,cups])
+}
+
+model Match {
+  id String @id @default(cuid())
+  mode String @db.VarChar(30)
+  ruleset String @db.VarChar(30)
+  status String @default("active") @db.VarChar(20)
+  state Json
+  initialState Json
+  sequence Int @default(0)
+  roomCode String? @unique @db.VarChar(12)
+  difficulty String? @db.VarChar(30)
+  allowSpectators Boolean @default(false)
+  seasonId String?
+  createdAt DateTime @default(now())
+  finishedAt DateTime?
+  settledAt DateTime?
+  participants MatchParticipant[]
+  actions MatchAction[]
+  result MatchResult?
+  reports PlayerReport[]
+  tournamentMatch TournamentMatch?
+  season Season? @relation(fields:[seasonId],references:[id])
+  activeUsers User[] @relation("UserActiveMatch")
+  @@index([status,createdAt])
+  @@index([mode,finishedAt])
+}
+
+model MatchParticipant {
+  id String @id @default(cuid())
+  matchId String
+  userId String?
+  engineId String
+  name String @db.VarChar(40)
+  mark String @db.VarChar(1)
+  isAI Boolean @default(false)
+  initialCups Int @default(0)
+  cupChange Int @default(0)
+  coinReward Int @default(0)
+  xpReward Int @default(0)
+  outcome String? @db.VarChar(20)
+  match Match @relation(fields:[matchId],references:[id],onDelete:Cascade)
+  user User? @relation(fields:[userId],references:[id])
+  @@unique([matchId,engineId])
+  @@unique([matchId,mark])
+  @@index([userId,matchId])
+}
+
+model MatchAction {
+  id String @id @default(cuid())
+  matchId String
+  sequence Int
+  requestId String @db.VarChar(80)
+  actorId String @db.VarChar(80)
+  action Json
+  event Json
+  state Json
+  createdAt DateTime @default(now())
+  match Match @relation(fields:[matchId],references:[id],onDelete:Cascade)
+  @@unique([matchId,sequence])
+  @@unique([matchId,requestId])
+}
+
+model MatchResult {
+  matchId String @id
+  winnerId String? @db.VarChar(80)
+  reason String @db.VarChar(80)
+  turns Int
+  finalBoard Json
+  settledAt DateTime @default(now())
+  match Match @relation(fields:[matchId],references:[id],onDelete:Cascade)
+}
+
+model RatingHistory {
+  id String @id @default(cuid())
+  userId String
+  matchId String
+  before Int
+  after Int
+  delta Int
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@unique([userId,matchId])
+}
+
+model PowerDefinition {
+  id String @id @db.VarChar(40)
+  name String @db.VarChar(60)
+  element String @db.VarChar(30)
+  category String @db.VarChar(30)
+  description String @db.VarChar(500)
+  cost Int
+  cooldown Int
+  maxUses Int
+  enabled Boolean @default(false)
+  unlockLevel Int @default(1)
+  sortOrder Int
+  owners PlayerPower[]
+  slots PowerLoadoutSlot[]
+}
+
+model PlayerPower {
+  userId String
+  powerId String
+  unlockedAt DateTime @default(now())
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  power PowerDefinition @relation(fields:[powerId],references:[id])
+  @@id([userId,powerId])
+}
+
+model PowerLoadout {
+  id String @id @default(cuid())
+  userId String @unique
+  name String @default("Arena loadout") @db.VarChar(40)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  slots PowerLoadoutSlot[]
+}
+
+model PowerLoadoutSlot {
+  loadoutId String
+  position Int
+  powerId String
+  loadout PowerLoadout @relation(fields:[loadoutId],references:[id],onDelete:Cascade)
+  power PowerDefinition @relation(fields:[powerId],references:[id])
+  @@id([loadoutId,position])
+  @@unique([loadoutId,powerId])
+}
+
+model CurrencyWallet {
+  userId String @id
+  coins Int @default(250)
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  transactions CurrencyTransaction[]
+}
+
+model CurrencyTransaction {
+  id String @id @default(cuid())
+  userId String
+  amount Int
+  balanceAfter Int
+  reason String @db.VarChar(80)
+  reference String @unique @db.VarChar(191)
+  createdAt DateTime @default(now())
+  wallet CurrencyWallet @relation(fields:[userId],references:[userId],onDelete:Cascade)
+  @@index([userId,createdAt])
+}
+
+model RewardClaim {
+  id String @id @default(cuid())
+  userId String
+  kind String @db.VarChar(30)
+  key String @db.VarChar(100)
+  coins Int
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@unique([userId,kind,key])
+}
+
+model DailyMission {
+  id String @id @db.VarChar(40)
+  name String @db.VarChar(80)
+  description String @db.VarChar(200)
+  metric String @db.VarChar(40)
+  target Int
+  coins Int
+  active Boolean @default(true)
+  period String @default("daily") @db.VarChar(10)
+  progress PlayerMissionProgress[]
+}
+
+model PlayerMissionProgress {
+  userId String
+  missionId String
+  dateKey String @db.VarChar(10)
+  progress Int @default(0)
+  claimedAt DateTime?
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  mission DailyMission @relation(fields:[missionId],references:[id])
+  @@id([userId,missionId,dateKey])
+}
+
+model Achievement {
+  id String @id @db.VarChar(40)
+  name String @db.VarChar(80)
+  description String @db.VarChar(200)
+  metric String @db.VarChar(40)
+  target Int
+  coins Int
+  players PlayerAchievement[]
+}
+
+model PlayerAchievement {
+  userId String
+  achievementId String
+  unlockedAt DateTime @default(now())
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  achievement Achievement @relation(fields:[achievementId],references:[id])
+  @@id([userId,achievementId])
+}
+
+model FriendRequest {
+  id String @id @default(cuid())
+  senderId String
+  receiverId String
+  status String @default("pending") @db.VarChar(20)
+  createdAt DateTime @default(now())
+  sender User @relation("RequestSender",fields:[senderId],references:[id],onDelete:Cascade)
+  receiver User @relation("RequestReceiver",fields:[receiverId],references:[id],onDelete:Cascade)
+  @@unique([senderId,receiverId])
+  @@index([receiverId,status])
+}
+
+model Friendship {
+  id String @id @default(cuid())
+  userAId String
+  userBId String
+  createdAt DateTime @default(now())
+  userA User @relation("FriendA",fields:[userAId],references:[id],onDelete:Cascade)
+  userB User @relation("FriendB",fields:[userBId],references:[id],onDelete:Cascade)
+  @@unique([userAId,userBId])
+}
+
+model BlockedUser {
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+  blocker User @relation("Blocker",fields:[blockerId],references:[id],onDelete:Cascade)
+  blocked User @relation("Blocked",fields:[blockedId],references:[id],onDelete:Cascade)
+  @@id([blockerId,blockedId])
+}
+
+model Tournament {
+  id String @id @default(cuid())
+  name String @db.VarChar(100)
+  status String @default("registration") @db.VarChar(30)
+  startsAt DateTime
+  maxPlayers Int @default(16)
+  ruleset String @default("elemental") @db.VarChar(30)
+  createdAt DateTime @default(now())
+  participants TournamentParticipant[]
+  rounds TournamentRound[]
+}
+
+model TournamentParticipant {
+  tournamentId String
+  userId String
+  seed Int?
+  eliminated Boolean @default(false)
+  wins Int @default(0)
+  tournament Tournament @relation(fields:[tournamentId],references:[id],onDelete:Cascade)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@id([tournamentId,userId])
+}
+
+model TournamentRound {
+  id String @id @default(cuid())
+  tournamentId String
+  number Int
+  tournament Tournament @relation(fields:[tournamentId],references:[id],onDelete:Cascade)
+  matches TournamentMatch[]
+  @@unique([tournamentId,number])
+}
+
+model TournamentMatch {
+  id String @id @default(cuid())
+  roundId String
+  position Int
+  matchId String? @unique
+  playerAId String? @db.VarChar(80)
+  playerBId String? @db.VarChar(80)
+  winnerId String? @db.VarChar(80)
+  round TournamentRound @relation(fields:[roundId],references:[id],onDelete:Cascade)
+  match Match? @relation(fields:[matchId],references:[id])
+  @@unique([roundId,position])
+}
+
+model CosmeticItem {
+  id String @id @db.VarChar(80)
+  name String @db.VarChar(80)
+  type String @db.VarChar(30)
+  rarity String @db.VarChar(30)
+  description String @db.VarChar(250)
+  price Int
+  enabled Boolean @default(true)
+  asset String @db.VarChar(200)
+  inventory PlayerInventory[]
+  purchases ShopPurchase[]
+}
+
+model PlayerInventory {
+  userId String
+  cosmeticId String
+  acquiredAt DateTime @default(now())
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  cosmetic CosmeticItem @relation(fields:[cosmeticId],references:[id])
+  @@id([userId,cosmeticId])
+}
+
+model ShopPurchase {
+  id String @id @default(cuid())
+  userId String
+  cosmeticId String
+  requestId String @db.VarChar(80)
+  coins Int
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  cosmetic CosmeticItem @relation(fields:[cosmeticId],references:[id])
+  @@unique([userId,requestId])
+}
+
+model LeaderboardSnapshot {
+  id String @id @default(cuid())
+  seasonId String
+  entries Json
+  createdAt DateTime @default(now())
+  season Season @relation(fields:[seasonId],references:[id],onDelete:Cascade)
+}
+
+model Notification {
+  id String @id @default(cuid())
+  userId String
+  type String @db.VarChar(30)
+  message String @db.VarChar(250)
+  metadata Json?
+  readAt DateTime?
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@index([userId,createdAt])
+}
+
+model PlayerReport {
+  id String @id @default(cuid())
+  reporterId String
+  reportedId String
+  matchId String?
+  reason String @db.VarChar(500)
+  status String @default("open") @db.VarChar(20)
+  createdAt DateTime @default(now())
+  reporter User @relation("Reporter",fields:[reporterId],references:[id])
+  reported User @relation("Reported",fields:[reportedId],references:[id])
+  match Match? @relation(fields:[matchId],references:[id])
+}
+
+model AuditLog {
+  id String @id @default(cuid())
+  userId String?
+  action String @db.VarChar(80)
+  details Json
+  createdAt DateTime @default(now())
+  user User? @relation(fields:[userId],references:[id])
+  @@index([action,createdAt])
+}

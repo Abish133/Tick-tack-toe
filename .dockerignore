@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+.runtime
+test-results
+playwright-report
+work
+*.log
+docs/screenshots
+docs/lobby-desktop.png
+docs/lobby-mobile.png
+tests
+*.zip
+*.7z

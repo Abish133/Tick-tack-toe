@@ -1,0 +1,23 @@
+import {createHmac,randomBytes,scrypt as scryptCb,timingSafeEqual} from 'node:crypto';
+import {promisify} from 'node:util';
+import {db} from './db.mjs';
+const scrypt=promisify(scryptCb);
+export class AppError extends Error { constructor(code,message,status=400){super(message);this.code=code;this.status=status;} }
+export const fail=(condition,code,message,status=400)=>{if(!condition)throw new AppError(code,message,status);};
+export const cleanText=(v,min=1,max=80)=>typeof v==='string' && v.trim().length>=min && v.trim().length<=max ? v.trim() : null;
+export const secret=()=>{const value=process.env.SESSION_SECRET||process.env.AUTH_SECRET;fail(value&&value.length>=32,'SERVER_CONFIG','Authentication secret must contain at least 32 characters.',503);return value;};
+export const hashToken=token=>createHmac('sha256',secret()).update(token).digest('hex');
+export async function passwordHash(password){const salt=randomBytes(16).toString('hex');const key=await scrypt(password,salt,64,{N:16384,r:8,p:1});return `scrypt$16384$${salt}$${key.toString('hex')}`;}
+export async function verifyPassword(password,hash){if(typeof hash!=='string')return false;const [alg,n,salt,hex]=hash.split('$');if(alg!=='scrypt'||n!=='16384'||!salt||!hex)return false;const expected=Buffer.from(hex,'hex');const key=await scrypt(password,salt,64,{N:16384,r:8,p:1});return key.length===expected.length&&timingSafeEqual(key,expected);}
+export function parseCookies(value=''){return Object.fromEntries(value.split(';').map(x=>{const i=x.indexOf('=');if(i<0)return null;try{return [x.slice(0,i).trim(),decodeURIComponent(x.slice(i+1).trim())];}catch{return null;}}).filter(Boolean));}
+export const sessionCookie=(token,maxAge=60*60*24*30)=>`ea_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${process.env.NODE_ENV==='production'?'; Secure':''}`;
+export async function createSession(userId){const token=randomBytes(32).toString('base64url');await db.session.create({data:{userId,tokenHash:hashToken(token),expiresAt:new Date(Date.now()+30*86400000)}});return token;}
+export async function authenticate(cookie){const token=parseCookies(cookie).ea_session;if(!token||token.length>100)return null;const session=await db.session.findUnique({where:{tokenHash:hashToken(token)},include:{user:true}});if(!session||session.expiresAt<=new Date()||session.user.suspended)return null;return session.user;}
+export async function requireUser(cookie){const user=await authenticate(cookie);fail(user,'UNAUTHENTICATED','Sign in to continue.',401);return user;}
+export function allowedOrigins(){return (process.env.APP_ORIGIN||'http://localhost:3000').split(',').map(s=>s.trim()).filter(Boolean);}
+export function checkOrigin(origin){fail(origin&&allowedOrigins().includes(origin),'ORIGIN','This request origin is not permitted.',403);}
+export function originAllowed(origin){return Boolean(origin&&allowedOrigins().includes(origin));}
+const limits=globalThis.__elementalRateLimits||(globalThis.__elementalRateLimits=new Map());
+export function rateLimit(key,limit=60,windowMs=60000){const now=Date.now();let entry=limits.get(key);if(!entry||entry.reset<=now){entry={count:0,reset:now+windowMs};limits.set(key,entry);}entry.count++;fail(entry.count<=limit,'RATE_LIMITED','Too many requests. Please try again shortly.',429);if(limits.size>10000)for(const[k,v]of limits)if(v.reset<=now)limits.delete(k);}
+export function safeError(error){if(error instanceof AppError)return {code:error.code,message:error.message};if(error.code==='P2002'){const target=String(error.meta?.target||'');if(target.includes('User_name'))return {code:'USERNAME_TAKEN',message:'That player name is already taken. Choose another unique name.'};if(target.includes('User_email'))return {code:'EMAIL_TAKEN',message:'An account already uses that email address. Sign in or choose another email.'};return {code:'CONFLICT',message:'That entry already exists or this action was already processed.'};}if(error.code==='P2025')return {code:'NOT_FOUND',message:'The requested record was not found.'};if(error.code==='P2034')return {code:'CONFLICT',message:'Another request changed this record. Please retry.'};if(error.code&&!/^P\d{4}$/.test(String(error.code)))return {code:error.code,message:error.message};console.error(JSON.stringify({level:'error',event:'request_failed',message:error.message,at:new Date().toISOString()}));return {code:'SERVER_ERROR',message:'The server could not complete that request.'};}
+export const dateKey=()=>new Date().toISOString().slice(0,10);
