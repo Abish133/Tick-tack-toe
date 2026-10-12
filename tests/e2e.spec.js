@@ -20,8 +20,11 @@ const tag = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(
 const board = page => page.getByRole('group', { name: 'Three by three elemental game board' });
 test.beforeEach(async ({},info)=>{
   // The suite shares one localhost IP. Respect the normal public request budget
-  // after the API-heavy first four flows instead of weakening server protection.
-  if(info.title.startsWith('direct friend invitations'))await new Promise(resolve=>setTimeout(resolve,60_000));
+  // after the commerce/power flows and before each heavy social flow.
+  if(info.title.startsWith('friends, daily rewards')||info.title.startsWith('direct friend invitations')){
+    info.setTimeout(240_000);
+    await new Promise(resolve=>setTimeout(resolve,60_000));
+  }
 });
 
 async function read(page, route) {
@@ -335,7 +338,7 @@ test('guest practice, three-power loadout, persisted settings and cosmetic purch
 });
 
 test('friends, daily rewards, private classic play, reconnect, emotes and rematches persist', async ({ browser }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(240_000);
   const options = { baseURL: process.env.E2E_BASE_URL || 'http://localhost:3000', viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' };
   const contexts = await Promise.all([browser.newContext(options), browser.newContext(options)]);
   const pages = await Promise.all(contexts.map(context => context.newPage()));
@@ -486,7 +489,7 @@ test('local classic reloads and plays with the browser network offline', async (
 });
 
 test('direct friend invitations allow a read-only spectator and block controls prevent requests', async ({ browser }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(240_000);
   const options = { baseURL: process.env.E2E_BASE_URL || 'http://localhost:3000', viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' };
   const contexts = await Promise.all(Array.from({ length: 3 }, () => browser.newContext(options)));
   const [a, b, viewer] = await Promise.all(contexts.map(context => context.newPage()));

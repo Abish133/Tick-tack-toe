@@ -14,13 +14,15 @@ const fixture = (options = {}) => {
 };
 const expectCode = (fn, code) => assert.throws(fn, error => error.code === code);
 
-test('catalog has 22 distinct concepts with only the six released powers equipable', () => {
+test('catalog has 22 distinct functional powers with exactly three equipped', () => {
   assert.equal(POWER_CATALOG.length, 22);
   assert.equal(new Set(POWER_CATALOG.map(item => item.id)).size, 22);
-  assert.deepEqual(RANKED_POWER_IDS, ['fire', 'shield', 'portal', 'ice', 'crystal', 'surge']);
+  assert.equal(RANKED_POWER_IDS.length, 22);
+  assert(POWER_CATALOG.every(power => power.implemented && power.enabled && power.ranked));
   expectCode(() => game({ players: players(['fire', 'fire', 'portal']) }), 'INVALID_LOADOUT');
   expectCode(() => game({ players: players(['fire', 'portal']) }), 'INVALID_LOADOUT');
-  expectCode(() => game({ players: players(['fire', 'portal', 'eclipse']) }), 'INVALID_LOADOUT');
+  expectCode(() => game({ players: players(['fire', 'portal', 'unknown']) }), 'INVALID_LOADOUT');
+  assert.deepEqual(game({ players: players(['fire', 'portal', 'eclipse']) }).players[0].loadout, ['fire', 'portal', 'eclipse']);
 });
 
 test('all eight classic lines and an ordinary full-board draw resolve', () => {

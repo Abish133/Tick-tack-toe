@@ -4,7 +4,7 @@
 
 `server.mjs` runs one persistent Node process containing Next App Router and Socket.IO on the same port. Start with `npm run dev`, or build with `npm run build` and use `npm start`. Running `next start` alone does not start the match coordinator.
 
-MySQL 8 is the persistent source of truth. Prisma migrations create the relational schema; `node prisma/seed.mjs` inserts the approved six-power release, sixteen planned concepts, real cosmetic items, divisions, missions, achievements, and the initial season. It never creates players, rankings or fictitious matches. The canonical power definitions come from the pure game engine. Seed runs preserve configured cosmetic prices and availability.
+MySQL 8 is the persistent source of truth. Prisma migrations create the relational schema; `node prisma/seed.mjs` inserts all 22 powers, real cosmetic items including exclusive premium rewards, divisions, missions, achievements and the initial season. Existing players receive all 22 powers without losing their selected loadout. Seed never creates fictitious players or results, and preserves configured cosmetic prices and availability.
 
 The shared `globalThis.__elementalArena` service allows Route Handlers and Socket.IO to use the same coordinator. Persistent matches are loaded on startup. Temporary queues, presence, rematch votes, OAuth state and unfilled private rooms are memory-resident. Unfilled rooms expire after 30 minutes. Active private matches, match actions, outcomes, profiles, currency, friendships, bracket state and rewards survive restarts.
 
@@ -46,7 +46,7 @@ Password reset and email verification delivery require:
 
 The adapter receives POST JSON `{from,to,subject,text}` and must send the email, returning a successful status only after accepting delivery. Reset/verification links contain a one-time random token; only its hash is stored, with a one-hour expiry. Delivery remains unavailable unless configured. Reset request responses conceal whether an email exists. Reset confirmation consumes the token and revokes all account sessions. Automated tests validate token consumption, password changes and socket revocation; delivery to an actual mailbox remains provider-dependent.
 
-Real-money checkout, premium passes and rewarded advertising are deliberately unavailable until real providers are configured and integrated. No fake payment or ad-success events exist. Earned-coin purchases are fully transactional cosmetics with no ranked power benefits.
+The premium pass works with 900 earned coins; its five exclusive rewards require current season XP and persisted entitlement. Razorpay cash checkout and Android AdMob SSV are integrated and stay disabled until configured. Original-byte webhook HMAC, captured-payment matching, unique grant references and transactional wallet locking protect settlement; native ad events cannot grant currency. See [COMMERCE.md](COMMERCE.md) for exact credentials, callback URLs and live validation.
 
 ## Match authority and settlement
 

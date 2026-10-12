@@ -4,6 +4,11 @@ import {POWER_CATALOG} from '../src/lib/game-engine/powers.js';
 
 const db = new PrismaClient();
 const cosmetics = [
+  {id:'frame-eclipse',name:'Eclipse Halo',type:'frame',rarity:'legendary',description:'Premium season reward: an obsidian halo with a violet eclipse rim. Cosmetic only.',price:0,asset:''},
+  {id:'banner-solar',name:'Solar Horizon',type:'banner',rarity:'epic',description:'Premium season reward: a luminous amber and indigo profile horizon. Cosmetic only.',price:0,asset:''},
+  {id:'marks-galaxy',name:'Galaxy Sigils',type:'marks',rarity:'legendary',description:'Premium season reward: starlit violet and cyan marks. Cosmetic only.',price:0,asset:'/assets/elements.png'},
+  {id:'effect-dragon',name:'Dragon Arrival',type:'effect',rarity:'legendary',description:'Premium season reward: a warm dragon-fire glow around your identity. Cosmetic only.',price:0,asset:''},
+  {id:'arena-starlight',name:'Starlight Sanctuary',type:'arena',rarity:'legendary',description:'Premium season reward: a violet and cyan starfield arena. Cosmetic only.',price:0,asset:'/assets/arena-aurora.png'},
   {id:'frame-astral',name:'Astral Halo',type:'frame',rarity:'epic',description:'A violet and gold portrait frame. Cosmetic only.',price:300,asset:''},
   {id:'banner-convergence',name:'Elemental Convergence',type:'banner',rarity:'rare',description:'A flowing cyan and violet profile banner.',price:300,asset:''},
   {id:'arena-aurora',name:'Aurora Nexus',type:'arena',rarity:'legendary',description:'An aurora-lit arena environment. Cosmetic only.',price:650,asset:'/assets/arena-aurora.png'},
@@ -27,6 +32,15 @@ try {
     await db.powerDefinition.upsert({where:{id},create:data,update:data});
   }
   await db.powerDefinition.deleteMany({where:{id:{notIn:POWER_CATALOG.map(p=>p.id)},owners:{none:{}},slots:{none:{}}}});
+  // Release all powers to existing players as well as new accounts. Paged,
+  // idempotent inserts preserve loadouts, purchases and the rest of player data.
+  let cursor;
+  while(true){
+    const players=await db.user.findMany({select:{id:true},orderBy:{id:'asc'},take:100,...(cursor?{cursor:{id:cursor},skip:1}:{})});
+    if(!players.length)break;
+    await db.playerPower.createMany({data:players.flatMap(player=>POWER_CATALOG.map(power=>({userId:player.id,powerId:power.id}))),skipDuplicates:true});
+    cursor=players.at(-1).id;
+  }
   for (const item of cosmetics) {const avatarAsset={'avatar-void':'/assets/avatar-void.png','avatar-ember':'/assets/avatar-fire.png','avatar-frost':'/assets/avatar-ice.png'}[item.id];const data={...item,asset:avatarAsset||(item.type==='board'?'/assets/arena.png':['title','effect','frame','banner','emote'].includes(item.type)?'':item.type==='arena'?item.asset:'/assets/elements.png')};await db.cosmeticItem.upsert({where:{id:item.id},create:data,update:{asset:data.asset}});}
   const divisions = [['rookie','Rookie',0,'#acb4d0'],['bronze','Bronze',100,'#c58c60'],['silver','Silver',250,'#d2def8'],['gold','Gold',450,'#ffd067'],['platinum','Platinum',700,'#89f2e8'],['diamond','Diamond',1000,'#77bcff'],['master','Master',1400,'#bd94ff'],['grandmaster','Grandmaster',1900,'#fa7dd7'],['legend','Legend',2500,'#ffb157'],['mythic','Mythic',3300,'#ff777b']];
   for(const [id,name,minCups,color] of divisions) await db.rankDivision.upsert({where:{id},create:{id,name,minCups,color},update:{name,minCups,color}});
@@ -55,5 +69,5 @@ try {
     {id:'power-twenty',name:'Elemental Adept',description:'Use twenty powers in human matches.',metric:'powersUsed',target:20,coins:150},
     {id:'rank-ten',name:'Competitive Spirit',description:'Complete ten ranked matches.',metric:'rankedPlayed',target:10,coins:200},
   ]) await db.achievement.upsert({where:{id:achievement.id},create:achievement,update:achievement});
-  console.log('Seed complete: 22 power concepts, 6 balanced release powers, cosmetics, divisions, season, missions and achievements. No fake users or leaderboard entries.');
+  console.log('Seed complete: all 22 powers granted equally, free and premium cosmetics, divisions, season, missions and achievements. No fake users or leaderboard entries.');
 } finally { await db.$disconnect(); }

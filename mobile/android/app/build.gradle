@@ -1,0 +1,48 @@
+import groovy.json.JsonOutput
+
+plugins { id 'com.android.application' }
+
+def gameOrigin = providers.environmentVariable('ELEMENTAL_GAME_ORIGIN')
+    .orElse('https://elemental-arena-production.up.railway.app').get().replaceAll('/+$', '')
+def originUri = new URI(gameOrigin)
+if (originUri.scheme != 'https' || !originUri.host || originUri.userInfo || originUri.query || originUri.fragment || (originUri.path && originUri.path != '')) {
+    throw new GradleException('ELEMENTAL_GAME_ORIGIN must be one HTTPS origin without a path, query or credentials.')
+}
+def adMobAppId = providers.environmentVariable('ADMOB_ANDROID_APP_ID')
+    .orElse('ca-app-pub-3940256099942544~3347511713').get()
+if (!(adMobAppId ==~ /ca-app-pub-[0-9]{16}~[0-9]{10}/)) {
+    throw new GradleException('ADMOB_ANDROID_APP_ID must be an AdMob Android app ID, not an ad-unit ID.')
+}
+
+android {
+    namespace 'com.elementalarena.game'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'com.elementalarena.game'
+        minSdk 24
+        targetSdk 36
+        versionCode 1
+        versionName '1.0.0'
+        manifestPlaceholders = [adMobAppId: adMobAppId]
+        buildConfigField 'String', 'GAME_ORIGIN', JsonOutput.toJson(gameOrigin)
+        buildConfigField 'String', 'ADMOB_APP_ID', JsonOutput.toJson(adMobAppId)
+    }
+    buildFeatures { buildConfig true }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    buildTypes {
+        debug { debuggable true }
+        release {
+            debuggable false
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.17.1'
+    implementation 'com.google.android.gms:play-services-ads:25.5.0'
+    implementation 'com.google.android.ump:user-messaging-platform:4.0.0'
+}

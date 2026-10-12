@@ -1,59 +1,87 @@
-# Elemental Arena rules: v1
+# Elemental Arena rules: ranked-elemental-v2
 
-Ranked Elemental Battle is the flagship: a visible three-power loadout, a 3 by 3 board, 20-second turns, and best-of-three rounds. The initial match-duration target is 2–5 minutes, to be measured with human playtests rather than treated as a guaranteed duration. The six released powers are available equally to every player. Sixteen other concepts remain explicitly locked and unimplemented until progressive balance work is complete. Purchases never increase ranked power strength.
+Ranked Elemental Battle is the flagship: a visible three-power loadout, a 3 by 3 board, 20-second turns, and up to three rounds. All 22 catalog powers are implemented and available equally to every player. Cosmetic purchases never alter power strength, energy, targeting, clocks, or rewards. The initial match-duration target is 2–5 minutes; human playtests are needed to measure actual duration and balance.
 
 ## Match and turn structure
 
 - X starts round one. O starts round two. X starts round three. Marks stay assigned to the same players throughout the match.
 - The winner of two rounds wins immediately. Otherwise the higher round-win total after three rounds wins; tied totals draw. Drawn rounds count toward the three-round cap.
-- One turn is exactly one placement or one power activation. Every released power consumes the entire turn. No chaining or extra action is possible.
+- One main action is a placement or a power activation. Time Warp is the sole auxiliary power: it extends the clock without consuming or adding a main action. Every other power consumes the whole turn.
 - Each player starts each elemental round with three energy. Ordinary placement earns one, capped at six. Power actions do not earn placement energy. Classic has no energy or powers.
-- Equip exactly three different released powers before the match. Both loadouts remain visible. Each equipped power can be used once per round; its round cooldown and energy reset when a new round starts. Total per-player usage is retained for match statistics.
-- A standard line of three real owned marks wins. Frozen and shielded marks still count. A full board without a line draws immediately, even when a destructive power remains available.
-- Check both owners after the complete atomic action. If both have winning lines, the round draws. Ownership is represented by participant IDs; X and O are visual assignments.
-- Thirty completed main actions without another result draw the round. No power loop can continue indefinitely.
+- Equip exactly three different powers before a match. Both loadouts stay visible. Each equipped power can be used once per round; Eclipse is additionally limited to once per match. Energy and round cooldowns reset on a new round. Match usage remains available for statistics and Eclipse validation.
+- A line of three real owned marks wins. Frozen, rooted, mirrored and shielded marks still count. A full board without a line draws immediately, even when a destructive power remains available. Phantom illusions are effects and never real marks.
+- Check both owners after the complete action and its effect expiration. Simultaneous winning lines draw. Ownership uses participant IDs; X and O are visual assignments.
+- Thirty completed main actions without another result draw the round. Time Warp does not increment this counter and cannot be used repeatedly in the same round.
 
-## Clocks
+## Clocks and rejected actions
 
-The server sets a deadline of the smaller of the configured turn limit (default 20 seconds; permitted range 15–30) and the player's remaining match bank. Each player has a total 120-second thinking bank across all rounds. Accepted actions charge their elapsed thinking time. A turn timeout loses the current round; exhausting the match bank loses the whole match. A delayed timer callback charges only up to the deadline. New-round clocks start when the authoritative transition is processed. The client clock is only a display.
+The server sets a deadline of the smaller of the configured turn limit (default 20 seconds; permitted range 15–30) and the player's remaining match bank. Each player starts with a 120-second thinking bank across all rounds. Accepted actions charge elapsed thinking time. Time Warp can restore up to eight seconds to that bank, capped at 120 seconds, and extend the current deadline by up to eight seconds. Its absolute turn deadline remains capped at 30 seconds from the original start of the turn. It never grants another placement or power action.
 
-Surrender ends the entire match and is allowed by either participant regardless of whose turn it is. Spectators cannot act. A valid, current integer revision is mandatory for every action including surrender. A duplicate or stale revision, wrong turn, invalid target, unavailable power or insufficient energy rejects the request without changing the state, clock deadline, energy, effects or history. At or after the deadline main actions reject with `TURN_EXPIRED`; the authoritative server's `tick` transition resolves the timeout.
+A turn timeout loses the current round; exhausting the bank loses the whole match. A delayed timer callback charges only up to the deadline. New-round clocks start when the server processes the transition. Animation and reconnect delays do not pause the clock; the client clock is a display.
 
-## Released powers
+Surrender ends the whole match and is allowed by either participant regardless of whose turn it is. Spectators cannot act. Every action, including surrender, requires a valid current integer revision. A duplicate or stale revision, wrong turn, invalid target, unavailable power or insufficient energy rejects the request without changing state, deadline, energy, effects, usage or history. At or after a deadline main actions reject with `TURN_EXPIRED`; the server's `tick` resolves the timeout.
+
+## All 22 powers
 
 | Power | Energy | Activation and targets | Duration and counterplay |
 |---|---:|---|---|
-| Fire Blast | 2 | Target an enemy occupied cell that is not frozen. Remove the mark, or consume its shield without removing it. | Instant. A shield absorbs the single attack. Frozen targets are invalid and do not spend the power. |
-| Shield Guard | 1 | Target an existing friendly occupied cell without a shield. | One destructive hit, or the end of the round. A hit consumes the shield. It is not a new symbol placement. |
-| Portal Shift | 2 | Choose an owned source mark with no shield or freeze and an empty, unlocked destination. Source empties and destination takes ownership atomically. | Instant. Frozen and protected sources cannot move. All winning lines are reevaluated immediately. |
-| Ice Freeze | 1 | Target an enemy occupied cell not already frozen. | Expires after that mark owner's next two completed turns. Freeze anchors the mark against Portal Shift and prevents Fire Blast. The frozen mark still counts toward a line. |
-| Crystal Lock | 1 | Target an empty cell that is not already locked. Neither participant can occupy it while locked. | Expires at the end of the opponent's next completed action. If a temporary restriction leaves the incoming player with no legal main action, locks expire early so the board cannot deadlock. |
-| Energy Surge | 0 | Activate while below six energy. No cell target. | Gain up to three energy, capped at six. The opponent gets the next action. Cannot be activated at full energy. |
-
-These are deliberately conservative implementations of the original concepts. Shield guards an existing mark rather than placing a protected mark. Portal cannot move a protected mark and does not carry a shield. Ice protects and anchors an enemy mark rather than creating extra friendly placements or disabling line detection. This makes it useful against enemy Portal Shift but requires judgment because it also prevents your own Fire Blast. Crystal is always temporary. No released power grants an extra turn or silently changes rules.
+| Fire Blast | 2 | Target an unfrozen enemy mark. Destroy it, or consume its shield. | Instant. Mirror may reflect it once. No terrain is created. |
+| Shield Guard | 1 | Protect a friendly mark without a shield. | Absorbs one destructive hit or lasts to round end. Shield resolves before Mirror. |
+| Portal Shift | 2 | Move an eligible friendly source to an empty unlocked destination. | Instant. Frozen, rooted, shielded and mirrored sources cannot move. |
+| Ice Freeze | 1 | Freeze an unfrozen enemy mark. Its symbol still counts toward lines. | Through the next two completed owner turns. It anchors the mark and prevents destructive targeting. Purify removes frost. |
+| Crystal Lock | 1 | Restrict an empty unlocked cell for both players. | Through the opponent's next main action. Purify removes it; Tide redirects it. |
+| Energy Surge | 0 | Activate while below six energy. Gain up to three. | The whole main action is spent; the opponent acts next. Invalid at full energy. |
+| Lightning Strike | 3 | Target an unfrozen enemy mark. Destroy it and electrify the resulting empty cell. | Terrain persists through one opponent action. Shield absorbs impact without terrain; Mirror may reflect impact and terrain. Purify or Tide counters terrain. |
+| Time Warp | 1 | Extend the current deadline and restore bank time. No board target. | Once per round; up to eight seconds, a 30-second absolute turn cap and 120-second bank cap. The same player retains the one main action. |
+| Shadow Swap | 3 | Choose a friendly source, then an enemy destination, and exchange ownership, effects and mark provenance atomically. | Both marks must be movable: no freeze, root, shield or mirror. Both players' lines are checked. |
+| Meteor Crash | 4 | Target an unfrozen enemy mark. Destroy it and scorch the resulting empty cell. | Terrain persists through two opponent actions. Shield or Mirror counters impact; Purify or Tide counters terrain. |
+| Healing Bloom | 2 | Spend the oldest genuine destroyed-friendly-mark charge to restore a mark on any empty unlocked cell. | A real mark must first be destroyed in this round. Each charge restores at most one mark and is shared with Echo. |
+| Mirror Reflect | 2 | Give a friendly mark a reflective defense. | Through two subsequent completed owner turns or the next eligible single-cell hit. Select the first unfrozen, unshielded, unmirrored attacker mark in ascending cell order; destroy that mark once. With no eligible attacker mark, block the attack. Dragon and poison cannot be reflected. |
+| Phantom Mark | 1 | Put a visibly labelled illusion on an empty unlocked cell. | Through one opponent action. It never counts toward lines or blocks a real placement. A real placement clears it; Purify also removes it. |
+| Gravity Pulse | 3 | Choose up, down, left or right. Slide every eligible mark one square, resolving the leading edge first. | Anchored marks stay fixed. Occupied and locked destinations stop movement; no edge wrap occurs. A direction with no movement is invalid. |
+| Poison Curse | 2 | Curse an unfrozen enemy mark and display a warning to its owner. | After that owner's next main action, apply a delayed destructive hit before line checks. Purify cleanses the curse; Shield absorbs the hit. A mark still frozen at expiration survives. Mirror does not reflect poison. |
+| Purify | 1 | Choose a cell with a removable negative effect. Remove frost, poison, hostile root, phantom and restricted terrain. | Ownership, beneficial shield, Mirror and the caster's own root remain. An unaffected cell is invalid. |
+| Dragon Breath | 4 | Choose a row or column. Hit its first unfrozen enemy mark in ascending cell order. | At most one target per activation. Shield absorbs that hit; Mirror cannot reflect it. Frozen marks are skipped. |
+| Ultimate Eclipse | 6 | After four completed main actions in the current round, strike an unfrozen enemy mark and darken the resulting empty cell. | Once per match across all rounds. Darkness persists through one opponent action and never conceals the board. Shield or Mirror counters impact; Purify or Tide counters terrain. |
+| Tide Reversal | 2 | Choose enemy-created terrain on an empty locked cell, then transfer it to a different empty unlocked destination. | Preserve terrain type without duplicating it; the redirected terrain lasts through one opponent action. Occupied cells and the caster's own terrain are invalid sources. |
+| Wind Step | 1 | Move an eligible friendly mark exactly one square diagonally to an empty unlocked cell. | No orthogonal or multi-square shortcut. Freeze, root, shield and mirror anchor the source. |
+| Root Anchor | 1 | Anchor a friendly mark without an existing root. | Through two subsequent completed owner turns. Prevents Portal, Wind, Shadow and Gravity movement. Destructive powers still work. |
+| Chrono Echo | 2 | Restore the caster's most recent basic placement at its original cell, consuming that exact mark's genuine destruction charge. | The most recent placement must have been destroyed in this round; its original cell must be empty and unlocked. Movement alone gives no charge. It cannot reuse a charge already consumed by Bloom. |
 
 ## Effect timing and atomic resolution
 
-The global `turnNumber` increments after each action. Ice activated at turn N stores `frozenUntil = N + 4`: it persists through the enemy turns N + 1 and N + 3 and expires as turn N + 4 begins. Crystal stores `lockedUntil = N + 2`: it persists through enemy turn N + 1 and expires before the activating player's next turn. This represents owner-turn boundaries deterministically because turns strictly alternate. Effects reset at round boundaries, including timeout boundaries.
+`turnNumber` increments after main actions; Time Warp does not advance it or expire effects. Effects reset at round boundaries, including timeout boundaries.
 
-Resolution order is authentication/membership in the server adapter; engine phase and revision validation; turn/time, power, energy and target validation; clone the state; charge elapsed time; apply one action and any one-hit shield reaction; check simultaneous lines/full-board/action cap; then advance the turn, expire effects and set the next deadline. The released timed effects do not change ownership on expiry, so win evaluation before their cleanup has the same ownership result as evaluation afterward. History records accepted actions with revision and server timestamp. Invalid actions never append history.
+- Ice cast at turn N stores `frozenUntil = N + 4`, covering enemy owner turns N + 1 and N + 3.
+- Root and Mirror cast at turn N store their deadline at N + 5, covering the caster's next two completed owner turns N + 2 and N + 4.
+- Crystal, Lightning, Eclipse, Tide and Phantom store a deadline at N + 2, covering the opponent's next main action N + 1.
+- Meteor stores `lockedUntil = N + 4`, covering two opponent actions.
+- Poison stores `poisonUntil = N + 2`. Its warning gives the mark owner the incoming main action to respond. Expiration happens before winning lines are checked.
 
-## Classic and AI
+The resolution order is authentication and membership in the server adapter; phase, revision, turn, time, power, energy and target validation; clone the state; charge the clock; apply one action and any shield or one-level Mirror reaction; advance the turn for main actions; expire timed effects and resolve poison; check both owners' lines, board fullness and action cap; set the next deadline. Shield resolves before Mirror. Mirror reflection never recursively reflects. Gravity's stable leading-edge order allows a chain to move one cell each without collisions. Dragon and Mirror use ascending row-major cell order for deterministic targets.
 
-Classic uses the same authoritative alternating-turn and deadline rules with ordinary placement only. The server configures Classic as a single round for online, private and AI matches. It evaluates all eight lines and a full-board draw. Elemental matches use the three-round shell described above.
+Destruction records the lost mark's owner, original placement and loss identifier as a restoration charge. Bloom and Echo consume this same inventory. Charges reset between rounds, so neither power can fabricate, duplicate or restore marks from earlier rounds. If temporary terrain leaves the incoming player with no legal main action, the engine clears terrain early instead of forcing a timeout. Time Warp alone does not count as an available main action for this safeguard.
 
-AI has seven levels: Beginner uses mostly random legal choices; Easy mixes random choices with one-action tactics; Medium targets two-action search with occasional mistakes; Hard targets three elemental actions; Expert, Extreme and Nightmare target progressively deeper adversarial search, move ordering, alpha-beta pruning, memoization and bounded node/thinking-time budgets. Iterative deepening returns the strongest fully completed depth, preventing an incomplete early branch from biasing the final choice. Elemental simulations use the same legal power transitions and durations as multiplayer. This is practical bounded search, not a claim of a solved elemental ruleset. Hard and higher classic AI use complete-board minimax and cannot lose under ordinary classic rules. AI actions carry the current revision and never receive ranked cups or impersonate human opponents.
+History records accepted actions with revision and server timestamp. Invalid actions never append history. Board coordinates are A1, B1, C1, then A2, B2, C2, then A3, B3, C3. Cell indices are 0–8 in the same order.
+
+## Practice, Classic and AI
+
+The Power Lab on `/powers` offers one prepared scenario for each of the 22 powers. Prerequisites such as a genuinely destroyed mark, hostile terrain, a poison curse and Eclipse's opening limit are created by recorded legal engine actions. Only the starting demonstration energy is supplied. Training is local, has no rewards and uses the same immutable transition function as multiplayer.
+
+Classic uses authoritative alternating turns and deadlines with ordinary placement only. Online, private and AI Classic matches use one round. It evaluates all eight lines and full-board draws. Elemental matches use the three-round shell.
+
+AI has seven levels. Beginner uses mostly random legal choices; Easy mixes random actions with one-action tactics; Medium targets two-action search with occasional mistakes; Hard targets three elemental actions; Expert, Extreme and Nightmare target progressively deeper adversarial search, move ordering, alpha-beta pruning, memoization and bounded node/thinking-time budgets. Iterative deepening returns the strongest fully completed depth. Simulations use the same legal power transitions, targets and durations as multiplayer. This is bounded search, not a claim of a solved elemental ruleset. Hard and higher Classic AI use full-board minimax and cannot lose under ordinary Classic rules. AI actions carry the current revision and never award ranked cups or impersonate human opponents.
 
 ## Engine API
 
-The browser/Socket.IO adapter imports ESM from `src/lib/game-engine/index.js`. The module has no database, browser, network or timer side effects.
+The browser and Socket.IO adapter import ESM from `src/lib/game-engine/index.js`. The module has no database, browser, network or timer side effects.
 
 - `createGame({ mode: 'elemental' | 'classic', players: [{ id, name, loadout }], turnSeconds: 20, now, rounds: 3 })` creates a JSON-serializable state.
-- `applyAction(state, playerId, action, now)` returns a new state or throws `Error` with a stable `.code`. Actions are `{ type: 'place', cell, revision }`, `{ type: 'power', powerId, cell?, from?, to?, revision }` or `{ type: 'surrender', revision }`. Cell indices are 0–8 in row-major order. Cell-targeted powers also accept `target` as an alias of `cell`.
-- `tick(state, now)` returns the original reference until a timeout, then a new resolved state. Finished states remain unchanged.
-- `legalActions(state, playerId)` returns legal main actions, each with the current revision. It excludes surrender so AI never randomly forfeits.
-- `chooseAIAction(state, difficulty, { rng?, depth?, maxNodes?, maxTimeMs? })` returns one legal action or null when no action is possible. Tests may set `maxTimeMs: Infinity` for a deterministic node budget.
-- `detectOutcome(board)` returns deterministic line/full-board results and is used by the engine and tests.
-- `POWER_CATALOG`, `RANKED_POWER_IDS`, `DEFAULT_LOADOUT`, `WIN_LINES` and `RULESET` provide the shared presentation and validation data.
+- `applyAction(state, playerId, action, now)` returns a new state or throws an `Error` with a stable `.code`. Actions are `{ type: 'place', cell, revision }`, `{ type: 'power', powerId, cell?, from?, to?, direction?, axis?, index?, revision }`, or `{ type: 'surrender', revision }`. Cell-targeted powers also accept `target` as an alias of `cell`. Gravity uses `direction: 'up' | 'down' | 'left' | 'right'`. Dragon uses `axis: 'row' | 'column'` and a zero-based `index` from 0 to 2.
+- `tick(state, now)` returns the original reference until a timeout, then a new resolved state. Finished states stay unchanged.
+- `legalActions(state, playerId)` returns validated main and auxiliary actions with the current revision. It excludes surrender, so AI never randomly forfeits. The frontend derives target highlights and direction/line controls from this exact list.
+- `chooseAIAction(state, difficulty, { rng?, depth?, maxNodes?, maxTimeMs? })` returns a legal action or null. Tests can use `maxTimeMs: Infinity` for a deterministic node budget.
+- `detectOutcome(board)` returns deterministic real-mark line and full-board results.
+- `POWER_CATALOG`, `RANKED_POWER_IDS`, `DEFAULT_LOADOUT`, `WIN_LINES` and `RULESET` provide shared validation and presentation data.
 
-Run `node --test tests/engine.test.js` for engine validation, including an exhaustive tree of every human continuation against Nightmare classic AI as either side.
+Run `node --test tests/engine.test.js tests/all-powers.test.js tests/power-training.test.js tests/replay-analysis.test.js` to validate engine behavior, every training scenario and replay explanations. The Classic tests also enumerate every human continuation against Nightmare AI as either side.

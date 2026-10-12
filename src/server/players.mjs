@@ -1,9 +1,11 @@
 import {db} from './db.mjs';
 import {randomBytes} from 'node:crypto';
+import {RANKED_POWER_IDS,DEFAULT_LOADOUT} from '../lib/game-engine/powers.js';
 import {fail,cleanText,passwordHash,verifyPassword,AppError,dateKey} from './security.mjs';
+import {premiumTiers,passCoinPrice,checkoutConfigured} from './commerce-policy.mjs';
 
-export const starterPowers=['fire','shield','portal','ice','crystal','surge'];
-export const defaultLoadout=['fire','shield','portal'];
+export const starterPowers=[...RANKED_POWER_IDS];
+export const defaultLoadout=[...DEFAULT_LOADOUT];
 const include={profile:true,settings:true,stats:true,rating:true,wallet:true,loadout:{include:{slots:{orderBy:{position:'asc'}}}}};
 export function publicPlayer(user){if(!user)return null;return {id:user.id,name:user.name,email:user.email,guest:user.guest,role:user.role,cups:user.rating?.cups||0,rating:user.rating?{cups:user.rating.cups,peakCups:user.rating.peakCups,rankedWins:user.rating.rankedWins,rankedLosses:user.rating.rankedLosses,rankedDraws:user.rating.rankedDraws}:null,coins:user.wallet?.coins||0,level:user.profile?.level||1,xp:user.profile?.xp||0,loadout:user.loadout?.slots.map(s=>s.powerId)||defaultLoadout,profile:user.profile,settings:user.settings,stats:user.stats,createdAt:user.createdAt};}
 export async function getPlayer(id){return publicPlayer(await db.user.findUnique({where:{id},include}));}
@@ -28,6 +30,7 @@ export async function walletCredit(tx,userId,amount,reason,reference){fail(Numbe
 export async function purchaseCosmetic(userId,cosmeticId,requestId){fail(cleanText(cosmeticId,1,80)&&cleanText(requestId,8,80),'VALIDATION','A cosmetic ID and unique request ID are required.');return db.$transaction(async tx=>{
   const previous=await tx.shopPurchase.findUnique({where:{userId_requestId:{userId,requestId}}});if(previous){fail(previous.cosmeticId===cosmeticId,'REQUEST_CONFLICT','This request ID was used for a different item.');return {purchase:previous,wallet:await tx.currencyWallet.findUnique({where:{userId}}),duplicate:true};}
   const cosmetic=await tx.cosmeticItem.findUnique({where:{id:cosmeticId}});fail(cosmetic?.enabled,'NOT_FOUND','This cosmetic is unavailable.',404);
+  fail(!premiumTiers.some(tier=>tier.cosmeticId===cosmeticId),'SEASON_EXCLUSIVE','This cosmetic is an exclusive season-pass reward. Claim its premium journey tier.');
   fail(!await tx.playerInventory.findUnique({where:{userId_cosmeticId:{userId,cosmeticId}}}),'ALREADY_OWNED','You already own this cosmetic.');
   const changed=await tx.currencyWallet.updateMany({where:{userId,coins:{gte:cosmetic.price}},data:{coins:{decrement:cosmetic.price}}});fail(changed.count===1,'INSUFFICIENT_COINS','You need more coins for this cosmetic.');
   const wallet=await tx.currencyWallet.findUnique({where:{userId}});
@@ -41,7 +44,42 @@ export function weeklyResetAt(now=new Date()){return new Date(new Date(periodKey
 export async function missions(userId){const today=periodKey(),week=periodKey('weekly');const [definitions,progress,totalClaims,todayClaim]=await Promise.all([db.dailyMission.findMany({where:{active:true},orderBy:{id:'asc'}}),db.playerMissionProgress.findMany({where:{userId,dateKey:{in:[today,week]}}}),db.rewardClaim.count({where:{userId,kind:'daily'}}),db.rewardClaim.findUnique({where:{userId_kind_key:{userId,kind:'daily',key:today}}})]);const values=definitions.map(m=>{const key=m.period==='weekly'?week:today;const row=progress.find(p=>p.missionId===m.id&&p.dateKey===key);return {...m,dateKey:key,progress:row?.progress||0,claimed:Boolean(row?.claimedAt)};});return {missions:values.filter(m=>m.period!=='weekly'),weeklyMissions:values.filter(m=>m.period==='weekly'),daily:{claimedToday:Boolean(todayClaim),day:totalClaims%7+1,totalClaims,rewards:[40,50,60,70,80,90,120]},dateKey:today,weeklyResetAt:weeklyResetAt()};}
 export async function claimMission(userId,missionId){fail(cleanText(missionId,1,40),'VALIDATION','Choose a valid mission.');return db.$transaction(async tx=>{const mission=await tx.dailyMission.findUnique({where:{id:missionId}});fail(mission?.active,'NOT_FOUND','This mission is not available.',404);const key=periodKey(mission.period);const where={userId_missionId_dateKey:{userId,missionId,dateKey:key}};const progress=await tx.playerMissionProgress.findUnique({where});fail(progress&&progress.progress>=mission.target,'NOT_COMPLETE','Complete this mission first.');const changed=await tx.playerMissionProgress.updateMany({where:{userId,missionId,dateKey:key,claimedAt:null},data:{claimedAt:new Date()}});fail(changed.count===1,'ALREADY_CLAIMED','This reward has already been claimed.');await tx.rewardClaim.create({data:{userId,kind:'mission',key:key+':'+missionId,coins:mission.coins}});const wallet=await walletCredit(tx,userId,mission.coins,mission.period==='weekly'?'weekly_mission':'daily_mission','mission:'+userId+':'+key+':'+missionId);return {coins:mission.coins,wallet};});}
 export const journeyTiers=[{level:1,requiredXp:100,coins:40},{level:2,requiredXp:500,coins:100},{level:3,requiredXp:1000,coins:150},{level:4,requiredXp:2000,coins:200},{level:5,requiredXp:3500,coins:300}];
-export async function seasonJourney(userId){const [profile,season,claims]=await Promise.all([db.playerProfile.findUnique({where:{userId}}),db.season.findFirst({where:{active:true,startsAt:{lte:new Date()},endsAt:{gt:new Date()}},orderBy:{startsAt:'desc'}}),db.rewardClaim.findMany({where:{userId,kind:'season'}})]);const participation=season?await db.seasonParticipation.findUnique({where:{seasonId_userId:{seasonId:season.id,userId}}}):null;const xp=participation?.xp||0;return {season,xp,accountXp:profile.xp,level:profile.level,paidPassAvailable:false,xpSource:'season',tiers:journeyTiers.map(t=>({...t,claimed:Boolean(season&&claims.some(c=>c.key===season.id+':'+t.level)),unlocked:xp>=t.requiredXp})),message:'Free cosmetic coin rewards for XP earned in this season. No paid power benefits.'};}
-export async function claimJourney(userId,level){fail(Number.isInteger(level)&&journeyTiers.some(t=>t.level===level),'VALIDATION','Choose a valid journey tier.');return db.$transaction(async tx=>{const season=await tx.season.findFirst({where:{active:true,startsAt:{lte:new Date()},endsAt:{gt:new Date()}},orderBy:{startsAt:'desc'}});fail(season,'NO_ACTIVE_SEASON','There is no active season journey.',409);const participation=await tx.seasonParticipation.findUnique({where:{seasonId_userId:{seasonId:season.id,userId}}});const tier=journeyTiers.find(t=>t.level===level);fail((participation?.xp||0)>=tier.requiredXp,'NOT_COMPLETE','Earn the required XP during this season before claiming this tier.');const key=season.id+':'+level;await tx.rewardClaim.create({data:{userId,kind:'season',key,coins:tier.coins}});const wallet=await walletCredit(tx,userId,tier.coins,'season_journey','season:'+userId+':'+key);return {coins:tier.coins,level,wallet};});}
+export async function seasonJourney(userId){
+ const [profile,season,claims,cosmetics]=await Promise.all([
+  db.playerProfile.findUnique({where:{userId}}),
+  db.season.findFirst({where:{active:true,startsAt:{lte:new Date()},endsAt:{gt:new Date()}},orderBy:{startsAt:'desc'}}),
+  db.rewardClaim.findMany({where:{userId,kind:{in:['season','premium_season','premium_pass']}}}),
+  db.cosmeticItem.findMany({where:{id:{in:premiumTiers.map(tier=>tier.cosmeticId)}}}),
+ ]);
+ const participation=season?await db.seasonParticipation.findUnique({where:{seasonId_userId:{seasonId:season.id,userId}}}):null;
+ const xp=participation?.xp||0,premiumOwned=Boolean(season&&claims.some(claim=>claim.kind==='premium_pass'&&claim.key===season.id));
+ const claimed=(kind,level)=>Boolean(season&&claims.some(claim=>claim.kind===kind&&claim.key===`${season.id}:${level}`));
+ return {season,xp,accountXp:profile?.xp||0,level:profile?.level||1,paidPassAvailable:checkoutConfigured(),xpSource:'season',premiumOwned,passCoinPrice,
+  tiers:journeyTiers.map(tier=>({...tier,claimed:claimed('season',tier.level),unlocked:xp>=tier.requiredXp})),
+  premiumTiers:premiumTiers.map(tier=>({...tier,cosmetic:cosmetics.find(item=>item.id===tier.cosmeticId)||null,claimed:claimed('premium_season',tier.level),unlocked:premiumOwned&&xp>=tier.requiredXp})),
+  message:'The free journey rewards seasonal XP with cosmetic coins. Unlock the premium journey using earned coins or configured checkout for five exclusive cosmetics. All 22 powers remain equally available.',
+ };
+}
+export async function claimJourney(userId,level,track='free'){
+ fail(['free','premium'].includes(track),'VALIDATION','Choose the free or premium reward track.');
+ const tier=(track==='premium'?premiumTiers:journeyTiers).find(item=>item.level===level);
+ fail(Number.isInteger(level)&&tier,'VALIDATION','Choose a valid journey tier.');
+ return db.$transaction(async tx=>{
+  const season=await tx.season.findFirst({where:{active:true,startsAt:{lte:new Date()},endsAt:{gt:new Date()}},orderBy:{startsAt:'desc'}});
+  fail(season,'NO_ACTIVE_SEASON','There is no active season journey.',409);
+  if(track==='premium')fail(await tx.rewardClaim.findUnique({where:{userId_kind_key:{userId,kind:'premium_pass',key:season.id}}}),'PASS_REQUIRED','Unlock this season cosmetic pass before claiming premium rewards.',403);
+  const participation=await tx.seasonParticipation.findUnique({where:{seasonId_userId:{seasonId:season.id,userId}}});
+  fail((participation?.xp||0)>=tier.requiredXp,'NOT_COMPLETE','Earn the required XP during this season before claiming this tier.');
+  const key=`${season.id}:${level}`,kind=track==='premium'?'premium_season':'season';
+  await tx.rewardClaim.create({data:{userId,kind,key,coins:tier.coins}});
+  if(track==='premium'){
+   const cosmetic=await tx.cosmeticItem.findUnique({where:{id:tier.cosmeticId}});
+   fail(cosmetic,'REWARD_UNAVAILABLE','This season cosmetic reward is unavailable. Please try again later.',503);
+   await tx.playerInventory.upsert({where:{userId_cosmeticId:{userId,cosmeticId:tier.cosmeticId}},create:{userId,cosmeticId:tier.cosmeticId},update:{}});
+  }
+  const wallet=await walletCredit(tx,userId,tier.coins,track==='premium'?'premium_season_journey':'season_journey',`${track==='premium'?'premium_season':'season'}:${userId}:${key}`);
+  return {coins:tier.coins,level,wallet,track,...(track==='premium'?{cosmeticId:tier.cosmeticId}:{})};
+ });
+}
 export async function leaderboard({region,season,limit=50}={}){limit=Math.min(100,Math.max(1,Number(limit)||50));if(season){const rows=await db.seasonParticipation.findMany({where:{seasonId:season,user:{suspended:false,...(region&&region!=='GLOBAL'?{profile:{region}}:{})}},orderBy:[{cups:'desc'},{wins:'desc'},{userId:'asc'}],take:limit,include:{user:{select:{id:true,name:true,profile:true}}}});return rows.map((r,i)=>({rank:i+1,id:r.userId,name:r.user.name,cups:r.cups,wins:r.wins,profile:r.user.profile}));}const rows=await db.playerRating.findMany({where:{user:{suspended:false,...(region&&region!=='GLOBAL'?{profile:{region}}:{})}},orderBy:[{cups:'desc'},{rankedWins:'desc'},{userId:'asc'}],take:limit,include:{user:{select:{id:true,name:true,profile:true}}}});return rows.map((r,i)=>({rank:i+1,id:r.userId,name:r.user.name,cups:r.cups,wins:r.rankedWins,profile:r.user.profile}));}
 export async function matchHistory(userId,cursor){const rows=await db.match.findMany({where:{participants:{some:{userId}},status:'finished'},orderBy:[{createdAt:'desc'},{id:'desc'}],take:21,...(cursor?{cursor:{id:cursor},skip:1}:{}),include:{participants:true,result:true}});return {matches:rows.slice(0,20).map(({state,...m})=>({...m,winnerId:m.result?.winnerId||null,endedAt:m.finishedAt,turnCount:m.result?.turns||0,outcome:m.participants.find(p=>p.userId===userId)?.outcome})),nextCursor:rows.length>20?rows[19].id:null};}

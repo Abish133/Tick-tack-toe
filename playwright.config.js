@@ -5,7 +5,7 @@ const chrome = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Applic
 
 export default defineConfig({
   testDir: './tests',
-  testMatch: '**/e2e.spec.js',
+  testMatch: '**/*.spec.js',
   fullyParallel: false,
   workers: 1,
   timeout: 120_000,

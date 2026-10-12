@@ -1,0 +1,114 @@
+name: Release gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Railway Wait for CI can ignore a cancelled workflow when another workflow on
+# the commit passes. Do not use a shared concurrency group: GitHub can replace
+# a queued run even with cancel-in-progress:false. Each commit runs this gate.
+
+jobs:
+  pure-tests-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      SESSION_SECRET: isolated-ci-session-secret-32-characters-long
+      APP_ORIGIN: http://localhost:3000
+      DOTENV_CONFIG_PATH: /tmp/elemental-no-env-file
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --include=dev
+      - name: Generate Prisma without a live database
+        run: npm run db:generate
+        env:
+          DATABASE_URL: mysql://build:build@127.0.0.1:3306/build_only
+      - name: Pure tests; database fixtures must be skipped
+        run: npm test
+        env:
+          DATABASE_URL: ''
+          COORDINATOR_TEST_DATABASE_URL: ''
+      - name: Production Next.js build
+        run: npm run build
+        env:
+          DATABASE_URL: mysql://build:build@127.0.0.1:3306/build_only
+
+  mysql-and-production-boot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: isolated-ci-password
+          MYSQL_DATABASE: ea_ci_release
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pisolated-ci-password"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    env:
+      CI: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      DATABASE_URL: mysql://root:isolated-ci-password@127.0.0.1:3306/ea_ci_release
+      COORDINATOR_TEST_DATABASE_URL: mysql://root:isolated-ci-password@127.0.0.1:3306/ea_ci_release
+      SESSION_SECRET: isolated-ci-session-secret-32-characters-long
+      APP_ORIGIN: http://localhost:3000
+      DOTENV_CONFIG_PATH: /tmp/elemental-no-env-file
+      PLAYWRIGHT_BROWSERS_PATH: 0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --include=dev
+      - run: npm run db:generate
+      - name: Build the actual production container
+        run: docker build --tag elemental-arena:ci .
+      - name: Fresh Linux boot and two-coordinator takeover guard
+        run: node scripts/ci-production-boot.mjs
+      - name: Real MySQL authentication, sockets, transactions and provider fixtures
+        run: npm test
+      - name: Build for actual browser game flows
+        run: npm run build
+      - name: Install Chromium with its Linux dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Complete multiplayer, all powers and cosmetic pass browser flows
+        run: node scripts/ci-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-evidence
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  release-gate:
+    name: Release gate passed
+    if: always()
+    needs: [pure-tests-and-build, mysql-and-production-boot]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require both test suites
+        env:
+          PURE_RESULT: ${{ needs.pure-tests-and-build.result }}
+          MYSQL_RESULT: ${{ needs.mysql-and-production-boot.result }}
+        run: test "$PURE_RESULT" = success && test "$MYSQL_RESULT" = success
+
+# Deploying is native Railway GitHub autodeploy with Wait for CI enabled.
+# No production token, database secret, or deploy call belongs in this workflow.

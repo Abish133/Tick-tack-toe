@@ -1,38 +1,35 @@
-/** Shared public catalog. Planned powers cannot be equipped or activated. */
-const active = (id, name, cost, category, description, target, counterplay, animation) => ({
+/** Public, shared rules metadata. Every catalog power is validated by the engine. */
+const power = (id, name, cost, category, description, target, counterplay, animation, options = {}) => ({
   id, name, cost, energyCost: cost, category, description, target, counterplay, animation,
-  implemented: true, enabled: true, status: 'available', consumesTurn: true,
-  cooldown: 'round', maxUsesPerRound: 1, ranked: true,
-});
-const planned = (id, name, category, description) => ({
-  id, name, category, description, implemented: false, enabled: false,
-  status: 'planned', ranked: false, locked: true, cost: null,
+  implemented: true, enabled: true, status: 'available', ranked: true, locked: false,
+  consumesTurn: true, cooldown: 'round', maxUsesPerRound: 1, ...options,
 });
 
 export const POWER_CATALOG = Object.freeze([
-  active('fire', 'Fire Blast', 2, 'offense', 'Destroy one enemy mark. A shield absorbs the blast and breaks instead.', 'enemy', 'Frozen marks cannot be targeted; a shield absorbs one blast.', 'fire-impact'),
-  active('shield', 'Shield Guard', 1, 'defense', 'Protect one existing friendly mark from one destructive attack.', 'own', 'Fire Blast breaks the shield without removing the mark.', 'shield-ring'),
-  active('portal', 'Portal Shift', 2, 'positioning', 'Move an unprotected, unfrozen friendly mark to any empty unlocked cell.', 'own-and-empty', 'Freeze anchors a mark; a shield must be removed before shifting.', 'portal-transfer'),
-  active('ice', 'Ice Freeze', 1, 'control', 'Freeze an enemy mark through its next two owner-turn boundaries. It still counts toward lines.', 'enemy', 'An anchored mark cannot move or be destroyed. Play around its known position.', 'frost-wave'),
-  active('crystal', 'Crystal Lock', 1, 'control', 'Lock an empty cell until the end of the opponent\'s next action.', 'empty', 'The lock expires automatically and never creates a permanent blockade.', 'crystal-rise'),
-  active('surge', 'Energy Surge', 0, 'energy', 'Spend the action to gain three energy, up to the six-energy maximum.', 'self', 'The opponent receives a full action while you recharge.', 'energy-pulse'),
-  planned('lightning', 'Lightning Strike', 'offense', 'Remove an eligible enemy mark and briefly electrify its cell.'),
-  planned('time', 'Time Warp', 'tempo', 'Limited extra thinking time without an additional move.'),
-  planned('shadow', 'Shadow Swap', 'positioning', 'Exchange two eligible occupied cells.'),
-  planned('meteor', 'Meteor Crash', 'offense', 'Destroy an eligible mark and leave temporary scorched terrain.'),
-  planned('bloom', 'Healing Bloom', 'restoration', 'Restore a lost mark using a valid restoration charge.'),
-  planned('mirror', 'Mirror Reflect', 'defense', 'Reflect one eligible destructive effect without recursive reflections.'),
-  planned('phantom', 'Phantom Mark', 'deception', 'Create a clearly identified temporary illusion that cannot win a line.'),
-  planned('gravity', 'Gravity Pulse', 'positioning', 'Shift eligible marks in a deterministic direction.'),
-  planned('poison', 'Poison Curse', 'offense', 'Warn of delayed destruction that can be cleansed or protected.'),
-  planned('purify', 'Purify', 'counterplay', 'Remove one removable negative status effect.'),
-  planned('dragon', 'Dragon Breath', 'offense', 'Destroy at most one eligible mark in a chosen row or column.'),
-  planned('eclipse', 'Ultimate Eclipse', 'ultimate', 'A high-cost, once-per-match strike with a short darkness effect.'),
-  planned('tide', 'Tide Reversal', 'counterplay', 'Return a temporary terrain restriction to an eligible opposing cell.'),
-  planned('wind', 'Wind Step', 'positioning', 'A constrained diagonal reposition with visible counterplay.'),
-  planned('root', 'Root Anchor', 'defense', 'Temporarily anchor a friendly mark against displacement.'),
-  planned('echo', 'Chrono Echo', 'tempo', 'A limited tactical echo of a previous eligible basic action.'),
-].map(power => Object.freeze(power)));
-export const RANKED_POWER_IDS = Object.freeze(POWER_CATALOG.filter(power => power.implemented).map(power => power.id));
+  power('fire', 'Fire Blast', 2, 'offense', 'Destroy one enemy mark. A shield absorbs the blast and breaks instead.', 'enemy', 'Frozen marks cannot be targeted. Shields absorb one hit; Mirror can reflect it.', 'fire-impact'),
+  power('shield', 'Shield Guard', 1, 'defense', 'Protect one friendly mark from one destructive effect. Lasts until hit or round end.', 'own', 'A successful attack spends the shield without destroying the mark.', 'shield-ring'),
+  power('portal', 'Portal Shift', 2, 'positioning', 'Move an unprotected, unfrozen, unrooted friendly mark to an empty unlocked cell.', 'own-and-empty', 'Freeze, Root Anchor, Shield and Mirror prevent displacement.', 'portal-transfer'),
+  power('ice', 'Ice Freeze', 1, 'control', 'Freeze an enemy mark through its next two completed owner turns. It still counts toward lines.', 'enemy', 'Purify removes frost. Frozen marks cannot move or be destroyed.', 'frost-wave', { duration: 'two owner turns' }),
+  power('crystal', 'Crystal Lock', 1, 'control', 'Lock an empty cell until the end of the opponent’s next action.', 'empty', 'Purify cleanses it. Tide redirects it. Restrictions expire early before a stalemate.', 'crystal-rise', { duration: 'one opponent action' }),
+  power('surge', 'Energy Surge', 0, 'energy', 'Spend your action to gain three energy, capped at six.', 'self', 'The opponent receives a full action while you recharge.', 'energy-pulse'),
+  power('lightning', 'Lightning Strike', 3, 'offense', 'Destroy one enemy mark and electrify its cell for one opponent action.', 'enemy', 'Shields absorb it, Mirror reflects it, and Purify or Tide clears the terrain.', 'lightning-strike', { duration: 'one opponent action' }),
+  power('time', 'Time Warp', 1, 'tempo', 'Add up to eight thinking seconds without another move. The turn stays capped at 30 seconds and the match bank at 120 seconds.', 'self', 'Once per round. It grants no mark, displacement or extra main action.', 'time-distortion', { consumesTurn: false, extraSeconds: 8 }),
+  power('shadow', 'Shadow Swap', 3, 'positioning', 'Swap one friendly and one enemy mark atomically, then check both players’ lines.', 'two-occupied', 'Frozen, rooted, shielded and mirrored marks are anchored.', 'shadow-swap'),
+  power('meteor', 'Meteor Crash', 4, 'offense', 'Destroy one enemy mark and scorch its cell for two opponent actions.', 'enemy', 'Shield or Mirror counters impact. Purify or Tide clears the terrain.', 'meteor-impact', { duration: 'two opponent actions' }),
+  power('bloom', 'Healing Bloom', 2, 'restoration', 'Spend your oldest genuine lost-mark charge to restore a mark on an empty unlocked cell.', 'empty', 'Needs a real destroyed mark in this round. Locked cells block restoration.', 'healing-bloom'),
+  power('mirror', 'Mirror Reflect', 2, 'defense', 'Reflect the next single-cell blast onto the first eligible enemy mark, or block it if none exists. Lasts two owner turns.', 'own', 'Frozen, shielded or mirrored attackers are skipped. Reflections never recurse. Poison and Dragon cannot be reflected.', 'mirror-reflect', { duration: 'two owner turns' }),
+  power('phantom', 'Phantom Mark', 1, 'deception', 'Show a visibly translucent illusion on an empty cell for one opponent action. It never counts toward lines or blocks a real placement.', 'empty', 'The illusion is labelled, can be purified, and disappears when a real mark arrives.', 'phantom-mark', { duration: 'one opponent action' }),
+  power('gravity', 'Gravity Pulse', 3, 'positioning', 'Slide every movable mark one cell in a chosen direction, resolving the leading edge first.', 'direction', 'Frozen, rooted, shielded and mirrored marks stay anchored. Occupied or locked destinations stop movement.', 'gravity-pulse'),
+  power('poison', 'Poison Curse', 2, 'offense', 'Curse an enemy mark. After its next action, the mark is destroyed unless purified, frozen or shielded. Expiration resolves before lines.', 'enemy', 'The owner receives a warning and one action to cleanse or protect the mark.', 'poison-curse', { duration: 'one owner action' }),
+  power('purify', 'Purify', 1, 'counterplay', 'Cleanse frost, poison, hostile root, phantom and restricted terrain from one cell. Ownership and beneficial shields remain.', 'debuff', 'Only a cell with a removable negative effect is a legal target.', 'purify-light'),
+  power('dragon', 'Dragon Breath', 4, 'offense', 'Choose a row or column. Strike its first unfrozen enemy mark in ascending cell order; at most one mark is destroyed.', 'line', 'A shield absorbs the selected hit. Frozen targets are skipped; Mirror cannot reflect an area attack.', 'dragon-breath'),
+  power('eclipse', 'Ultimate Eclipse', 6, 'ultimate', 'After four main actions, strike one enemy mark and darken its empty cell for one opponent action. Once per match.', 'enemy', 'Shield or Mirror counters it. Darkness never conceals the board. Purify or Tide clears it.', 'ultimate-eclipse', { maxUsesPerMatch: 1, minimumRoundActions: 4, duration: 'one opponent action' }),
+  power('tide', 'Tide Reversal', 2, 'counterplay', 'Redirect enemy-created terrain from an empty locked cell to a different empty unlocked cell for one opponent action.', 'from-to', 'Cannot duplicate terrain or target an occupied cell. Purify removes the redirected restriction.', 'tide-reversal', { duration: 'one opponent action' }),
+  power('wind', 'Wind Step', 1, 'positioning', 'Move one eligible friendly mark exactly one square diagonally into an empty unlocked cell.', 'own-and-diagonal-empty', 'Freeze, Root Anchor, Shield and Mirror anchor the source; terrain blocks the landing.', 'wind-step'),
+  power('root', 'Root Anchor', 1, 'defense', 'Anchor one friendly mark through its next two completed owner turns without making it immune to damage.', 'own', 'Fire and other destruction still work. Root prevents Portal, Wind, Shadow and Gravity displacement.', 'root-anchor', { duration: 'two owner turns' }),
+  power('echo', 'Chrono Echo', 2, 'tempo', 'Restore your most recent basic placement to its original cell, using that exact destroyed mark’s restoration charge.', 'self', 'The last placement must genuinely have been destroyed this round, and its original cell must be empty and unlocked.', 'chrono-echo'),
+].map(item => Object.freeze(item)));
+
+export const RANKED_POWER_IDS = Object.freeze(POWER_CATALOG.map(item => item.id));
 export const DEFAULT_LOADOUT = Object.freeze(['fire', 'shield', 'portal']);
-export const POWER_BY_ID = Object.freeze(Object.fromEntries(POWER_CATALOG.map(power => [power.id, power])));
+export const POWER_BY_ID = Object.freeze(Object.fromEntries(POWER_CATALOG.map(item => [item.id, item])));
