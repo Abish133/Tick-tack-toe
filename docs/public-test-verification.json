@@ -1,0 +1,60 @@
+{
+  "url": "https://conversation-mileage-oxide-montana.trycloudflare.com",
+  "checkedAt": "2026-10-12T06:22:10.530Z",
+  "browserFlows": {
+    "count": 2,
+    "status": "passed",
+    "coverage": [
+      "ranked powers cups replay",
+      "friends private classic reconnect emotes rematch"
+    ]
+  },
+  "visual": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "errors": [],
+      "visual": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "images": []
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "errors": [],
+      "visual": {
+        "width": 390,
+        "documentWidth": 390,
+        "images": []
+      }
+    }
+  ],
+  "http": [
+    {
+      "route": "/api/health",
+      "status": 200
+    },
+    {
+      "route": "/api/admin/metrics",
+      "status": 401
+    },
+    {
+      "route": "/.env",
+      "status": 404
+    },
+    {
+      "route": "/.runtime/game-process.json",
+      "status": 404
+    },
+    {
+      "route": "/assets/arena.png",
+      "status": 200
+    }
+  ]
+}

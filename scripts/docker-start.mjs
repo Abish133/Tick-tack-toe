@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { spawn } from 'node:child_process';
 import { PrismaClient } from '@prisma/client';
 import { run, root, sleep } from './local-utils.mjs';
+import {deployMigrationsWithCaseCompatibility} from './migration-case-compat.mjs';
 
 if(!process.env.DATABASE_URL)throw new Error('DATABASE_URL must point to the dedicated MySQL database.');
 const authSecret=process.env.SESSION_SECRET||process.env.AUTH_SECRET;
@@ -27,8 +28,11 @@ try{
       await sleep(2000);
     }
   }
+  await deployMigrationsWithCaseCompatibility({db,root,
+    deploy:()=>run(process.execPath,['node_modules/prisma/build/index.js','migrate','deploy'],{stdio:'inherit'}),
+    resolve:name=>run(process.execPath,['node_modules/prisma/build/index.js','migrate','resolve','--applied',name],{stdio:'inherit'}),
+  });
 }finally{await db.$disconnect();}
-await run(process.execPath,['node_modules/prisma/build/index.js','migrate','deploy'],{stdio:'inherit'});
 await run(process.execPath,['prisma/seed.mjs'],{stdio:'inherit'});
 const child = spawn(process.execPath, ['server.mjs', '--production'], { cwd: root, env: process.env, stdio: 'inherit' });
 for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => child.kill(signal));
