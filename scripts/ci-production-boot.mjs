@@ -24,9 +24,13 @@ const docker=(args)=>new Promise((resolve,reject)=>{
   child.on('error',reject);child.on('exit',code=>code===0?resolve(output.trim()):reject(new Error(`Docker ${args[0]} failed: ${error.slice(-3000)}`)));
 });
 const start=(name,port,release)=>docker(['run','-d','--name',name,'--network','host','--env','DATABASE_URL','--env','AUTH_SECRET','--env','APP_ORIGIN','--env','NODE_ENV=production','--env','HOST=127.0.0.1','--env',`PORT=${port}`,'--env',`RELEASE_SHA=${release}`,image]);
-async function poll(origin,pathname,expected,timeout=120000){
+async function poll(origin,pathname,expected,timeout=120000,{allowClosedListener=false}={}){
   const deadline=Date.now()+timeout;
-  while(Date.now()<deadline){try{const response=await fetch(origin+pathname,{signal:AbortSignal.timeout(2000)});if(response.status===expected)return response;}catch{}await delay(100);}
+  while(Date.now()<deadline){
+    try{const response=await fetch(origin+pathname,{signal:AbortSignal.timeout(2000)});if(response.status===expected)return response;}
+    catch(error){if(allowClosedListener&&error.cause?.code==='ECONNREFUSED')return null;}
+    await delay(100);
+  }
   throw new Error(`Timed out waiting for ${pathname} status ${expected}.`);
 }
 const db=new PrismaClient();
@@ -45,6 +49,8 @@ try{
   const [stillEmpty]=await sql.query('SHOW TABLES');assert.equal(stillEmpty.length,0,'Migrations and seed must also wait for ownership.');
   await hold.release();
   const health=await (await poll(firstOrigin,'/api/health',200)).json();assert.equal(health.coordinator,'active');assert.equal(health.release,'ci-first');
+  const [[{owner:firstOwner}]]=await sql.query('SELECT IS_USED_LOCK(?) AS owner',[hold.names.owner]);
+  assert.ok(Number(firstOwner)>0,'The healthy first coordinator must own its dedicated MySQL lock.');
   const guest=await fetch(firstOrigin+'/api/auth/guest',{method:'POST',headers:{origin:firstOrigin,'content-type':'application/json'},body:JSON.stringify({name:'CI '+key})});
   assert.equal(guest.status,201);const cookie=guest.headers.get('set-cookie').split(';')[0];userId=(await guest.json()).user.id;
   // Hold this fixture player's occupancy row until a real request is waiting
@@ -66,10 +72,17 @@ try{
   assert.ok(blockedTransaction,'The accepted request must actually reach its SQL occupancy write.');
   assert.equal(matchResolved,false);
   await start(second,3912,'ci-second');
-  await poll(secondOrigin,'/health/live',200,10000);
-  await poll(firstOrigin,'/health/live',503,10000);
+  await poll(secondOrigin,'/health/live',200,3000);
+  // server.close() stops accepting new connections while existing requests
+  // drain. A refused listener and an explicit 503 both mean it is unhealthy;
+  // the SQL ownership and container checks below prove it has not exited.
+  await poll(firstOrigin,'/health/live',503,2000,{allowClosedListener:true});
+  assert.equal(matchResolved,false,'The accepted request must still be waiting for its fixture row lock during drain.');
   assert.equal((await fetch(secondOrigin+'/api/health')).status,503,'Replacement must wait until the accepted write drains.');
   const draining=JSON.parse(await docker(['inspect','--format','{{json .State}}',first]));assert.equal(draining.Running,true);
+  const [[ownership]]=await sql.query('SELECT IS_USED_LOCK(?) AS owner, IS_USED_LOCK(?) AS requester',[hold.names.owner,hold.names.request]);
+  assert.equal(Number(ownership.owner),Number(firstOwner),'The draining coordinator must retain ownership while an accepted write is pending.');
+  assert.ok(Number(ownership.requester)>0&&Number(ownership.requester)!==Number(firstOwner),'The replacement must request handoff on a separate MySQL session.');
   await sql.commit();
   const match=await creatingMatch;assert.equal(match.status,201,'The accepted request must finish with its normal success response.');matchId=(await match.json()).matchId;
   const replacement=await (await poll(secondOrigin,'/api/health',200)).json();assert.equal(replacement.release,'ci-second');

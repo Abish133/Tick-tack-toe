@@ -1,0 +1,127 @@
+{
+  "status": "passed",
+  "timestamp": "2026-10-13T04:20:57.817Z",
+  "baseURL": "http://localhost:3000",
+  "database": "isolated ea_test_release",
+  "testedViewports": [
+    1440,
+    390
+  ],
+  "checks": [
+    {
+      "name": "powers",
+      "route": "/powers",
+      "width": 1440,
+      "image": "release-powers-1440.png",
+      "viewport": 1440,
+      "document": 1440,
+      "brokenImages": [],
+      "overflow": []
+    },
+    {
+      "name": "powers",
+      "route": "/powers",
+      "width": 390,
+      "image": "release-powers-390.png",
+      "viewport": 390,
+      "document": 390,
+      "brokenImages": [],
+      "overflow": []
+    },
+    {
+      "name": "shop",
+      "route": "/shop",
+      "width": 1440,
+      "image": "release-shop-1440.png",
+      "viewport": 1440,
+      "document": 1440,
+      "brokenImages": [],
+      "overflow": []
+    },
+    {
+      "name": "shop",
+      "route": "/shop",
+      "width": 390,
+      "image": "release-shop-390.png",
+      "viewport": 390,
+      "document": 390,
+      "brokenImages": [],
+      "overflow": []
+    },
+    {
+      "name": "season-locked",
+      "route": "/season-pass",
+      "width": 1440,
+      "image": "release-season-locked-1440.png",
+      "viewport": 1440,
+      "document": 1440,
+      "brokenImages": [],
+      "overflow": []
+    },
+    {
+      "name": "all-premium-claims",
+      "count": 5,
+      "coins": 400,
+      "cosmetics": [
+        "Eclipse Halo",
+        "Solar Horizon",
+        "Galaxy Sigils",
+        "Dragon Arrival",
+        "Starlight Sanctuary"
+      ]
+    },
+    {
+      "name": "season-claimed",
+      "route": "/season-pass",
+      "width": 390,
+      "image": "release-season-claimed-390.png",
+      "viewport": 390,
+      "document": 390,
+      "brokenImages": [],
+      "overflow": []
+    },
+    {
+      "name": "inventory",
+      "route": "/inventory",
+      "width": 1440,
+      "image": "release-inventory-1440.png",
+      "viewport": 1440,
+      "document": 1440,
+      "brokenImages": [],
+      "overflow": []
+    },
+    {
+      "name": "profile-cosmetics",
+      "route": "/profile",
+      "width": 1440,
+      "image": "release-profile-cosmetics-1440.png",
+      "viewport": 1440,
+      "document": 1440,
+      "brokenImages": [],
+      "overflow": []
+    },
+    {
+      "name": "profile-cosmetics",
+      "route": "/profile",
+      "width": 390,
+      "image": "release-profile-cosmetics-390.png",
+      "viewport": 390,
+      "document": 390,
+      "brokenImages": [],
+      "overflow": []
+    },
+    {
+      "name": "premium-cosmetics-equipment",
+      "frame": "frame-eclipse",
+      "banner": "banner-solar",
+      "effect": "effect-dragon",
+      "arena": "arena-starlight",
+      "marks": "marks-galaxy"
+    }
+  ],
+  "errors": [],
+  "assetFailures": [],
+  "providerCheckout": "disabled until owner supplies credentials",
+  "nativeAdDelivery": "not exercised by browser",
+  "layoutNotes": "The mobile sidebar is intentionally positioned offscreen until its menu opens. Document width matched every viewport."
+}
