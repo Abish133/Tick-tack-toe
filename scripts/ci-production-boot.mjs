@@ -51,13 +51,17 @@ try{
   // to claim it. The takeover must drain that accepted request rather than
   // making a second coordinator ready while the first is still writing.
   await sql.beginTransaction();await sql.query('SELECT id FROM User WHERE id=? FOR UPDATE',[userId]);
-  let matchResolved=false;
-  const creatingMatch=fetch(firstOrigin+'/api/matches',{method:'POST',headers:{origin:firstOrigin,'content-type':'application/json',cookie},body:JSON.stringify({mode:'ai',ruleset:'elemental',difficulty:'easy'})}).then(response=>{matchResolved=true;return response;});
+  let matchResolved=false,earlyResponse;
+  const creatingMatch=fetch(firstOrigin+'/api/matches',{method:'POST',headers:{origin:firstOrigin,'content-type':'application/json',cookie},body:JSON.stringify({mode:'ai',ruleset:'elemental',difficulty:'easy'})}).then(response=>{matchResolved=true;earlyResponse=response;return response;});
   const waitingDeadline=Date.now()+5000;let blockedTransaction=false;
   while(Date.now()<waitingDeadline){
     const [transactions]=await sql.query("SELECT trx_mysql_thread_id FROM information_schema.innodb_trx WHERE trx_state='LOCK WAIT'");
     if(transactions.length){blockedTransaction=true;break;}
-    await delay(50);
+    if(matchResolved)throw new Error(`The occupancy request finished before it blocked: status ${earlyResponse.status}, ${(await earlyResponse.text()).slice(0,1000)}`);
+    // INNODB_TRX caches its snapshot until there has been more than 100ms
+    // without a read. Faster polling continually extends that idle timer and
+    // can freeze the first empty snapshot while the request is truly blocked.
+    await delay(250);
   }
   assert.ok(blockedTransaction,'The accepted request must actually reach its SQL occupancy write.');
   assert.equal(matchResolved,false);

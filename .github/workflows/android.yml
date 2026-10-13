@@ -12,10 +12,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: elemental-android-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
   android-apk:
     name: Android APK build

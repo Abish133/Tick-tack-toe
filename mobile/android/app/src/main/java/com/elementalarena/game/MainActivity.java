@@ -1,7 +1,6 @@
 package com.elementalarena.game;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Color;
@@ -26,8 +25,9 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.window.OnBackInvokedDispatcher;
 
+import androidx.activity.ComponentActivity;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.webkit.WebViewCompat;
 import androidx.webkit.WebViewFeature;
@@ -50,7 +50,7 @@ import org.json.JSONObject;
 import java.util.Collections;
 
 /** Platform glue only. Match authority, authentication and rewards remain on the JS server. */
-public final class MainActivity extends Activity {
+public final class MainActivity extends ComponentActivity {
     private static final int MAX_MESSAGE_LENGTH = 8192;
     private final Uri trustedOrigin = Uri.parse(BuildConfig.GAME_ORIGIN);
     private WebView webView;
@@ -62,6 +62,17 @@ public final class MainActivity extends Activity {
     private boolean adsInitializing;
     private boolean adsInitialized;
     private RewardRequest pendingReward;
+    private final OnBackPressedCallback webBackCallback = new OnBackPressedCallback(false) {
+        @Override public void handleOnBackPressed() {
+            if (webView != null && errorPanel == null && webView.canGoBack()) {
+                webView.goBack();
+            } else {
+                // History may have changed since the gesture started. Let Android handle exit.
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+            }
+        }
+    };
 
     private static final class RewardRequest {
         final String sessionId;
@@ -113,6 +124,8 @@ public final class MainActivity extends Activity {
         webView.setBackgroundColor(Color.rgb(9, 14, 28));
         root.addView(webView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
         configureWebView();
+        // AndroidX bridges legacy buttons and modern predictive gestures with one lifecycle.
+        getOnBackPressedDispatcher().addCallback(this, webBackCallback);
         if (!WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
             showError("Update Android System WebView to securely open Elemental Arena.", false);
             return;
@@ -125,12 +138,10 @@ public final class MainActivity extends Activity {
                 if (text == null || text.length() > MAX_MESSAGE_LENGTH) return;
                 runOnUiThread(() -> handleMessage(text));
             });
-        if (Build.VERSION.SDK_INT >= 33) {
-            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::handleBack);
-        }
         if (savedInstanceState == null || webView.restoreState(savedInstanceState) == null) {
             webView.loadUrl(BuildConfig.GAME_ORIGIN + "/");
         }
+        updateBackNavigation();
         gatherConsent();
     }
 
@@ -180,6 +191,10 @@ public final class MainActivity extends Activity {
                     view.stopLoading();
                     view.loadUrl(BuildConfig.GAME_ORIGIN + "/");
                 }
+                updateBackNavigation();
+            }
+            @Override public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
+                updateBackNavigation();
             }
         });
     }
@@ -324,10 +339,13 @@ public final class MainActivity extends Activity {
             errorPanel.addView(retryButton);
         }
         root.addView(errorPanel, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        updateBackNavigation();
     }
 
-    private void handleBack() { if (webView != null && webView.canGoBack()) webView.goBack(); else finish(); }
-    @Override public void onBackPressed() { handleBack(); }
+    private void updateBackNavigation() {
+        // With no web history, leave exit to Android so its back-to-home preview can run.
+        webBackCallback.setEnabled(webView != null && errorPanel == null && webView.canGoBack());
+    }
     @Override protected void onSaveInstanceState(@NonNull Bundle state) { super.onSaveInstanceState(state); if (webView != null) webView.saveState(state); }
     @Override protected void onPause() { if (webView != null) webView.onPause(); CookieManager.getInstance().flush(); super.onPause(); }
     @Override protected void onResume() { super.onResume(); if (webView != null) webView.onResume(); }

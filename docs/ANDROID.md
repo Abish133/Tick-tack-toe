@@ -56,6 +56,8 @@ The optional `{type:'privacy'}` bridge message opens the same UMP privacy-option
 
 The app disables file/content access, mixed content, cleartext traffic, third-party cookies, arbitrary intent schemes and automatic new windows. SSL errors are cancelled. Only the trusted game stays in the WebView; external HTTPS links and Google sign-in open the phone's browser. Browser and WebView authentication cookies are separate, so use email/password or a guest account for in-app play; a Google browser sign-in stays in that browser.
 
+Back navigation uses AndroidX `ComponentActivity` and its lifecycle-aware `OnBackPressedDispatcher`. The callback handles WebView history only while history exists; otherwise Android handles activity exit and its predictive back-to-home animation. The app does not override the deprecated platform `onBackPressed()` method.
+
 Before distributing a release, test on an emulator and a physical device: registration/login, Socket.IO reconnection, all board target styles, audio after a tap, consent acceptance/refusal/privacy reopening, ad no-fill and cancellation, signed SSV reward delivery, app background/resume and network loss. APK compilation confirms SDK/API compatibility; it does not replace those device checks.
 
 ## Verified upstream references
@@ -65,4 +67,6 @@ Before distributing a release, test on an emulator and a physical device: regist
 - [Google UMP integration](https://developers.google.com/admob/android/privacy) — UMP 4.0.0 and consent/privacy-options sequence.
 - [AndroidX WebKit releases](https://developer.android.com/jetpack/androidx/releases/webkit) — stable WebKit 1.17.1.
 - [Android's origin-scoped JavaScript bridge](https://developer.android.com/develop/ui/views/layout/webapps/native-api-access-jsbridge).
+- [AndroidX Activity releases](https://developer.android.com/jetpack/androidx/releases/activity) — stable Activity 1.13.0.
+- [Custom back navigation](https://developer.android.com/guide/navigation/navigation-custom-back) and [predictive back migration](https://developer.android.com/guide/navigation/custom-back/predictive-back-gesture).
 - [AGP 8.13 compatibility](https://developer.android.com/build/releases/agp-8-13-0-release-notes) — Gradle 8.13/JDK 17/Android API 36.
