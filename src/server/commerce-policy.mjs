@@ -1,5 +1,6 @@
 import {createHmac,timingSafeEqual} from 'node:crypto';
 import {fail} from './security.mjs';
+import {COLLECTION_BUNDLES} from '../lib/cosmetic-collection.js';
 
 export const premiumTiers=Object.freeze([
   {level:1,requiredXp:100,coins:25,cosmeticId:'frame-eclipse'},
@@ -21,6 +22,7 @@ export function commerceProducts(env=process.env) {
     {id:'coins-flare',name:'Flare chest',coins:1200,amount:price(env.RAZORPAY_FLARE_PAISE,9900),currency:'INR'},
     {id:'coins-cosmic',name:'Cosmic vault',coins:3000,amount:price(env.RAZORPAY_COSMIC_PAISE,19900),currency:'INR'},
     {id:'season-pass',name:'Season cosmetic pass',coins:0,amount:price(env.RAZORPAY_PASS_PAISE,9900),currency:'INR'},
+    ...COLLECTION_BUNDLES.map(bundle=>({...bundle,amount:price(env.RAZORPAY_COLLECTION_PAISE,14900)})),
   ];
 }
 export function validHmac(payload,signature,key) {

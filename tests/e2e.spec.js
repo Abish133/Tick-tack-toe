@@ -20,8 +20,8 @@ const tag = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(
 const board = page => page.getByRole('group', { name: 'Three by three elemental game board' });
 test.beforeEach(async ({},info)=>{
   // The suite shares one localhost IP. Respect the normal public request budget
-  // after the commerce/power flows and before each heavy social flow.
-  if(info.title.startsWith('friends, daily rewards')||info.title.startsWith('direct friend invitations')){
+  // after collection purchase/equip checks and before heavy multiplayer flows.
+  if(['two human accounts complete','guest practice, three-power','friends, daily rewards','direct friend invitations'].some(prefix=>info.title.startsWith(prefix))){
     info.setTimeout(240_000);
     await new Promise(resolve=>setTimeout(resolve,60_000));
   }

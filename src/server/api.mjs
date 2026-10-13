@@ -8,8 +8,8 @@ import {leaderboardPage} from './leaderboards.mjs';
 import {publicProfile,friendsOverview,requestFriend,respondFriend,challengeFriend,acceptChallenge,playerSelect,socialPlayer,blockedPair} from './social.mjs';
 import {RANKED_POWER_IDS,POWER_CATALOG} from '../lib/game-engine/powers.js';
 import {emailConfigured,sendEmail} from './email.mjs';
-import {checkoutConfigured,commerceProducts,passCoinPrice,premiumTiers} from './commerce-policy.mjs';
-import {buyPassWithCoins,createCheckout,verifyCheckout,orderStatus,razorpayWebhook} from './commerce.mjs';
+import {checkoutConfigured,passCoinPrice,premiumTiers} from './commerce-policy.mjs';
+import {buyPassWithCoins,createCheckout,verifyCheckout,orderStatus,razorpayWebhook,listCommerceProducts} from './commerce.mjs';
 import {admobConfigured,startAdReward,adRewardStatus,admobCallback} from './admob.mjs';
 
 export const features=()=>({database:'mysql',ranked:true,humanOnlyRanked:true,ai:true,google:Boolean(process.env.GOOGLE_CLIENT_ID&&process.env.GOOGLE_CLIENT_SECRET),email:emailConfigured(),checkout:checkoutConfigured(),rewardedAds:admobConfigured(),multiProcess:false,turnSeconds:20,equippedPowers:3,targetMatchMinutes:[2,5],releasedPowers:RANKED_POWER_IDS.length,totalPowerConcepts:POWER_CATALOG.length});
@@ -31,7 +31,7 @@ export async function handleAPI(request,context={}){
     const body=['POST','PUT','PATCH','DELETE'].includes(method)?await readBody(request):{};
     if(path==='health'&&method==='GET'){await db.$queryRaw`SELECT 1`;return json({ok:true,database:'mysql',features:features()});}
     if(path==='features'&&method==='GET')return json({features:features()});
-    if(path==='commerce/products'&&method==='GET')return json({products:commerceProducts(),checkoutEnabled:checkoutConfigured(),passCoinPrice,nativeAdsAvailable:admobConfigured()});
+    if(path==='commerce/products'&&method==='GET'){const viewer=await authenticate(cookie);return json({...await listCommerceProducts(viewer?.id),checkoutEnabled:checkoutConfigured(),passCoinPrice,nativeAdsAvailable:admobConfigured()});}
     if(path==='auth/session'&&method==='GET'){const user=await authenticate(cookie);return json({user:user?await getPlayer(user.id):null,features:features()});}
     if(['auth/register','auth/login','auth/guest'].includes(path)&&method==='POST'){
       rateLimit(`auth:${request.headers.get('x-arena-ip')||'unknown'}`,12,60000);const current=path==='auth/register'?await authenticate(cookie):null;const user=path==='auth/login'?await loginPlayer(body.email,body.password):path==='auth/register'&&current?.guest?await upgradeGuest(current.id,body):await createPlayer({...body,guest:path==='auth/guest'});const token=await createSession(user.id);return json({user:await getPlayer(user.id),features:features()},path==='auth/login'?200:201,{'set-cookie':sessionCookie(token)});

@@ -2,6 +2,8 @@
 
 Project assets are copied into `public/assets` so this game does not depend on the Codex image cache.
 
+The October collection expansion adds 20 separately generated assets: ten transparent avatars and ten arena backgrounds. Their optimized WebP files are in `public/assets/collection/`; original PNGs remain locally in `artwork/collection/`. The built-in imagegen tool created every new raster image. Avatar alpha was verified before and after optimization. Exact prompts, dimensions, file locations and hashes are recorded in [collection-art-prompts.json](collection-art-prompts.json), and [COLLECTION.md](COLLECTION.md) describes how the artwork appears in the shop and equipped game styles.
+
 | Asset | Dimensions | Use | Source |
 | --- | --- | --- | --- |
 | `arena.png` | 1672 × 941 | Cinematic elemental arena background | `exec-e10dafb5-8f31-4409-aba4-5401459a12ab.png` |

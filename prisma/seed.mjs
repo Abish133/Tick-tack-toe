@@ -1,9 +1,11 @@
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import {POWER_CATALOG} from '../src/lib/game-engine/powers.js';
+import {COLLECTION_COSMETICS} from '../src/lib/cosmetic-collection.js';
 
 const db = new PrismaClient();
 const cosmetics = [
+  ...COLLECTION_COSMETICS,
   {id:'frame-eclipse',name:'Eclipse Halo',type:'frame',rarity:'legendary',description:'Premium season reward: an obsidian halo with a violet eclipse rim. Cosmetic only.',price:0,asset:''},
   {id:'banner-solar',name:'Solar Horizon',type:'banner',rarity:'epic',description:'Premium season reward: a luminous amber and indigo profile horizon. Cosmetic only.',price:0,asset:''},
   {id:'marks-galaxy',name:'Galaxy Sigils',type:'marks',rarity:'legendary',description:'Premium season reward: starlit violet and cyan marks. Cosmetic only.',price:0,asset:'/assets/elements.png'},
@@ -41,7 +43,7 @@ try {
     await db.playerPower.createMany({data:players.flatMap(player=>POWER_CATALOG.map(power=>({userId:player.id,powerId:power.id}))),skipDuplicates:true});
     cursor=players.at(-1).id;
   }
-  for (const item of cosmetics) {const avatarAsset={'avatar-void':'/assets/avatar-void.png','avatar-ember':'/assets/avatar-fire.png','avatar-frost':'/assets/avatar-ice.png'}[item.id];const data={...item,asset:avatarAsset||(item.type==='board'?'/assets/arena.png':['title','effect','frame','banner','emote'].includes(item.type)?'':item.type==='arena'?item.asset:'/assets/elements.png')};await db.cosmeticItem.upsert({where:{id:item.id},create:data,update:{asset:data.asset}});}
+  for (const item of cosmetics) {const avatarAsset={'avatar-void':'/assets/avatar-void.png','avatar-ember':'/assets/avatar-fire.png','avatar-frost':'/assets/avatar-ice.png'}[item.id];const generated=COLLECTION_COSMETICS.some(entry=>entry.id===item.id);const data={...item,asset:generated?item.asset:avatarAsset||(item.type==='board'?'/assets/arena.png':['title','effect','frame','banner','emote'].includes(item.type)?'':item.type==='arena'?item.asset:'/assets/elements.png')};await db.cosmeticItem.upsert({where:{id:item.id},create:data,update:{asset:data.asset}});}
   const divisions = [['rookie','Rookie',0,'#acb4d0'],['bronze','Bronze',100,'#c58c60'],['silver','Silver',250,'#d2def8'],['gold','Gold',450,'#ffd067'],['platinum','Platinum',700,'#89f2e8'],['diamond','Diamond',1000,'#77bcff'],['master','Master',1400,'#bd94ff'],['grandmaster','Grandmaster',1900,'#fa7dd7'],['legend','Legend',2500,'#ffb157'],['mythic','Mythic',3300,'#ff777b']];
   for(const [id,name,minCups,color] of divisions) await db.rankDivision.upsert({where:{id},create:{id,name,minCups,color},update:{name,minCups,color}});
   // Fixed dates describe the real local launch season; no artificial scarcity timer.

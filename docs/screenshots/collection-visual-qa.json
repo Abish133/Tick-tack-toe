@@ -1,0 +1,268 @@
+{
+  "at": "2026-10-13T07:54:49.469Z",
+  "baseURL": "http://localhost:3000",
+  "readOnly": true,
+  "accountsCreated": 0,
+  "fixtureWrites": 0,
+  "totalStyles": 103,
+  "checks": [
+    {
+      "label": "desktop shop",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "All styles loaded",
+      "count": 103
+    },
+    {
+      "label": "Search exact avatar",
+      "id": "avatar-collection-storm"
+    },
+    {
+      "label": "desktop avatars",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "Avatar category",
+      "count": 13
+    },
+    {
+      "label": "Arena category",
+      "count": 11
+    },
+    {
+      "label": "Solar avatar preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "Solar avatar artwork",
+      "width": 540,
+      "height": 568.75,
+      "svgCount": 3,
+      "imageCount": 1
+    },
+    {
+      "label": "Solar board preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "Solar board artwork",
+      "width": 540,
+      "height": 568.75,
+      "svgCount": 8,
+      "imageCount": 0
+    },
+    {
+      "label": "Solar marks preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "Solar marks artwork",
+      "width": 540,
+      "height": 568.75,
+      "svgCount": 8,
+      "imageCount": 0
+    },
+    {
+      "label": "Solar arena preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "Solar arena artwork",
+      "width": 540,
+      "height": 568.75,
+      "svgCount": 4,
+      "imageCount": 1
+    },
+    {
+      "label": "Solar frame preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "Solar frame artwork",
+      "width": 540,
+      "height": 568.75,
+      "svgCount": 5,
+      "imageCount": 1
+    },
+    {
+      "label": "Solar banner preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "Solar banner artwork",
+      "width": 540,
+      "height": 568.75,
+      "svgCount": 4,
+      "imageCount": 1
+    },
+    {
+      "label": "Solar effect preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "Solar effect artwork",
+      "width": 540,
+      "height": 568.75,
+      "svgCount": 10,
+      "imageCount": 0
+    },
+    {
+      "label": "Reduced motion arrival decorations",
+      "activeAnimations": 0
+    },
+    {
+      "label": "Solar emote preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "Solar emote artwork",
+      "width": 540,
+      "height": 568.75,
+      "svgCount": 5,
+      "imageCount": 0
+    },
+    {
+      "label": "Solar title preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "Solar title artwork",
+      "width": 540,
+      "height": 568.75,
+      "svgCount": 4,
+      "imageCount": 0
+    },
+    {
+      "label": "lunar avatar preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "lunar arena preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "rose avatar preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "rose arena preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "nebula avatar preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "nebula arena preview",
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "mobile shop",
+      "viewport": 390,
+      "document": 390,
+      "body": 390,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "mobile avatars",
+      "viewport": 390,
+      "document": 390,
+      "body": 390,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "mobile transparent avatar preview",
+      "viewport": 390,
+      "document": 390,
+      "body": 390,
+      "missing": [],
+      "reducedMotion": true
+    },
+    {
+      "label": "Reduced motion arrival decorations",
+      "activeAnimations": 0
+    },
+    {
+      "label": "Cash bundle product display",
+      "bundleCount": 10,
+      "defaultPrice": "₹149",
+      "stylesPerBundle": 9,
+      "checkoutEnabled": false,
+      "paymentsSetupMessageVisible": true
+    }
+  ],
+  "errors": [],
+  "badAssets": [],
+  "passed": true
+}

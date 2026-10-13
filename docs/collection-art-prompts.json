@@ -1,0 +1,297 @@
+{
+  "generatedAt": "2026-10-13T07:29:51.779Z",
+  "tool": "built-in imagegen",
+  "optimization": "WebP encoding and size optimization only; avatar alpha preserved; original PNGs maintained in the project artwork/collection folder",
+  "assets": [
+    {
+      "id": "avatar-solar",
+      "source": "artwork/collection/avatar-solar.png",
+      "asset": "/assets/collection/avatar-solar.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium game avatar, a single standalone transparent PNG cutout. Create Sunfire Phoenix: a striking regal phoenix guardian bust for Elemental Arena, fiery golden metallic face armor and sculpted feather crown, amber-lit eyes, warm orange feather plumes around shoulders. Modern high-end fantasy game cosmetic illustration, polished dimensional metal and feather materials, crisp elegant silhouette, readable at small profile size. Front three-quarter portrait centered, entire head, crown and shoulder silhouette fully visible with 10% empty margin on all sides. True transparent background, clean alpha edges, no floor, no background, no badge border, no text, no logo, no watermark. Restrained amber glow stays near the character, gold and saffron palette.",
+      "transparent": true,
+      "width": 597,
+      "height": 640,
+      "bytes": 149874,
+      "sha256": "a3718552fb080ad85916842b937d58e2af8c7905301179e9dd8a8563c7da2897",
+      "alpha": {
+        "min": 0,
+        "max": 255,
+        "mean": 135
+      }
+    },
+    {
+      "id": "arena-solar",
+      "source": "artwork/collection/arena-solar.png",
+      "asset": "/assets/collection/arena-solar.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium wide game arena background, cinematic environmental illustration. Modern high-end fantasy game art with rich material detail and atmospheric depth, elegant subdued center where a tic-tac-toe board and readable UI will be overlaid. Wide landscape composition, no people, no game board, no UI, no text, no logo, no watermark. Detailed edge landmarks with subtle lighting, avoid blinding white center. Palace of the Sun: monumental golden sandstone sky palace at sunset, elegant sun disc architectural forms, distant floating terraces above clouds, warm saffron and champagne highlights against indigo shadows. Quiet polished courtyard centered, sunlight from upper edge, fine metallic filigree. Wide 16:9.",
+      "transparent": false,
+      "width": 1600,
+      "height": 900,
+      "bytes": 308628,
+      "sha256": "618cf7f3a8e600136a4c280cc258ab991bd4e17aec89e8b2138df567725b4c47"
+    },
+    {
+      "id": "avatar-abyss",
+      "source": "artwork/collection/avatar-abyss.png",
+      "asset": "/assets/collection/avatar-abyss.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium game avatar, single standalone transparent PNG cutout. Modern high-end fantasy game cosmetic illustration with polished dimensional materials, sharp readable silhouette at small size. Centered bust portrait, entire head and shoulders within frame with generous clear margin. True transparent background, clean alpha edges, no floor or background, no badge border, no text, no logo or watermark. Restrained luminous accents close to character. Abyssal Sentinel: mysterious underwater armored guardian bust, ornate dark teal navy helmet with elegant fin crown, turquoise illuminated eyes and pearl inlays, flowing translucent aqua ribbon accents at shoulders, refined oceanic metal armor. Oceanic fantasy without gore.",
+      "transparent": true,
+      "width": 640,
+      "height": 585,
+      "bytes": 147966,
+      "sha256": "bc3dcc8f9a3762ef6bad3ffd7b5ef2c272a4c9582eacc08c65904aac41437c04",
+      "alpha": {
+        "min": 0,
+        "max": 255,
+        "mean": 136
+      }
+    },
+    {
+      "id": "arena-abyss",
+      "source": "artwork/collection/arena-abyss.png",
+      "asset": "/assets/collection/arena-abyss.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium wide game arena background, cinematic environmental illustration. Modern high-end fantasy game art with rich material detail and atmospheric depth, elegant subdued center where a tic-tac-toe board and readable UI will be overlaid. Wide landscape composition, no people, no game board, no UI, no text, no logo, no watermark. Detailed edge landmarks with subtle lighting, avoid blinding white center. Leviathan Throne: immense submerged palace surrounded by deep ocean, luminous turquoise coral pillars, elegant pearl arches and distant leviathan-shaped stone throne, drifting bioluminescent particles, dark navy stone platform at center, aquatic shafts of light from above. Wide 16:9.",
+      "transparent": false,
+      "width": 1600,
+      "height": 900,
+      "bytes": 426788,
+      "sha256": "b7caf8acef264a1458d3ac9f7629d3e7f17bf77c748abc457f6cb8f53fc8105e"
+    },
+    {
+      "id": "avatar-jade",
+      "source": "artwork/collection/avatar-jade.png",
+      "asset": "/assets/collection/avatar-jade.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium game avatar, single standalone transparent PNG cutout. Modern high-end fantasy game cosmetic illustration with polished dimensional materials, sharp readable silhouette at small size. Centered bust portrait, entire head and shoulders within frame with generous clear margin. True transparent background, clean alpha edges, no floor or background, no badge border, no text, no logo or watermark. Restrained luminous accents close to character. Verdant Guardian: regal stag-faced woodland spirit in ivory and jade ceremonial armor, graceful branching antlers decorated with tiny golden leaves, luminous pale emerald eyes, moss silk shoulder mantle, peaceful powerful expression. Forest green, ivory and antique gold.",
+      "transparent": true,
+      "width": 640,
+      "height": 585,
+      "bytes": 167806,
+      "sha256": "e4c76b3c08761a28f35f7152d80f70986a6e8e0841f6053d947f151d0df4273d",
+      "alpha": {
+        "min": 0,
+        "max": 255,
+        "mean": 147
+      }
+    },
+    {
+      "id": "arena-jade",
+      "source": "artwork/collection/arena-jade.png",
+      "asset": "/assets/collection/arena-jade.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium wide game arena background, cinematic environmental illustration. Modern high-end fantasy game art with rich material detail and atmospheric depth, elegant subdued center where a tic-tac-toe board and readable UI will be overlaid. Wide landscape composition, no people, no game board, no UI, no text, no logo, no watermark. Detailed edge landmarks with subtle lighting, avoid blinding white center. Temple of the Wild: ancient ivory stone sanctuary in a lush enchanted emerald forest, majestic tree canopy, delicate golden leaves, waterfalls at edges, jade lanterns along a quiet central terrace, sunlight filtering through distant moss arches. Grounded refined fantasy and deep green shadows. Wide 16:9.",
+      "transparent": false,
+      "width": 1600,
+      "height": 900,
+      "bytes": 494562,
+      "sha256": "7416c531f1e79a74421498ce794399b4204b7da514c62b01746a5b4440511791"
+    },
+    {
+      "id": "avatar-storm",
+      "source": "artwork/collection/avatar-storm.png",
+      "asset": "/assets/collection/avatar-storm.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium game avatar, single standalone transparent PNG cutout. Modern high-end fantasy game cosmetic illustration with polished dimensional materials, sharp readable silhouette at small size. Centered bust portrait, entire head and shoulders within frame with generous clear margin. True transparent background, clean alpha edges, no floor or background, no badge border, no text, no logo or watermark. Restrained luminous accents close to character. Volt Ronin: futuristic masked ronin warrior bust, sleek navy and electric-blue segmented armor, violet luminous accents, swept angular helmet crest, pale blue eyes under refined visor, floating lightning ribbons near shoulders. Stylish technological fantasy, no weapons.",
+      "transparent": true,
+      "width": 640,
+      "height": 585,
+      "bytes": 144060,
+      "sha256": "56996c4fc9868dea942e8a3ca55bb2c17dd8cc4cb66a622e7d0b1206510225de",
+      "alpha": {
+        "min": 0,
+        "max": 255,
+        "mean": 137
+      }
+    },
+    {
+      "id": "arena-storm",
+      "source": "artwork/collection/arena-storm.png",
+      "asset": "/assets/collection/arena-storm.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium wide game arena background, cinematic environmental illustration. Modern high-end fantasy game art with rich material detail and atmospheric depth, elegant subdued center where a tic-tac-toe board and readable UI will be overlaid. Wide landscape composition, no people, no game board, no UI, no text, no logo, no watermark. Detailed edge landmarks with subtle lighting, avoid blinding white center. Thunder District: rainy futuristic neon city rooftop courtyard high above a midnight metropolis, violet and electric-blue lights reflected in wet dark stone, distant lightning behind skyline, elegant cyberpunk tower architecture, subtle storm clouds. Clear central dark terrace. Wide 16:9.",
+      "transparent": false,
+      "width": 1600,
+      "height": 900,
+      "bytes": 418498,
+      "sha256": "f85081a4d86635e60d2654750b1d3bbbe0dd4dbe999389b0a4cd51c4e1f0d8e5"
+    },
+    {
+      "id": "avatar-rose",
+      "source": "artwork/collection/avatar-rose.png",
+      "asset": "/assets/collection/avatar-rose.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium game avatar, single standalone transparent PNG cutout. Modern high-end fantasy game cosmetic illustration with polished dimensional materials, sharp readable silhouette at small size. Centered bust portrait, entire head and shoulders within frame with generous clear margin. True transparent background, clean alpha edges, no floor or background, no badge border, no text, no logo or watermark. Restrained luminous accents close to character. Thorn Empress: elegant regal fantasy empress bust with a graceful thorn filigree mask, rose-gold sculpted armor and black velvet mantle, dark rose jeweled crown, pink luminous eyes, delicate flower petal accents close to silhouette. Beautiful imposing portrait, sophisticated blush rose and deep plum palette, no cleavage.",
+      "transparent": true,
+      "width": 640,
+      "height": 585,
+      "bytes": 139880,
+      "sha256": "2d536f1784f2ab59a62d8b4f308c02e1ef127f010715eac5744522107cfffb69",
+      "alpha": {
+        "min": 0,
+        "max": 255,
+        "mean": 147
+      }
+    },
+    {
+      "id": "arena-rose",
+      "source": "artwork/collection/arena-rose.png",
+      "asset": "/assets/collection/arena-rose.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium wide game arena background, cinematic environmental illustration. Modern high-end fantasy game art with rich material detail and atmospheric depth, elegant subdued center where a tic-tac-toe board and readable UI will be overlaid. Wide landscape composition, no people, no game board, no UI, no text, no logo, no watermark. Detailed edge landmarks with subtle lighting, avoid blinding white center. Crimson Moon Garden: elegant gothic garden balcony beneath a large crimson moon, arching rose-vine columns, black marble and rose-gold railings, beautiful red and blush roses along edges, distant castle towers, soft magenta lantern glow and plum midnight sky. Romantic mysterious refined environment. Wide 16:9.",
+      "transparent": false,
+      "width": 1600,
+      "height": 900,
+      "bytes": 331736,
+      "sha256": "cd62ec689c5c445e7b70cdc08c54361dc2a63cfa9638f404e45b06e341a6611d"
+    },
+    {
+      "id": "avatar-clockwork",
+      "source": "artwork/collection/avatar-clockwork.png",
+      "asset": "/assets/collection/avatar-clockwork.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium game avatar, single standalone transparent PNG cutout. Modern high-end fantasy game cosmetic illustration with polished dimensional materials, sharp readable silhouette at small size. Centered bust portrait, entire head and shoulders within frame with generous clear margin. True transparent background, clean alpha edges, no floor or background, no badge border, no text, no logo or watermark. Restrained luminous accents close to character. Brass Lion: magnificent mechanical lion guardian bust, intricate brass and copper plating, turquoise illuminated eyes, elegant radial mane of finely machined clockwork gears and gilt armor, no exposed wires, dignified rich collectible portrait. Antique gold, patinated turquoise, dark leather.",
+      "transparent": true,
+      "width": 640,
+      "height": 591,
+      "bytes": 159184,
+      "sha256": "463c24bfa26fd033725ade841deb1bf2cf07450f518cdc3d7be640378069dd04",
+      "alpha": {
+        "min": 0,
+        "max": 255,
+        "mean": 161
+      }
+    },
+    {
+      "id": "arena-clockwork",
+      "source": "artwork/collection/arena-clockwork.png",
+      "asset": "/assets/collection/arena-clockwork.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium wide game arena background, cinematic environmental illustration. Modern high-end fantasy game art with rich material detail and atmospheric depth, elegant subdued center where a tic-tac-toe board and readable UI will be overlaid. Wide landscape composition, no people, no game board, no UI, no text, no logo, no watermark. Detailed edge landmarks with subtle lighting, avoid blinding white center. Celestial Observatory: magnificent steampunk observatory courtyard under a blue twilight sky, grand astronomical brass orrery at far edge, clock towers and sculpted copper domes, illuminated turquoise dial accents, dark warm stone terrace at center, subtle suspended planetary instruments. Wide 16:9.",
+      "transparent": false,
+      "width": 1600,
+      "height": 900,
+      "bytes": 429122,
+      "sha256": "0b7f62696ce7cd34532781eb9fb40e898840715d7d2a6358f8bd5fc7624f03f6"
+    },
+    {
+      "id": "avatar-lunar",
+      "source": "artwork/collection/avatar-lunar.png",
+      "asset": "/assets/collection/avatar-lunar.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium game avatar, single standalone transparent PNG cutout. Modern high-end fantasy game cosmetic illustration with polished dimensional materials, sharp readable silhouette at small size. Centered bust portrait, entire head and shoulders within frame with generous clear margin. True transparent background, clean alpha edges, no floor or background, no badge border, no text, no logo or watermark. Restrained luminous accents close to character. Moonlit Kitsune: elegant silver-white celestial fox guardian bust, graceful tall fox ears, refined lavender and silver lunar circlet and silk armor, luminous pale cyan eyes, delicate star jewels and ethereal pale fur, gentle regal expression. Silver, lavender and moonlit cyan palette.",
+      "transparent": true,
+      "width": 640,
+      "height": 585,
+      "bytes": 127176,
+      "sha256": "16e3fb650c1c4ff53076ffe2b2634451179bffda7e7058bddcd31422683cc1c1",
+      "alpha": {
+        "min": 0,
+        "max": 255,
+        "mean": 143
+      }
+    },
+    {
+      "id": "arena-lunar",
+      "source": "artwork/collection/arena-lunar.png",
+      "asset": "/assets/collection/arena-lunar.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium wide game arena background, cinematic environmental illustration. Modern high-end fantasy game art with rich material detail and atmospheric depth, elegant subdued center where a tic-tac-toe board and readable UI will be overlaid. Wide landscape composition, no people, no game board, no UI, no text, no logo, no watermark. Detailed edge landmarks with subtle lighting, avoid blinding white center. Lotus Moonlake: serene floating pagoda garden above a luminous moonlit lake, lavender lotus blossoms at edges, silver moon overhead, distant pale mountains and elegant white bridges, subtle cyan lantern glow. Beautiful quiet dark violet courtyard center. Wide 16:9.",
+      "transparent": false,
+      "width": 1600,
+      "height": 900,
+      "bytes": 292786,
+      "sha256": "e9acafc747b92da432bf752e22f2bf7527dcceece3d51644e46c9286495e4eb9"
+    },
+    {
+      "id": "avatar-emberglass",
+      "source": "artwork/collection/avatar-emberglass.png",
+      "asset": "/assets/collection/avatar-emberglass.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium game avatar, single standalone transparent PNG cutout. Modern high-end fantasy game cosmetic illustration with polished dimensional materials, sharp readable silhouette at small size. Centered bust portrait, entire head and shoulders within frame with generous clear margin. True transparent background, clean alpha edges, no floor or background, no badge border, no text, no logo or watermark. Restrained luminous accents close to character. Obsidian Drake: powerful dragon guardian bust with glossy black obsidian scales, elegant crimson molten-glass armor, branching ember horns, warm amber eyes and magma lines beneath dark volcanic plates, bold sculpted dragon muzzle. Refined collectible fantasy, no gore, no weapon.",
+      "transparent": true,
+      "width": 640,
+      "height": 585,
+      "bytes": 138246,
+      "sha256": "897a5ac2a4f646b7e4cd65f1c8ecbef379edc233aac35f2951deb122d150e222",
+      "alpha": {
+        "min": 0,
+        "max": 255,
+        "mean": 133
+      }
+    },
+    {
+      "id": "arena-emberglass",
+      "source": "artwork/collection/arena-emberglass.png",
+      "asset": "/assets/collection/arena-emberglass.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium wide game arena background, cinematic environmental illustration. Modern high-end fantasy game art with rich material detail and atmospheric depth, elegant subdued center where a tic-tac-toe board and readable UI will be overlaid. Wide landscape composition, no people, no game board, no UI, no text, no logo, no watermark. Detailed edge landmarks with subtle lighting, avoid blinding white center. Emberglass Foundry: ancient volcanic glass forge courtyard surrounded by black obsidian spires, warm amber lava channels far to edges, towering dark foundry arches with elegant molten bronze ornaments, glowing crimson mist in distance. Central quiet black polished platform stays readable. Wide 16:9.",
+      "transparent": false,
+      "width": 1600,
+      "height": 900,
+      "bytes": 299208,
+      "sha256": "b275aa8985fbb0800d00b93e3c1b1bf9a7b0877ec731799aaecc33f835b33c22"
+    },
+    {
+      "id": "avatar-arctic",
+      "source": "artwork/collection/avatar-arctic.png",
+      "asset": "/assets/collection/avatar-arctic.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium game avatar, single standalone transparent PNG cutout. Modern high-end fantasy game cosmetic illustration with polished dimensional materials, sharp readable silhouette at small size. Centered bust portrait, entire head and shoulders within frame with generous clear margin. True transparent background, clean alpha edges, no floor or background, no badge border, no text, no logo or watermark. Restrained luminous accents close to character. Prism Owl: regal snowy owl oracle bust in faceted ice-crystal ceremonial armor, elegant tall frost feather crest, lavender and pale-blue glints, wise luminous cyan eyes, white feather shoulders and delicate geometric icy jewels. Gentle powerful winter spirit, crisp snow-white crystalline fantasy.",
+      "transparent": true,
+      "width": 640,
+      "height": 585,
+      "bytes": 121764,
+      "sha256": "f8f1944b731c21abf6139a89462d508ed48b255ba19fd2c4053e3c8c4d5988fc",
+      "alpha": {
+        "min": 0,
+        "max": 255,
+        "mean": 134
+      }
+    },
+    {
+      "id": "arena-arctic",
+      "source": "artwork/collection/arena-arctic.png",
+      "asset": "/assets/collection/arena-arctic.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium wide game arena background, cinematic environmental illustration. Modern high-end fantasy game art with rich material detail and atmospheric depth, elegant subdued center where a tic-tac-toe board and readable UI will be overlaid. Wide landscape composition, no people, no game board, no UI, no text, no logo, no watermark. Detailed edge landmarks with subtle lighting, avoid blinding white center. Frozen Sky Cathedral: magnificent floating ice cathedral terrace among alpine clouds, faceted pale-blue crystal spires, graceful ice arches, quiet midnight blue stone central platform, soft aurora and falling ice sparkles in distance, frost-covered edges. Elegant clean cyan and lavender palette. Wide 16:9.",
+      "transparent": false,
+      "width": 1600,
+      "height": 900,
+      "bytes": 333898,
+      "sha256": "c4d8fd2c4f41502e380444f4bde8520a6f8ab07ed0850d74e8e87415341cf42f"
+    },
+    {
+      "id": "avatar-nebula",
+      "source": "artwork/collection/avatar-nebula.png",
+      "asset": "/assets/collection/avatar-nebula.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium game avatar, single standalone transparent PNG cutout. Modern high-end fantasy game cosmetic illustration with polished dimensional materials, sharp readable silhouette at small size. Centered bust portrait, entire head and shoulders within frame with generous clear margin. True transparent background, clean alpha edges, no floor or background, no badge border, no text, no logo or watermark. Restrained luminous accents close to character. Starborn Voyager: stylish mysterious celestial astronaut guardian bust with a polished dark cosmic visor showing a tiny nebula reflection, elegant violet and rose-gold futuristic armor, luminous orbital collar ornaments, subtle starlight particles near shoulders. Premium sleek space fantasy collectible, no weapon.",
+      "transparent": true,
+      "width": 616,
+      "height": 640,
+      "bytes": 143830,
+      "sha256": "bbdc8da146f4a6f665eb87bbe50252bbad3d8d3ba1d4aa2ce19a8a312b912729",
+      "alpha": {
+        "min": 0,
+        "max": 255,
+        "mean": 150
+      }
+    },
+    {
+      "id": "arena-nebula",
+      "source": "artwork/collection/arena-nebula.png",
+      "asset": "/assets/collection/arena-nebula.webp",
+      "tool": "built-in imagegen",
+      "prompt": "Use case: stylized-concept. Asset type: premium wide game arena background, cinematic environmental illustration. Modern high-end fantasy game art with rich material detail and atmospheric depth, elegant subdued center where a tic-tac-toe board and readable UI will be overlaid. Wide landscape composition, no people, no game board, no UI, no text, no logo, no watermark. Detailed edge landmarks with subtle lighting, avoid blinding white center. Nebula Spaceport: elegant futuristic cosmic terrace overlooking a magnificent violet pink nebula and ringed planet, sculpted metallic spaceport arches at edges, subtle lavender runway accents, dark polished central platform, distant ships as tiny environmental details. Spacious quiet immersive premium sci-fi landscape. Wide 16:9.",
+      "transparent": false,
+      "width": 1600,
+      "height": 900,
+      "bytes": 347046,
+      "sha256": "0ca8f00a0cb7b126ac1a237b698584ec2831c3fdb459945b6e3de2b0171fba3e"
+    }
+  ]
+}

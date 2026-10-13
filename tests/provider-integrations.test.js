@@ -4,10 +4,12 @@ import assert from 'node:assert/strict';
 import {createHmac, generateKeyPairSync, sign, randomUUID} from 'node:crypto';
 import {db} from '../src/server/db.mjs';
 import {validHmac, validateCapturedPayment, commerceProducts, checkoutConfigured, passCoinPrice, premiumTiers} from '../src/server/commerce-policy.mjs';
-import {createCheckout, fulfillCapturedPayment, verifyCheckout, orderStatus, razorpayWebhook, buyPassWithCoins, activeSeason} from '../src/server/commerce.mjs';
+import {createCheckout, fulfillCapturedPayment, verifyCheckout, orderStatus, razorpayWebhook, buyPassWithCoins, activeSeason, listCommerceProducts} from '../src/server/commerce.mjs';
 import {verifyAdmobCallback, googleAdmobKeys, admobConfigured, startAdReward, grantVerifiedAdReward, adRewardStatus, admobCallback} from '../src/server/admob.mjs';
 import {emailConfigured, sendEmail} from '../src/server/email.mjs';
-import {claimJourney, purchaseCosmetic} from '../src/server/players.mjs';
+import {claimJourney, purchaseCosmetic, equipCosmetic, updateProfile} from '../src/server/players.mjs';
+import {COLLECTION_BUNDLES, COLLECTION_COSMETICS, cosmeticEmotes} from '../src/lib/cosmetic-collection.js';
+import {validateMatchEmote} from '../src/server/arena.mjs';
 import {hashToken} from '../src/server/security.mjs';
 import {handleAPI} from '../src/server/api.mjs';
 
@@ -65,6 +67,9 @@ test('Razorpay HMAC checks raw UTF8 bytes rather than a reserialized JSON object
 test('Payment prices use server-side integer paise and capture must match its recorded order',()=>{
   assert.equal(checkoutConfigured(env),true);assert.equal(checkoutConfigured({RAZORPAY_KEY_ID:'public-only'}),false);
   const products=commerceProducts({});assert.equal(products.find(p=>p.id==='coins-spark').amount,4900);assert(products.every(p=>Number.isInteger(p.amount)&&p.currency==='INR'));
+  const bundles=products.filter(product=>product.kind==='bundle');assert.equal(bundles.length,10);assert(bundles.every(bundle=>bundle.amount===14900&&bundle.coins===0&&bundle.cosmeticIds.length===9));
+  assert.equal(commerceProducts({RAZORPAY_COLLECTION_PAISE:'19900'}).find(product=>product.kind==='bundle').amount,19900);
+  assert.throws(()=>commerceProducts({RAZORPAY_COLLECTION_PAISE:'149.5'}),code('PAYMENT_CONFIG'));
   assert.throws(()=>commerceProducts({RAZORPAY_SPARK_PAISE:'49.5'}),code('PAYMENT_CONFIG'));
   const order={providerOrderId:'order_fixture',amount:4900,currency:'INR'},payment=captured(order,'pay_fixture');
   assert.equal(validateCapturedPayment(order,payment),payment);
@@ -133,6 +138,137 @@ test('A configured HTTPS email webhook wins over incomplete SMTP settings and pr
 });
 
 test('real isolated MySQL provider settlement and cosmetic entitlements',{skip:!configured,timeout:60000},async t=>{
+  // Canonical display catalog only, scoped to the guarded disposable test DB.
+  for(const item of COLLECTION_COSMETICS)await db.cosmeticItem.upsert({where:{id:item.id},create:item,update:{enabled:true}});
+  const bundle=COLLECTION_BUNDLES[0];
+
+  await t.test('Collections require enabled catalog styles, a registered player and configured checkout',async()=>{
+    const user=await fixture(),guest=await fixture(250,true);
+    await assert.rejects(createCheckout(user.id,{sku:bundle.id,requestId:'disabled-'+randomUUID()},{env:{}}),code('CHECKOUT_UNAVAILABLE'));
+    await assert.rejects(createCheckout(guest.id,{sku:bundle.id,requestId:'guest-'+randomUUID()},{env}),code('REGISTER_REQUIRED'));
+    const id=bundle.cosmeticIds[0];await db.cosmeticItem.update({where:{id},data:{enabled:false}});
+    try {
+      assert(!(await listCommerceProducts(user.id,env)).products.some(product=>product.id===bundle.id));
+      await assert.rejects(createCheckout(user.id,{sku:bundle.id,requestId:'unavailable-'+randomUUID()},{env}),code('PRODUCT_UNAVAILABLE'));
+    } finally {await db.cosmeticItem.update({where:{id},data:{enabled:true}});}
+  });
+
+  await t.test('A partial collection shows full price, stores its immutable snapshot and reuses a pending external order',async()=>{
+    const user=await fixture(10000);await purchaseCosmetic(user.id,bundle.cosmeticIds[0],'partial-'+randomUUID());
+    const listed=(await listCommerceProducts(user.id,env)).products.find(product=>product.id===bundle.id);
+    assert.equal(listed.ownedCount,1);assert.equal(listed.itemCount,9);assert.equal(listed.amount,14900);
+    const first=await pending(user,bundle.id),second=await pending(user,bundle.id);
+    assert.equal(first.order.id,second.order.id);assert.equal(first.posts,1);assert.equal(second.posts,0);
+    assert.deepEqual(first.order.cosmeticIds,bundle.cosmeticIds);assert.equal(first.order.coins,0);assert.equal(first.order.amount,14900);
+    await assert.rejects(createCheckout(user.id,{sku:'coins-flare',requestId:first.order.requestId},{env}),code('REQUEST_CONFLICT'));
+    const payment=captured(first.order,'pay_'+run+'BundleSigned');
+    const body={orderId:first.order.id,cosmeticIds:['avatar-void'],coins:999999,razorpay_order_id:first.order.providerOrderId,razorpay_payment_id:payment.id,razorpay_signature:hmac(first.order.providerOrderId+'|'+payment.id,env.RAZORPAY_KEY_SECRET)};
+    const before=(await db.currencyWallet.findUnique({where:{userId:user.id}})).coins;
+    await verifyCheckout(user.id,body,{env,fetcher:async()=>jsonResponse(payment)});await webhook(first.order,payment,'payment.captured');
+    assert.equal(await db.playerInventory.count({where:{userId:user.id,cosmeticId:{in:bundle.cosmeticIds}}}),9);
+    assert.equal(await db.commerceCosmeticGrant.count({where:{orderId:first.order.id}}),9);
+    assert.equal((await db.currencyWallet.findUnique({where:{userId:user.id}})).coins,before);
+    assert.equal(await db.currencyTransaction.count({where:{userId:user.id,reason:'razorpay_cosmetic_coins'}}),0);
+    assert.equal(await db.playerPower.count({where:{userId:user.id}}),0);
+    await assert.rejects(pending(user,bundle.id),code('ALREADY_OWNED'));
+  });
+
+  await t.test('Duplicate capture grants exactly nine styles and honors the snapshot after catalog changes',async()=>{
+    const user=await fixture(),{order}=await pending(user,bundle.id),payment=captured(order,'pay_'+run+'BundleDuplicate');
+    const id=bundle.cosmeticIds[0];await db.cosmeticItem.update({where:{id},data:{enabled:false}});
+    try {
+      const results=await Promise.all([fulfillCapturedPayment(order,payment),fulfillCapturedPayment(order,payment)]);
+      assert.equal(results.filter(result=>result.duplicate).length,1);
+      assert.equal(await db.playerInventory.count({where:{userId:user.id}}),9);
+      assert.equal(await db.commerceCosmeticGrant.count({where:{orderId:order.id}}),9);
+      assert.equal((await db.currencyWallet.findUnique({where:{userId:user.id}})).coins,250);
+      await assert.rejects(fulfillCapturedPayment(order,{...payment,id:'pay_different'}),code('PAYMENT_MISMATCH'));
+    } finally {await db.cosmeticItem.update({where:{id},data:{enabled:true}});}
+  });
+
+  await t.test('Collection refunds preserve coin and legacy ownership and reset only actually revoked equipped styles',async()=>{
+    const user=await fixture(10000),other=await fixture();
+    await purchaseCosmetic(user.id,bundle.cosmeticIds[0],'refund-owned-'+randomUUID());
+    await db.playerInventory.create({data:{userId:user.id,cosmeticId:bundle.cosmeticIds[1]}});
+    await db.playerInventory.create({data:{userId:other.id,cosmeticId:bundle.cosmeticIds[2]}});
+    const {order}=await pending(user,bundle.id),payment=captured(order,'pay_'+run+'BundleRefund');await fulfillCapturedPayment(order,payment);
+    for(const id of bundle.cosmeticIds)await equipCosmetic(user.id,id);
+    const before=(await db.currencyWallet.findUnique({where:{userId:user.id}})).coins;
+    await webhook(order,{...payment,status:'refunded',amount_refunded:order.amount});await webhook(order,{...payment,status:'refunded',amount_refunded:order.amount});
+    assert.deepEqual((await db.playerInventory.findMany({where:{userId:user.id},orderBy:{cosmeticId:'asc'}})).map(item=>item.cosmeticId),bundle.cosmeticIds.slice(0,2).sort());
+    const profile=await db.playerProfile.findUnique({where:{userId:user.id}});
+    assert.equal(profile.avatar,bundle.cosmeticIds[0]);assert.equal(profile.equippedBoard,bundle.cosmeticIds[1]);assert.equal(profile.equippedMark,'marks-neon');assert.equal(profile.title,'Rookie Strategist');
+    for(const field of ['equippedArena','equippedFrame','equippedBanner','equippedEffect','equippedEmote'])assert.equal(profile[field],null);
+    assert.equal((await db.currencyWallet.findUnique({where:{userId:user.id}})).coins,before);
+    assert.equal(await db.playerInventory.count({where:{userId:other.id}}),1);
+    const audit=await db.auditLog.findFirst({where:{userId:user.id,action:'cosmetic_payment_refunded'}});
+    assert.equal(audit.details.revokedCosmeticIds.length,7);assert.equal(audit.details.retainedCosmeticIds.length,2);
+    assert.equal(await db.auditLog.count({where:{userId:user.id,action:'cosmetic_payment_refunded'}}),1);
+    await fulfillCapturedPayment(order,payment);assert.equal(await db.playerInventory.count({where:{userId:user.id}}),2);
+  });
+
+  await t.test('Overlapping paid order entitlements survive one refund and disappear only after both are refunded',async()=>{
+    const user=await fixture(10000),first=await pending(user,bundle.id);
+    // A provider order may remain payable after an upstream preparation failure.
+    await db.commerceOrder.update({where:{id:first.order.id},data:{status:'failed'}});
+    const second=await pending(user,bundle.id),a=captured(first.order,'pay_'+run+'BundleOverlapA'),b=captured(second.order,'pay_'+run+'BundleOverlapB');
+    await Promise.all([fulfillCapturedPayment(first.order,a),fulfillCapturedPayment(second.order,b)]);
+    assert.equal(await db.playerInventory.count({where:{userId:user.id}}),9);
+    await purchaseCosmetic(user.id,'frame-astral','outside-collection-'+randomUUID());await equipCosmetic(user.id,'frame-astral');
+    await webhook(first.order,{...a,status:'refunded',amount_refunded:first.order.amount});assert.equal(await db.playerInventory.count({where:{userId:user.id}}),10);
+    await webhook(second.order,{...b,status:'refunded',amount_refunded:second.order.amount});assert.equal(await db.playerInventory.count({where:{userId:user.id}}),1);
+    assert.equal((await db.playerProfile.findUnique({where:{userId:user.id}})).equippedFrame,'frame-astral');
+  });
+
+  await t.test('A partial money refund retains styles; a full refund before fulfillment grants nothing',async()=>{
+    const user=await fixture(),{order}=await pending(user,bundle.id),payment=captured(order,'pay_'+run+'BundleEarly');
+    await webhook(order,{...payment,status:'refunded',amount_refunded:order.amount});await fulfillCapturedPayment(order,payment);
+    assert.equal(await db.playerInventory.count({where:{userId:user.id}}),0);assert.equal(await db.commerceCosmeticGrant.count({where:{orderId:order.id}}),0);
+    assert.equal((await db.commerceOrder.findUnique({where:{id:order.id}})).status,'refunded');
+    const other=await fixture(),next=await pending(other,bundle.id),paid=captured(next.order,'pay_'+run+'BundlePartialRefund');await fulfillCapturedPayment(next.order,paid);
+    await webhook(next.order,{...paid,status:'refunded',amount_refunded:100});
+    assert.equal((await db.commerceOrder.findUnique({where:{id:next.order.id}})).status,'paid');assert.equal(await db.playerInventory.count({where:{userId:other.id}}),9);
+  });
+
+  await t.test('Cash collection capture contends with earned coin purchase without duplicate inventory or fake credit',async()=>{
+    for(let index=0;index<4;index++) {
+      const user=await fixture(10000),{order}=await pending(user,bundle.id),payment=captured(order,'pay_'+run+'BundleCoinRace'+index);
+      const results=await Promise.allSettled([fulfillCapturedPayment(order,payment),purchaseCosmetic(user.id,bundle.cosmeticIds[0],'bundle-coin-race-'+randomUUID())]);
+      assert.equal(results[0].status,'fulfilled');
+      const purchase=await db.shopPurchase.findFirst({where:{userId:user.id,cosmeticId:bundle.cosmeticIds[0]}}),wallet=await db.currencyWallet.findUnique({where:{userId:user.id}});
+      assert.equal(wallet.coins,10000-(purchase?.coins||0));assert.equal(await db.playerInventory.count({where:{userId:user.id}}),9);
+      await webhook(order,{...payment,status:'refunded',amount_refunded:order.amount});
+      assert.equal(await db.playerInventory.count({where:{userId:user.id}}),purchase?1:0);
+      assert.equal((await db.currencyWallet.findUnique({where:{userId:user.id}})).coins,wallet.coins);
+    }
+  });
+
+  await t.test('Capture/refund and equip/refund races cannot leave revoked styles equipped',async()=>{
+    for(let index=0;index<4;index++) {
+      const user=await fixture(),{order}=await pending(user,bundle.id),payment=captured(order,'pay_'+run+'BundleRefundRace'+index);
+      const results=await Promise.allSettled([fulfillCapturedPayment(order,payment),webhook(order,{...payment,status:'refunded',amount_refunded:order.amount})]);
+      assert(results.every(result=>result.status==='fulfilled'),JSON.stringify(results));
+      assert.equal((await db.commerceOrder.findUnique({where:{id:order.id}})).status,'refunded');assert.equal(await db.playerInventory.count({where:{userId:user.id}}),0);
+      const next=await pending(user,bundle.id),paid=captured(next.order,'pay_'+run+'BundleEquipRace'+index);await fulfillCapturedPayment(next.order,paid);
+      await Promise.allSettled([index%2?updateProfile(user.id,{equippedFrame:bundle.cosmeticIds[4]}):equipCosmetic(user.id,bundle.cosmeticIds[4]),webhook(next.order,{...paid,status:'refunded',amount_refunded:next.order.amount})]);
+      assert.equal((await db.playerProfile.findUnique({where:{userId:user.id}})).equippedFrame,null);
+      assert.equal(await db.playerInventory.count({where:{userId:user.id}}),0);
+    }
+  });
+
+  await t.test('All twenty collection emotes require the matching equipped inventory item while six base signals remain free',async()=>{
+    const user=await fixture();for(const emote of ['wave','gg','wow','think','fire','shield'])await validateMatchEmote(user.id,emote);
+    await assert.rejects(validateMatchEmote(user.id,'unknown'),code('VALIDATION'));
+    for(const item of COLLECTION_COSMETICS.filter(item=>item.type==='emote')) {
+      for(const emote of cosmeticEmotes(item.id))await assert.rejects(validateMatchEmote(user.id,emote),code('EMOTE_LOCKED'));
+      await db.playerInventory.create({data:{userId:user.id,cosmeticId:item.id}});await equipCosmetic(user.id,item.id);
+      for(const emote of cosmeticEmotes(item.id))await validateMatchEmote(user.id,emote);
+      await db.playerInventory.delete({where:{userId_cosmeticId:{userId:user.id,cosmeticId:item.id}}});
+      await assert.rejects(validateMatchEmote(user.id,cosmeticEmotes(item.id)[0]),code('EMOTE_LOCKED'));
+      await db.playerProfile.update({where:{userId:user.id},data:{equippedEmote:null}});
+    }
+  });
+
   await t.test('Concurrent checkout retries create one external order and capture credits coins exactly once',async()=>{
     const user=await fixture();const requestId='same-request-'+randomUUID();let posts=0;
     const fetcher=async(url,options)=>{assert.equal(url,'https://api.razorpay.com/v1/orders');posts++;const body=JSON.parse(options.body);return jsonResponse({id:'order_'+run+'Retry',amount:body.amount,currency:body.currency});};

@@ -63,6 +63,7 @@ model CommerceOrder {
   currency String @db.VarChar(3)
   coins Int @default(0)
   seasonId String? @db.VarChar(80)
+  cosmeticIds Json?
   providerOrderId String? @unique @db.VarChar(80)
   providerPaymentId String? @unique @db.VarChar(80)
   status String @default("pending") @db.VarChar(20)
@@ -71,8 +72,19 @@ model CommerceOrder {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  cosmeticGrants CommerceCosmeticGrant[]
   @@unique([userId,requestId])
   @@index([userId,createdAt])
+}
+
+model CommerceCosmeticGrant {
+  orderId String
+  cosmeticId String @db.VarChar(80)
+  grantedAt DateTime @default(now())
+  order CommerceOrder @relation(fields:[orderId],references:[id],onDelete:Cascade)
+  cosmetic CosmeticItem @relation(fields:[cosmeticId],references:[id])
+  @@id([orderId,cosmeticId])
+  @@index([cosmeticId])
 }
 
 model ProviderEvent {
@@ -500,12 +512,14 @@ model CosmeticItem {
   asset String @db.VarChar(200)
   inventory PlayerInventory[]
   purchases ShopPurchase[]
+  commerceGrants CommerceCosmeticGrant[]
 }
 
 model PlayerInventory {
   userId String
   cosmeticId String
   acquiredAt DateTime @default(now())
+  cashCreated Boolean @default(false)
   user User @relation(fields:[userId],references:[id],onDelete:Cascade)
   cosmetic CosmeticItem @relation(fields:[cosmeticId],references:[id])
   @@id([userId,cosmeticId])

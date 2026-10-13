@@ -5,16 +5,26 @@ These integrations are implemented with server validation. Live merchant capture
 ## Razorpay
 
 1. Complete your Razorpay merchant onboarding. Start with **Test Mode**.
-2. Add `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`. Enable automatic capture in Razorpay; authorized payments alone never grant coins.
+2. Add `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`. Enable automatic capture in Razorpay; authorized payments alone never grant coins, styles or pass ownership.
 3. Create a Razorpay webhook at `https://elemental-arena-production.up.railway.app/api/payments/razorpay/webhook`. Subscribe to `payment.captured`, `order.paid` and `payment.refunded`. Generate a separate webhook secret and set `RAZORPAY_WEBHOOK_SECRET` to the same value.
-4. Register an account in the game and test each coin pack and pass. Confirm successful capture changes the wallet once, replay the webhook and confirm it grants nothing extra, and test failed/abandoned checkout and a full refund.
+4. Register an account in the game and test each coin pack, pass and cosmetic collection. Confirm capture grants the expected wallet balance or nine styles once, replay the webhook and confirm it grants nothing extra, and test failed/abandoned checkout and a full refund. Test collection refunds with an equipped style and with a style already purchased using coins.
 5. Replace test keys with live keys after completing the tests and merchant activation.
 
-Default INR prices: 500 cosmetic coins ₹49, 1,200 coins ₹99, 3,000 coins ₹199, season pass ₹99. Optional price variables contain **integer paise**, as shown in `.env.example`. Amounts and products come from the server; browser prices cannot determine rewards. The pass is also available with 900 earned coins.
+Default INR prices: 500 cosmetic coins ₹49, 1,200 coins ₹99, 3,000 coins ₹199, season pass ₹99, and each of the ten nine-style cosmetic collections ₹149. Set `RAZORPAY_COLLECTION_PAISE=14900` to keep that collection price explicitly, or change it to another positive integer amount in paise. This variable applies to all ten collections. Optional price variables contain **integer paise**, as shown in `.env.example`. Amounts and products come from the server; browser prices cannot determine rewards. The pass is also available with 900 earned coins.
+
+The expanded collection contains **108 cosmetic items**: **103 styles in the coin shop**, including 90 new styles across ten matching worlds, and five exclusive season-pass rewards. Each cash collection includes one avatar, board, X/O mark set, arena, frame, banner, arrival effect, two-signal emote pack and title. All 90 new styles can also be bought individually with earned cosmetic coins. See [COLLECTION.md](COLLECTION.md) for the names, artwork and individual coin prices.
+
+Checkout rejects a collection when every style is already owned, and reuses an existing pending order for that collection. A partly owned collection still costs the full displayed price: the shop shows the ownership count and explains this policy. Already owned styles remain owned; duplicates never produce coin compensation. Checkout is available only to registered players and only when all nine listed styles are enabled in the server catalog.
 
 Orders are tied to their player and persist in MySQL. The server validates checkout HMAC, fetches the actual payment from Razorpay, and checks captured status, order, amount and currency before an atomic grant. Webhooks validate the original bytes using a separate HMAC secret. Duplicate captures cannot grant twice.
 
+Collection orders store an immutable snapshot of their exact nine cosmetic IDs at checkout. A verified capture atomically records all nine order entitlements and adds only missing inventory items. Later catalog changes do not substitute the promised styles. Collection purchases grant no coins, powers or account XP. Payment fulfillment, coin purchases, equipment changes and refunds use database locks to protect ownership and wallet balances.
+
 Full coin-pack refunds remove remaining purchased coins without allowing a negative wallet. Coins already spent are flagged in the admin audit for operator review. Full pass refunds revoke the entitlement; previously claimed cosmetics remain for operator review. Partial refunds need manual review. Cash purchases have no effect on powers, cups, ranked timers or energy.
+
+Full collection refunds use recorded ownership provenance. The server removes only styles created by cash fulfillment when there is no retained legacy or coin ownership and no other paid collection entitlement. It preserves unrelated styles and other players' inventories. An equipped slot resets to its starter value, or an optional slot clears, only when that exact equipped style is actually revoked; revoked equipped titles revert to Rookie Strategist. Refund audits record revoked and retained IDs. A full refund received before fulfillment permanently closes the order without granting inventory. Duplicate refunds do not revoke twice, and partial collection refunds retain inventory for manual review.
+
+**Merchant activation is still required.** Listing prices and passing signed provider fixtures do not enable real-money capture. Until valid Razorpay merchant keys and webhook configuration are added, checkout remains disabled and the styles remain available through earned coins.
 
 See [Razorpay checkout integration](https://razorpay.com/docs/payments/payment-gateway/web-integration/standard/integration-steps/) and [webhook validation](https://razorpay.com/docs/webhooks/validate-test/).
 

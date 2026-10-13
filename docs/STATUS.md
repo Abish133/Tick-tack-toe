@@ -18,6 +18,14 @@ Updated 13 October 2026. The complete 22-power release is live at [Elemental Are
 | Learning/UI | 22 Power Lab scenarios, three tutorials, daily puzzle, actual targeting controls/effects/sounds, responsive layouts, contrast and reduced motion |
 | Operations | Isolated local MySQL, launchers, migrations/seed, Docker, one-owner database coordination and drained rolling takeover |
 
+## Collection expansion — 13 October 2026
+
+The collection adds 90 styles across ten themed sets, bringing the public coin catalog to 103 styles and the total including exclusive season rewards to 108. All nine categories have real previews and equipped presentation. Twenty new raster images were generated with the built-in imagegen tool: ten transparent avatars and ten arena backgrounds, optimized to WebP while preserving avatar alpha. Original PNGs remain in the project artwork folder. [COLLECTION.md](COLLECTION.md) lists every set and price; [collection-art-prompts.json](collection-art-prompts.json) records prompts, dimensions and asset hashes.
+
+Ten complete nine-style sets are listed for Razorpay checkout at ₹149 by default, adjustable with `RAZORPAY_COLLECTION_PAISE`. Actual capture grants immutable recorded item snapshots, with provenance-aware refunds and equipment resets only for revoked items. Existing coin purchases and other ownership sources survive refunds. Cash checkout activates after merchant configuration; no live merchant payment is claimed. The additive seventh migration preserves existing inventory and player data.
+
+Local automated verification passed **187 tests**, including real payment/refund ownership races, serialized surrender during AI/timeout transitions and an actual InnoDB deadlock with exactly-once settlement. The two collection browser flows passed, and the existing ten game flows passed across the verification runs. Final visual QA passed **36 desktop/mobile checks**, including all nine previews, generated assets and ten correctly priced cash bundles, with no missing artwork, page errors or horizontal overflow. Final release/CI evidence is maintained locally in `.runtime/collection-release-verification.json`; the earlier deployment evidence below remains the initial full-game release snapshot.
+
 ## Provider integrations
 
 Razorpay checkout and signed webhooks validate actual captured payments before rewards. Full refunds and duplicate/delayed events are handled transactionally. Android AdMob uses consent, a restricted native bridge, player-bound nonces and Google-signed SSV; native reward events cannot credit coins. Email supports Resend, TLS SMTP and an HTTPS adapter. Google sign-in has its real authorization-code implementation.

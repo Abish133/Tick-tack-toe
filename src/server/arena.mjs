@@ -5,10 +5,34 @@ import {createGame,applyAction,tick,chooseAIAction} from '../lib/game-engine/ind
 import {fail,AppError,cleanText,dateKey,rateLimit,safeError,authenticate,originAllowed} from './security.mjs';
 import {getPlayer,walletCredit,defaultLoadout,periodKey} from './players.mjs';
 import {requestClientIp} from './client-ip.mjs';
+import {COLLECTION_COSMETICS,cosmeticEmotes} from '../lib/cosmetic-collection.js';
+import {setTimeout as delay} from 'node:timers/promises';
+
+const freeEmotes=['wave','gg','wow','think','fire','shield'];
+const collectionEmotes=new Set(['star','snow',...COLLECTION_COSMETICS.filter(item=>item.type==='emote').flatMap(item=>cosmeticEmotes(item.id))]);
+export async function validateMatchEmote(userId,emote) {
+  fail(freeEmotes.includes(emote)||collectionEmotes.has(emote),'VALIDATION','Choose a valid emote.');
+  if(freeEmotes.includes(emote))return;
+  const profile=await db.playerProfile.findUnique({where:{userId}}),id=profile?.equippedEmote;
+  fail(id&&cosmeticEmotes(id).includes(emote),'EMOTE_LOCKED','Equip the matching signal collection from your inventory to use this emote.',403);
+  const owned=await db.playerInventory.findUnique({where:{userId_cosmeticId:{userId,cosmeticId:id}},include:{cosmetic:true}});
+  fail(owned?.cosmetic.type==='emote','EMOTE_LOCKED','This signal collection is not in your inventory.',403);
+}
 
 export function ratingDelta(cups,opponentCups,score){const expected=1/(1+10**((opponentCups-cups)/400));return Math.round(40*(score-expected));}
 const locked=new Map();
 export async function serialize(key,work){const previous=locked.get(key)||Promise.resolve();let release;const gate=new Promise(r=>{release=r;});const tail=previous.catch(()=>{}).then(()=>gate);locked.set(key,tail);await previous.catch(()=>{});try{return await work();}finally{release();if(locked.get(key)===tail)locked.delete(key);}}
+async function serializableWrite(work){
+  for(let attempt=0;;attempt++){
+    try{return await db.$transaction(work,{isolationLevel:'Serializable',maxWait:2000,timeout:5000});}
+    catch(error){
+      // P2034 confirms rollback. Never retry a connection/commit ambiguity,
+      // occupancy conflict or stale action; keep all publication after commit.
+      if(error.code!=='P2034'||attempt>=3)throw error;
+      await delay(15*(attempt+1)+randomInt(25));
+    }
+  }
+}
 const hydrateInclude={participants:true,result:true};
 const aiDifficulty=['beginner','easy','medium','hard','expert','extreme','nightmare'];
 
@@ -28,10 +52,10 @@ export class ArenaService {
     const state=createGame({mode:ruleset,players:identities.map(({id,name,loadout})=>({id,name,loadout})),turnSeconds:20,rounds:ruleset==='classic'?1:3,now:Date.now()});
     for(const player of state.players){const identity=identities.find(p=>p.id===player.id);player.profile=identity?.profile?Object.fromEntries(['avatar','title','equippedBoard','equippedMark','equippedEffect','equippedFrame','equippedBanner','equippedArena','equippedEmote'].map(key=>[key,identity.profile[key]])):null;}
     const season=await db.season.findFirst({where:{active:true,startsAt:{lte:new Date()},endsAt:{gt:new Date()}},orderBy:{startsAt:'desc'}});
-    const m=await db.$transaction(async tx=>{const match=await tx.match.create({data:{mode,ruleset,state,initialState:state,sequence:state.revision,status:'active',difficulty,roomCode,allowSpectators:Boolean(allowSpectators&&humans.every(u=>u.settings?.allowSpectators)),seasonId:season?.id,participants:{create:identities.map((p,i)=>({engineId:p.id,userId:p.userId,name:p.name,mark:state.players.find(q=>q.id===p.id)?.mark||(i?'O':'X'),isAI:p.isAI,initialCups:p.cups}))}},include:hydrateInclude});
+    const m=await serializableWrite(async tx=>{const match=await tx.match.create({data:{mode,ruleset,state,initialState:state,sequence:state.revision,status:'active',difficulty,roomCode,allowSpectators:Boolean(allowSpectators&&humans.every(u=>u.settings?.allowSpectators)),seasonId:season?.id,participants:{create:identities.map((p,i)=>({engineId:p.id,userId:p.userId,name:p.name,mark:state.players.find(q=>q.id===p.id)?.mark||(i?'O':'X'),isAI:p.isAI,initialCups:p.cups}))}},include:hydrateInclude});
       // The database owns player occupancy across every match entry path.
       for(const userId of userIds.slice().sort()){const claimed=await tx.user.updateMany({where:{id:userId,activeMatchId:null,suspended:false},data:{activeMatchId:match.id}});fail(claimed.count===1,'MATCH_ACTIVE','A participant already has an active match.',409);}if(tournamentMatchId){const linked=await tx.tournamentMatch.updateMany({where:{id:tournamentMatchId,matchId:null,winnerId:null},data:{matchId:match.id}});fail(linked.count===1,'BRACKET_CHANGED','This bracket pair already has a match.',409);}return match;
-    },{isolationLevel:'Serializable',timeout:10000});
+    });
     this.matches.set(m.id,m);for(const p of m.participants)if(p.userId){this.queue.delete(p.userId);this.io?.to(`user:${p.userId}`).emit('match:found',{matchId:m.id,...this.snapshot(m,p.userId)});const sockets=await this.io?.in(`user:${p.userId}`).fetchSockets();for(const s of sockets||[])await this.selectMatchView(s,m.id);}
     await this.broadcast(m,'match:started');this.scheduleAI(m);return m;
   }
@@ -66,15 +90,19 @@ export class ArenaService {
   async persistTransition(m,next,{actorId='server',action={},requestId}={}){
     if(next===m.state||next.revision===m.state.revision)return m;
     const oldRevision=m.sequence;
-    await db.$transaction(async tx=>{const changed=await tx.match.updateMany({where:{id:m.id,sequence:oldRevision,status:'active'},data:{state:next,sequence:next.revision,status:next.status,...(next.status==='finished'?{finishedAt:new Date()}: {})}});fail(changed.count===1,'STALE_ACTION','The match changed. Reconnect for its latest state.',409);await tx.matchAction.create({data:{matchId:m.id,sequence:next.revision,requestId:requestId||`server:${oldRevision}:${next.revision}`,actorId,action,event:next.lastEvent||{},state:next}});if(next.status==='finished')await this.settle(tx,m,next);},{isolationLevel:'Serializable',maxWait:10000,timeout:20000});
+    await serializableWrite(async tx=>{const changed=await tx.match.updateMany({where:{id:m.id,sequence:oldRevision,status:'active'},data:{state:next,sequence:next.revision,status:next.status,...(next.status==='finished'?{finishedAt:new Date()}: {})}});fail(changed.count===1,'STALE_ACTION','The match changed. Reconnect for its latest state.',409);await tx.matchAction.create({data:{matchId:m.id,sequence:next.revision,requestId:requestId||`server:${oldRevision}:${next.revision}`,actorId,action,event:next.lastEvent||{},state:next}});if(next.status==='finished')await this.settle(tx,m,next);});
     const fresh=await db.match.findUnique({where:{id:m.id},include:hydrateInclude});if(fresh.status==='active')this.matches.set(m.id,fresh);else this.matches.delete(m.id);
     await this.broadcast(fresh,next.status==='finished'?'match:finished':'match:actionApplied');if(next.lastEvent?.type==='power')await this.broadcast(fresh,'match:powerActivated');if(next.status==='finished'){await this.broadcast(fresh,'match:rewardSettled');await this.advanceTournament(fresh);}else this.scheduleAI(fresh);return fresh;
   }
-  async act(userId,matchId,action,requestId){return serialize(`match:${matchId}`,async()=>{let m=await this.getMatch(matchId);fail(this.member(m,userId),'FORBIDDEN','Only match participants can act.',403);fail(cleanText(requestId,1,80),'VALIDATION','A unique request ID is required.');const previous=await db.matchAction.findUnique({where:{matchId_requestId:{matchId,requestId}}});if(previous){fail(previous.actorId===userId&&isDeepStrictEqual(previous.action,action),'REQUEST_CONFLICT','This request ID belongs to another action.',409);return this.snapshot(m,userId);}fail(m.status==='active','MATCH_FINISHED','This match has finished.',409);
+  async act(userId,matchId,action,requestId){return serialize(`match:${matchId}`,()=>this.#actLocked(userId,matchId,action,requestId));}
+  async #actLocked(userId,matchId,action,requestId,canonicalSurrender=false){let m=await this.getMatch(matchId);fail(this.member(m,userId),'FORBIDDEN','Only match participants can act.',403);fail(cleanText(requestId,1,80),'VALIDATION','A unique request ID is required.');const previous=await db.matchAction.findUnique({where:{matchId_requestId:{matchId,requestId}}});if(previous){const sameIntent=canonicalSurrender?previous.action?.type==='surrender':isDeepStrictEqual(previous.action,action);fail(previous.actorId===userId&&sameIntent,'REQUEST_CONFLICT','This request ID belongs to another action.',409);return this.snapshot(m,userId);}fail(m.status==='active','MATCH_FINISHED','This match has finished.',409);
     const timed=tick(m.state,Date.now());if(timed.revision!==m.state.revision){m=await this.persistTransition(m,timed,{action:{type:'timeout'}});if(m.status!=='active')throw new AppError('MATCH_FINISHED','The clock expired and this match finished.',409);}
-    const next=applyAction(m.state,userId,action,Date.now());m=await this.persistTransition(m,next,{actorId:userId,action,requestId});return this.snapshot(m,userId);
-  });}
-  async surrender(userId,matchId,requestId){const m=await this.getMatch(matchId);return this.act(userId,matchId,{type:'surrender',revision:m.state.revision},requestId||`surrender:${userId}:${m.state.revision}`);}
+    // Surrender is an authenticated server intent, independent of the board
+    // revision. Materialize it only after queued moves and timeouts settle.
+    const canonical=canonicalSurrender?{type:'surrender',revision:m.state.revision}:action;
+    const next=applyAction(m.state,userId,canonical,Date.now());m=await this.persistTransition(m,next,{actorId:userId,action:canonical,requestId});return this.snapshot(m,userId);
+  }
+  async surrender(userId,matchId,requestId){return serialize(`match:${matchId}`,()=>this.#actLocked(userId,matchId,{type:'surrender'},requestId||`surrender:${userId}`,true));}
   async runAI(matchId,engineId){return serialize(`match:${matchId}`,async()=>{const fresh=await this.getMatch(matchId);if(fresh.status!=='active'||fresh.state.currentPlayerId!==engineId)return;const action=chooseAIAction(fresh.state,fresh.difficulty);if(!action)return;const next=applyAction(fresh.state,engineId,action,Date.now());await this.persistTransition(fresh,next,{actorId:engineId,action,requestId:`ai:${fresh.sequence}`});});}
   scheduleAI(m){if(m.mode!=='ai'||m.status!=='active')return;const current=m.participants.find(p=>p.engineId===m.state.currentPlayerId);if(!current?.isAI||this.aiTimers.has(m.id))return;const timer=setTimeout(async()=>{this.aiTimers.delete(m.id);try{await this.runAI(m.id,current.engineId);}catch(error){console.error('AI action failed:',error.message);}},700+randomInt(400));timer.unref();this.aiTimers.set(m.id,timer);}
   async pulse(){await this.pairQueue();for(const q of this.queue.values())this.io?.to(`user:${q.userId}`).emit('queue:status',this.queueStatus(q.userId));for(const m of [...this.matches.values()]){if(m.status!=='active')continue;if(m.state.turnDeadline<=Date.now()){await serialize(`match:${m.id}`,async()=>{const fresh=await this.getMatch(m.id);const next=tick(fresh.state,Date.now());if(next.revision!==fresh.sequence)await this.persistTransition(fresh,next,{action:{type:'timeout'}});});}else this.scheduleAI(m);}for(const[code,r]of this.rooms)if(Date.now()-r.createdAt>30*60000){this.rooms.delete(code);this.io?.to(`room:${code}`).emit('room:updated',{code,status:'expired'});}if(Date.now()-this.lastTournamentPulse>5000){this.lastTournamentPulse=Date.now();await this.resumeTournaments();}}
@@ -96,7 +124,7 @@ export class ArenaService {
       bind('match:move',p=>this.act(userId,p.matchId,{type:'place',cell:p.cell,revision:p.revision??p.sequence},p.requestId||`move:${userId}:${p.revision??p.sequence}:${p.cell}`));
       bind('match:power',p=>{const action={type:'power',powerId:p.powerId||p.power,revision:p.revision??p.sequence};for(const key of['cell','from','to','target','direction','axis','index'])if(p[key]!==undefined)action[key]=p[key];if(p.targets){if(action.powerId==='portal'){action.from=p.targets[0];action.to=p.targets[1];}else action.cell=p.targets[0];}return this.act(userId,p.matchId,action,p.requestId||`power:${userId}:${action.revision}:${action.powerId}`);});
       bind('match:surrender',p=>this.surrender(userId,p.matchId,p.requestId));bind('match:rematchRequest',p=>this.rematch(userId,p.matchId));
-      bind('match:emote',async p=>{const m=await this.getMatch(p.matchId);fail(this.member(m,userId),'FORBIDDEN','Spectators cannot send emotes.',403);rateLimit(`emote:${userId}`,6,10000);fail(['wave','gg','wow','think','fire','shield','star','snow'].includes(p.emote),'VALIDATION','Choose a valid emote.');if(['star','snow'].includes(p.emote)){const profile=await db.playerProfile.findUnique({where:{userId}});fail(profile.equippedEmote==='emote-celestial','EMOTE_LOCKED','Equip Celestial Signals from your inventory to use this emote.',403);}io.to(`match:${m.id}`).emit('match:emote',{matchId:m.id,playerId:userId,emote:p.emote});return {sent:true};});
+      bind('match:emote',async p=>{const m=await this.getMatch(p.matchId);fail(this.member(m,userId),'FORBIDDEN','Spectators cannot send emotes.',403);rateLimit(`emote:${userId}`,6,10000);await validateMatchEmote(userId,p.emote);io.to(`match:${m.id}`).emit('match:emote',{matchId:m.id,playerId:userId,emote:p.emote});return {sent:true};});
       bind('room:create',async p=>{const room=await this.createRoom(userId,p);socket.join(`room:${room.code}`);socket.emit('room:updated',room);return room;});bind('room:join',async p=>{const room=await this.joinRoom(userId,p.code);socket.join(`room:${room.code}`);if(room.matchId)await this.selectMatchView(socket,room.matchId);io.to(`room:${room.code}`).emit('room:updated',room);return room;});bind('room:leave',p=>{const code=String(p.code||'').toUpperCase();const room=this.rooms.get(code);if(room?.hostId===userId){this.rooms.delete(code);io.to(`room:${code}`).emit('room:updated',{code,status:'closed'});}socket.leave(`room:${code}`);return {left:true};});
       socket.on('disconnect',()=>{const count=(this.presence.get(userId)||1)-1;if(count>0)this.presence.set(userId,count);else{this.presence.delete(userId);this.queue.delete(userId);for(const m of this.matches.values())if(this.member(m,userId))socket.to(`match:${m.id}`).emit('match:playerDisconnected',{matchId:m.id,playerId:userId,turnClockContinues:true});}});
       db.match.findMany({where:{status:'active',participants:{some:{userId}}},include:hydrateInclude}).then(async matches=>{for(const m of matches){await this.selectMatchView(socket,m.id);socket.emit('match:state',this.snapshot(m,userId));}}).catch(()=>{});
