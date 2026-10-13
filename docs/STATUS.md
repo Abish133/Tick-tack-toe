@@ -1,6 +1,6 @@
 # Implementation and verification status
 
-Updated 12 October 2026. All 22 powers are implemented and available equally. Ranked equips exactly three powers, uses 20-second turns with bounded Time Warp and 120-second banks, and runs up to three rounds. The 2–5-minute duration remains an initial human-play target.
+Updated 13 October 2026. The complete 22-power release is live at [Elemental Arena](https://elemental-arena-production.up.railway.app). All powers are implemented and available equally. Ranked equips exactly three powers, uses 20-second turns with bounded Time Warp and 120-second banks, and runs up to three rounds. The 2–5-minute duration remains an initial human-play target.
 
 ## Implemented game
 
@@ -24,20 +24,24 @@ Razorpay checkout and signed webhooks validate actual captured payments before r
 
 These integrations require owner credentials. No real merchant charge, delivered ad impression, sent mailbox email or live Google login is claimed before configuring and testing those accounts. Exact setup is in [COMMERCE.md](COMMERCE.md); Android instructions are in [ANDROID.md](ANDROID.md).
 
-## Current local evidence
+## Completed verification
 
 - **174 automated tests passed** against isolated MySQL: classic/all-power rules, training, replay, authentication, real sockets, rating/economy, coordinator locks, provider signatures/transactions and premium journey.
 - Production Next.js build passed; all 242 imported Lucide icons resolve.
-- **10 browser flows passed** across the existing suite, all 22 Power Lab activations/catalog controls and earned-pass unlock/claim/equip. One social flow initially hit the unchanged shared-IP request budget; a 60-second test cooldown resolved it and the flow passed on rerun.
+- **10 browser flows passed locally and in Linux CI**, covering multiplayer, progression, social features, all 22 Power Lab activations/catalog controls and earned-pass unlock/claim/equip. Social tests include a 60-second cooldown to respect the unchanged shared-IP request budget.
+- **9 public-URL browser flows passed; 1 was intentionally skipped** because the premium fixture requires direct database setup. Cloud tests used normal browser accounts without remote backend fixtures or administrator promotion.
+- Local visual QA passed **11 desktop/mobile checks** and saved 12 images. Cloud visual QA passed **4 desktop/mobile lobby and power-catalog checks**, confirmed all 22 power cards, and found no JavaScript errors, missing images, asset request failures or horizontal overflow.
 - Provider suite: 23 passing tests, including ECDSA fixtures, concurrent refunds/spending, capture/refund races, delayed pass reconciliation, daily ad caps and Ranked denial.
-- Android Gradle wrapper integrity, project configuration and dependency resolution passed locally. APK compile/lint run in GitHub Actions; device delivery is not yet asserted.
+- Android APK compilation and lint passed in [Android CI run 38346112814](https://github.com/Abish133/Tick-tack-toe/actions/runs/38346112814) for `d81345af394ca277e39e72b344dfd0aafafc2204`, whose native code is unchanged in the deployed release. The debug APK is saved locally at `downloads/ElementalArena-debug.apk`; SHA-256: `ba1c62fe4337e0d1a6830db6ffee42713a77fd5eebf80db223e5cf878cfcf698`. Device installation and real ad delivery remain unverified.
 
 ## Release pipeline and deployment
 
-GitHub release gate runs pure tests/build, fresh MySQL Linux container migrations, actual coordinator handoff and in-flight draining, real database/socket/provider tests and Chromium flows. The Android workflow compiles/lints a debug APK. Native Railway **Wait for CI** is enabled; the legacy pinned source must be upgraded to main after successful CI and a one-time legacy coordinator stop.
+The [GitHub release gate run 38346798403](https://github.com/Abish133/Tick-tack-toe/actions/runs/38346798403) passed for `96298dad7192d2984513afc9163eea5e8c04da79`: 174 automated tests, 10 Chromium flows, both production builds, fresh Linux MySQL migrations, and actual coordinator handoff with accepted requests drained before ownership transfer. The Android workflow separately compiles/lints a debug APK.
 
-The existing HTTPS game is [Elemental Arena](https://elemental-arena-production.up.railway.app), initially deployed at commit `a57614dcc984d506feed5a5be00ff8348e2267b7`. The updated 22-power cloud release and CI run are pending at this snapshot; final evidence will record their exact revisions.
+Railway deployment `2e3beee5-b54f-4527-8db5-e05f830ae422` succeeded for that tested commit. The public health endpoint returned `200`, `database: mysql`, `coordinator: active`, and the exact release SHA; the public features and catalog endpoints confirm all 22 powers enabled. The provider migration completed and player data was preserved. The old six-power deployment was stopped once before upgrading because it predates coordinator ownership.
+
+The application now follows `Abish133/Tick-tack-toe`, branch `main`, with no commit pin. Railway **Autodeploy** and **Wait for CI** are enabled, so normal pushes are configured to deploy after passing CI. Verify each release by comparing the public health SHA with its successful GitHub Actions run; local operational evidence is stored separately in `.runtime/automatic-release-verification.json`.
 
 One app replica, private MySQL, a persistent volume and ownership-aware health checks are required. Temporary queues/private room codes restart during deployment; persistent matches and player data recover. Railway account/trial limits apply. Provider credentials, moderation, representative human balance/load testing and commercial backup/uptime operations remain owner configuration work.
 
-The completed private `qa-cleanup` job has no public endpoint and restart policy Never; its deletion was previously declined. Test cleanup targets only recorded fixture IDs and refuses matches with outside players. Laptop MySQL service data is never removed.
+The completed private `qa-cleanup` job has no public endpoint and restart policy Never; its deletion was previously declined. Its successful cloud cleanup removed exactly 10 recorded E2E accounts and 6 finished matches; two outside accounts were preserved and no E2E leaderboard entries remained. The guard refuses matches with outside players. Laptop MySQL service data is never removed. [Current release evidence](release-verification.json) records these checks; the older [cloud-verification.json](cloud-verification.json) remains historical playtest evidence.

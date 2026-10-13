@@ -1,0 +1,94 @@
+{
+  "status": "passed",
+  "timestamp": "2026-10-13T04:45:05.343Z",
+  "baseURL": "https://elemental-arena-production.up.railway.app",
+  "release": "96298da",
+  "deployment": "2e3beee5-b54f-4527-8db5-e05f830ae422",
+  "checks": [
+    {
+      "name": "lobby",
+      "route": "/",
+      "width": 1440,
+      "image": "release-cloud-lobby-1440.png",
+      "viewport": 1440,
+      "document": 1440,
+      "brokenImages": [],
+      "overflow": []
+    },
+    {
+      "name": "lobby",
+      "route": "/",
+      "width": 390,
+      "image": "release-cloud-lobby-390.png",
+      "viewport": 390,
+      "document": 390,
+      "brokenImages": [],
+      "decorativeElementsOutsideViewport": [
+        {
+          "tag": "DIV",
+          "class": "hero-board",
+          "aria": null
+        },
+        {
+          "tag": "DIV",
+          "class": "orbit-ring",
+          "aria": null
+        },
+        {
+          "tag": "DIV",
+          "class": "preview-board",
+          "aria": null
+        },
+        {
+          "tag": "DIV",
+          "class": "preview-cell ",
+          "aria": null
+        },
+        {
+          "tag": "DIV",
+          "class": "preview-cell ",
+          "aria": null
+        },
+        {
+          "tag": "DIV",
+          "class": "preview-cell filled",
+          "aria": null
+        },
+        {
+          "tag": "SPAN",
+          "class": "mark x",
+          "aria": null
+        },
+        {
+          "tag": "svg",
+          "class": "lucide lucide-x",
+          "aria": null
+        }
+      ],
+      "layoutNote": "The decorative hero board is intentionally cropped by its panel. It does not create horizontal scrolling."
+    },
+    {
+      "name": "powers",
+      "route": "/powers",
+      "width": 1440,
+      "image": "release-cloud-powers-1440.png",
+      "viewport": 1440,
+      "document": 1440,
+      "brokenImages": [],
+      "overflow": []
+    },
+    {
+      "name": "powers",
+      "route": "/powers",
+      "width": 390,
+      "image": "release-cloud-powers-390.png",
+      "viewport": 390,
+      "document": 390,
+      "brokenImages": [],
+      "overflow": []
+    }
+  ],
+  "errors": [],
+  "assetFailures": [],
+  "scope": "Read-only public lobby and all22-power collection. No player accounts created or game actions sent."
+}

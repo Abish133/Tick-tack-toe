@@ -1,0 +1,121 @@
+{
+  "url": "https://elemental-arena-production.up.railway.app",
+  "checkedAt": "2026-10-13T04:51:40.771Z",
+  "release": "96298dad7192d2984513afc9163eea5e8c04da79",
+  "httpChecks": [
+    {
+      "route": "/api/health",
+      "status": 200
+    },
+    {
+      "route": "/api/admin",
+      "status": 401
+    },
+    {
+      "route": "/.env",
+      "status": 404
+    },
+    {
+      "route": "/.runtime/game-process.json",
+      "status": 404
+    },
+    {
+      "route": "/assets/arena.png",
+      "status": 200
+    },
+    {
+      "route": "/assets/avatar-fire.png",
+      "status": 200
+    },
+    {
+      "route": "/api/auth/guest",
+      "status": 403,
+      "origin": "untrusted"
+    }
+  ],
+  "health": {
+    "ok": true,
+    "database": "mysql",
+    "coordinator": "active",
+    "release": "96298dad7192d2984513afc9163eea5e8c04da79"
+  },
+  "features": {
+    "database": "mysql",
+    "ranked": true,
+    "humanOnlyRanked": true,
+    "ai": true,
+    "google": false,
+    "email": false,
+    "checkout": false,
+    "rewardedAds": false,
+    "multiProcess": false,
+    "turnSeconds": 20,
+    "equippedPowers": 3,
+    "targetMatchMinutes": [
+      2,
+      5
+    ],
+    "releasedPowers": 22,
+    "totalPowerConcepts": 22
+  },
+  "powerCatalog": {
+    "total": 22,
+    "enabled": 22
+  },
+  "browserFlows": {
+    "passed": 9,
+    "skipped": "Premium earned-pass database fixture is isolated CI only",
+    "total": 10,
+    "durationMinutes": 5.3,
+    "scope": "Public HTTPS UI, real player sessions and Socket.IO; no direct production database fixtures or admin promotion"
+  },
+  "ci": {
+    "testedRevision": "96298dad7192d2984513afc9163eea5e8c04da79",
+    "releaseGateRun": 38346798403,
+    "status": "success",
+    "automatedTests": 174,
+    "browserFlowsPassed": 10,
+    "freshLinuxMySQL": true,
+    "productionCoordinatorTakeover": true
+  },
+  "deployment": {
+    "id": "2e3beee5-b54f-4527-8db5-e05f830ae422",
+    "status": "SUCCESS"
+  },
+  "visual": {
+    "local": "screenshots/release-visual-qa.json",
+    "cloud": "screenshots/release-cloud-visual-qa.json"
+  },
+  "android": {
+    "workflowRun": 38346112814,
+    "compileAndLint": "success",
+    "apk": "downloads/ElementalArena-debug.apk",
+    "sha256": "ba1c62fe4337e0d1a6830db6ffee42713a77fd5eebf80db223e5cf878cfcf698",
+    "deviceDeliveryTested": false
+  },
+  "providerActivation": {
+    "razorpay": false,
+    "admob": false,
+    "google": false,
+    "email": false,
+    "guide": "COMMERCE.md"
+  },
+  "automaticDeployment": {
+    "configured": true,
+    "branch": "main",
+    "pinned": false,
+    "waitForCI": true,
+    "endToEndPushProof": "Exact subsequent push, CI and deployment evidence is maintained locally in .runtime/automatic-release-verification.json"
+  },
+  "cleanup": {
+    "status": "passed",
+    "deployment": "61d57392-1e97-4871-b65c-c8e13833803a",
+    "recordedAccountsRemoved": 10,
+    "completedMatchesRemoved": 6,
+    "scope": "Guarded exact-ID deletion; refuses non-fixture users, unfinished games and outside opponents; private one-shot service completed with restart NEVER and no endpoint"
+  },
+  "leaderboard": {
+    "fixtureEntries": 0,
+    "outsideEntries": 2
+  }
+}
