@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import CosmeticShop from "./CosmeticShop";
 import GameShell from "./GameShell";
 import ScreenHeading from "./ScreenHeading";
-import { GameUIProvider, Modal as GameModal } from "./ui";
+import { GameUIProvider, Modal as GameModal, Tabs } from "./ui";
 import GameEntrance from "./GameEntrance";
 import BattleHub, { ModeSelect } from "./BattleHub";
 import BoardSizePicker from "./BoardSizePicker";
@@ -273,6 +273,12 @@ function sound(type, settings) {
 export default function ArenaApp() {
   const router = useRouter(),
     pathname = usePathname();
+  const [armoryTab, setArmoryTab] = useState("deck");
+  useEffect(() => {
+    const lab = () => setArmoryTab("lab");
+    window.addEventListener("elemental:inspect-power", lab);
+    return () => window.removeEventListener("elemental:inspect-power", lab);
+  }, []);
   const [entered, setEntered] = useState(false),
     [savedLocal, setSavedLocal] = useState(false),
     [boardSize, setBoardSize] = useState(3),
@@ -1099,15 +1105,28 @@ export default function ArenaApp() {
                       Save loadout <Check size={16} />
                     </button>,
                   )}
-                  <PowerCollection
-                    loadout={loadout}
-                    setLoadout={setLoadout}
-                    disabled={!sessionReady || busy}
+                  <Tabs
+                    items={[
+                      { id: "deck", label: "Deck", icon: Layers3 },
+                      { id: "lab", label: "Power Lab", icon: WandSparkles },
+                    ]}
+                    value={armoryTab}
+                    onChange={setArmoryTab}
+                    label="Armory sections"
                   />
-                  <PowerLab
-                    reducedMotion={settings.reducedMotion}
-                    onSound={(id) => sound(id, settings)}
-                  />
+                  <div className="armory-panel" hidden={armoryTab !== "deck"}>
+                    <PowerCollection
+                      loadout={loadout}
+                      setLoadout={setLoadout}
+                      disabled={!sessionReady || busy}
+                    />
+                  </div>
+                  <div className="armory-panel" hidden={armoryTab !== "lab"}>
+                    <PowerLab
+                      reducedMotion={settings.reducedMotion}
+                      onSound={(id) => sound(id, settings)}
+                    />
+                  </div>
                 </>
               )}
 
