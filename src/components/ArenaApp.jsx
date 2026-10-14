@@ -42,6 +42,7 @@ import HistoryPanel from "./HistoryPanel";
 import SocialPanel from "./SocialPanel";
 import BattleScreen from "./BattleScreen";
 import ProfileEditor from "./ProfileEditor";
+import SettingsScreen from "./SettingsScreen";
 import LeaderboardPanel from "./LeaderboardPanel";
 import ReplayAnalysis from "./ReplayAnalysis";
 import OfflineArena from "./OfflineArena";
@@ -403,6 +404,25 @@ export default function ArenaApp() {
       );
     return data;
   }, []);
+  const [unreadCount, setUnreadCount] = useState(0);
+  useEffect(() => {
+    let live = true;
+    if (!user?.id) {
+      setUnreadCount(0);
+      return;
+    }
+    api("/notifications")
+      .then((data) => {
+        if (live)
+          setUnreadCount(
+            (data.notifications || []).filter((item) => !item.readAt).length,
+          );
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [api, user?.id, pathname]);
   const refresh = useCallback(async () => {
     try {
       const data = await api("/auth/session");
@@ -967,7 +987,7 @@ export default function ArenaApp() {
       "/tournaments": "Tournaments",
     }[pathname] ||
     "Arena";
-  const pageIntro = (_eyebrow, heading, description, aside) => (
+  const screenHeading = (_eyebrow, heading, description, aside) => (
     <ScreenHeading title={heading} description={description} aside={aside} />
   );
   const needAccount = (
@@ -1043,6 +1063,7 @@ export default function ArenaApp() {
           <GameShell
             user={user}
             connected={connected}
+            notificationCount={unreadCount}
             pathname={pathname}
             navigate={navigate}
             settings={settings}
@@ -1073,6 +1094,8 @@ export default function ArenaApp() {
             >
               {["/", "/login", "/register"].includes(pathname) && (
                 <BattleHub
+                  api={api}
+                  now={now}
                   user={user}
                   boardSize={boardSize}
                   setBoardSize={setBoardSize}
@@ -1093,7 +1116,7 @@ export default function ArenaApp() {
 
               {pathname === "/powers" && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "POWER IS A CHOICE",
                     title,
                     "All 22 powers are available equally. Equip three and build your own strategy.",
@@ -1187,7 +1210,7 @@ export default function ArenaApp() {
 
               {pathname === "/leaderboard" && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "EARN YOUR PLACE",
                     title,
                     "Real players. Recorded results. Ranked opponents may include clearly labelled competitive bots.",
@@ -1210,7 +1233,7 @@ export default function ArenaApp() {
 
               {pathname === "/shop" && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "STYLE HAS NO STAT BOOST",
                     title,
                     "Express yourself with cosmetic collections, transparent avatars and extraordinary arenas.",
@@ -1252,7 +1275,7 @@ export default function ArenaApp() {
 
               {pathname === "/friends" && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "GOOD RIVALS MAKE GREAT GAMES",
                     title,
                     "Find a friend, send a challenge, and make your next move together.",
@@ -1283,7 +1306,7 @@ export default function ArenaApp() {
 
               {pathname === "/inventory" && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "COLLECT A LITTLE OF YOURSELF",
                     "Your cosmetic collection",
                     "Make your marks, board, and player identity your own.",
@@ -1302,7 +1325,7 @@ export default function ArenaApp() {
                 pathname,
               ) && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "YOUR JOURNEY CONTINUES",
                     pathname === "/achievements"
                       ? "Earned, move by move"
@@ -1323,7 +1346,7 @@ export default function ArenaApp() {
               )}
               {pathname === "/history" && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "REVISIT YOUR BEST MOVES",
                     title,
                     "Recorded battles, verified rewards, and a closer look at every action.",
@@ -1343,7 +1366,7 @@ export default function ArenaApp() {
 
               {pathname === "/missions" && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "MAKE EVERY MATCH COUNT",
                     title,
                     "Earn cosmetic coins and account XP through play.",
@@ -1365,7 +1388,7 @@ export default function ArenaApp() {
               {(pathname === "/profile" ||
                 pathname.startsWith("/players/")) && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "THIS IS YOUR STORY",
                     "Player profile",
                     "Your identity, achievements, and competitive progress.",
@@ -1392,171 +1415,43 @@ export default function ArenaApp() {
               )}
 
               {pathname === "/settings" && (
-                <>
-                  {pageIntro(
-                    "TUNED TO YOU",
-                    title,
-                    "Control sound, motion, accessibility, and your session.",
-                  )}
-                  <section className="panel settings-panel">
-                    <h3>Sound & accessibility</h3>
-                    {[
-                      {
-                        key: "sound",
-                        label: "Sound effects",
-                        hint: "Synthesized game sounds after your first interaction.",
-                      },
-                      {
-                        key: "reducedMotion",
-                        label: "Reduced motion",
-                        hint: "Keep transitions and board effects gentle.",
-                      },
-                      {
-                        key: "highContrast",
-                        label: "High contrast",
-                        hint: "Stronger borders and clearer interactive states.",
-                      },
-                      {
-                        key: "screenShake",
-                        label: "Screen shake",
-                        hint: "Optional. Disabled by default.",
-                      },
-                      {
-                        key: "allowFriendRequests",
-                        label: "Friend requests",
-                        hint: "Allow other players to invite you to their friends list.",
-                      },
-                      {
-                        key: "showOnline",
-                        label: "Show online status",
-                        hint: "Let friends know when you are connected.",
-                      },
-                      {
-                        key: "allowSpectators",
-                        label: "Spectators",
-                        hint: "Allow viewing when you create a public match.",
-                      },
-                      {
-                        key: "notifications",
-                        label: "Arena announcements",
-                        hint: "Receive administrator updates in your inbox.",
-                      },
-                    ].map((s) => (
-                      <div className="setting-row" key={s.key}>
-                        <div>
-                          <strong>{s.label}</strong>
-                          <p>{s.hint}</p>
-                        </div>
-                        <button
-                          role="switch"
-                          aria-checked={settings[s.key]}
-                          aria-label={s.label}
-                          className={`toggle ${settings[s.key] ? "on" : ""}`}
-                          onClick={() =>
-                            setSettings((v) => ({ ...v, [s.key]: !v[s.key] }))
-                          }
-                        >
-                          <i />
-                        </button>
-                      </div>
-                    ))}
-                    <div className="setting-row">
-                      <label htmlFor="volume">
-                        Effects volume <span>{settings.volume}%</span>
-                      </label>
-                      <input
-                        id="volume"
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={settings.volume}
-                        onChange={(e) =>
-                          setSettings((v) => ({
-                            ...v,
-                            volume: Number(e.target.value),
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="setting-row">
-                      <label htmlFor="quality">Animation quality</label>
-                      <select
-                        id="quality"
-                        value={settings.quality}
-                        onChange={(e) =>
-                          setSettings((v) => ({
-                            ...v,
-                            quality: e.target.value,
-                          }))
-                        }
-                      >
-                        {["Low", "Medium", "High", "Ultra"].map((q) => (
-                          <option key={q}>{q}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="setting-row">
-                      <label htmlFor="profile-visibility">
-                        Profile visibility
-                      </label>
-                      <select
-                        id="profile-visibility"
-                        value={settings.profileVisibility || "public"}
-                        onChange={(e) =>
-                          setSettings((s) => ({
-                            ...s,
-                            profileVisibility: e.target.value,
-                          }))
-                        }
-                      >
-                        <option value="public">Everyone</option>
-                        <option value="friends">Accepted friends</option>
-                        <option value="private">Only me</option>
-                      </select>
-                    </div>
-                    <button
-                      className="button primary"
-                      onClick={() =>
-                        run(async () => {
-                          localStorage.setItem(
-                            "ea:settings",
-                            JSON.stringify(settings),
-                          );
-                          if (user) await api("/settings", "PATCH", settings);
-                          setNotice("Settings saved.");
-                        })
-                      }
-                    >
-                      Save settings <Check size={15} />
-                    </button>
-                    {user && (
-                      <>
-                        <hr />
-                        <button
-                          className="button danger"
-                          onClick={() =>
-                            run(async () => {
-                              await api("/auth/logout", "POST");
-                              socketRef.current?.disconnect();
-                              setUser(null);
-                              settingsOwner.current = null;
-                              setMatch(null);
-                              sessionStorage.removeItem("ea:spectating");
-                              navigate("/");
-                            })
-                          }
-                        >
-                          <LogOut size={16} /> Sign out
-                        </button>
-                      </>
-                    )}
-                  </section>
-                </>
+                <SettingsScreen
+                  settings={settings}
+                  setSettings={setSettings}
+                  user={user}
+                  navigate={navigate}
+                  onClose={() => navigate("/")}
+                  onUpgrade={() => {
+                    navigate("/");
+                    setAuth("register");
+                  }}
+                  onSave={() =>
+                    run(async () => {
+                      localStorage.setItem(
+                        "ea:settings",
+                        JSON.stringify(settings),
+                      );
+                      if (user) await api("/settings", "PATCH", settings);
+                      setNotice("Settings saved.");
+                    })
+                  }
+                  onSignOut={() =>
+                    run(async () => {
+                      await api("/auth/logout", "POST");
+                      socketRef.current?.disconnect();
+                      setUser(null);
+                      settingsOwner.current = null;
+                      setMatch(null);
+                      sessionStorage.removeItem("ea:spectating");
+                      navigate("/");
+                    })
+                  }
+                />
               )}
 
               {pathname === "/admin" && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "THE ARENA CONTROL ROOM",
                     "Administration",
                     "Real operations, with role-protected actions and audit logs.",
@@ -1571,7 +1466,7 @@ export default function ArenaApp() {
               )}
               {pathname.startsWith("/tournaments/") && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "FOLLOW THE BRACKET",
                     "The road to the final",
                     "Single elimination. Human competitors. Server-verified results.",
@@ -1600,7 +1495,7 @@ export default function ArenaApp() {
               )}
               {pathname === "/tutorial" && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "LEARN THE NEXT MOVE",
                     "Welcome to your arena",
                     "Three short interactive lessons using the real game rules.",
@@ -1613,7 +1508,7 @@ export default function ArenaApp() {
               )}
               {pathname === "/local-play" && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "ANYWHERE. YOUR PACE.",
                     "The local arena",
                     "Two players on one device, or a thoughtful computer rival.",
@@ -1623,7 +1518,7 @@ export default function ArenaApp() {
               )}
               {pathname === "/daily-puzzle" && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "A NEW ANGLE, EVERY DAY",
                     "One move. One opportunity.",
                     "A shared daily practice puzzle. No ranked cups or paid advantages.",
@@ -1633,7 +1528,7 @@ export default function ArenaApp() {
               )}
               {pathname === "/tournaments" && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "PLAY FOR THE MOMENT",
                     title,
                     "Single-elimination competitions with verified human results.",
@@ -1692,7 +1587,7 @@ export default function ArenaApp() {
 
               {pathname.startsWith("/replay/") && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "LOOK ONE MOVE DEEPER",
                     title,
                     "Recorded server snapshots, one action at a time.",
@@ -1715,7 +1610,7 @@ export default function ArenaApp() {
 
               {pathname === "/rules" && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "KNOW THE BOARD. MASTER THE ELEMENTS.",
                     "The rules of the arena",
                     "Familiar at first glance. Tactical at every turn.",
@@ -1799,7 +1694,7 @@ export default function ArenaApp() {
               )}
               {["/privacy", "/terms"].includes(pathname) && (
                 <>
-                  {pageIntro(
+                  {screenHeading(
                     "ELEMENTAL ARENA",
                     pathname === "/privacy"
                       ? "Privacy overview"
