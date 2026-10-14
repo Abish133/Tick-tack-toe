@@ -29,7 +29,8 @@ function Resource({value=0,icon:Icon,label,className='',onClick}) {
     if(next!==previous.current){setDelta(next-previous.current);clearTimeout(timer.current);timer.current=setTimeout(()=>setDelta(0),1700);previous.current=next;}
     return()=>clearTimeout(timer.current);
   },[value]);
-  return <button className={`${styles.resource} ${className} ${delta?styles.resourceChanged:''}`} onClick={onClick} aria-label={`${label}: ${Number(value||0).toLocaleString()}`}><Icon size={17}/><span>{Number(value||0).toLocaleString()}</span>{delta!==0&&<i key={`${value}-${delta}`} className={`${styles.resourceDelta} ${delta<0?styles.loss:''}`} aria-hidden="true">{delta>0?'+':''}{delta}</i>}</button>;
+  const fullValue=Number(value||0).toLocaleString(),compactValue=Number(value||0)>=10000?new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(Number(value)):fullValue;
+  return <button className={`${styles.resource} ${className} ${delta?styles.resourceChanged:''}`} onClick={onClick} aria-label={`${label}: ${fullValue}`} title={`${label}: ${fullValue}`}><Icon size={17}/><span className={styles.fullValue}>{fullValue}</span><span className={styles.compactValue}>{compactValue}</span>{delta!==0&&<i key={`${value}-${delta}`} className={`${styles.resourceDelta} ${delta<0?styles.loss:''}`} aria-hidden="true">{delta>0?'+':''}{delta}</i>}</button>;
 }
 
 export default function GameShell({children,user,connected,pathname,navigate,settings,onToggleSound,onSettings,onAccount,avatar,rankLabel='Rookie',rankProgress=0,battleActive=false,hasActiveMatch=false,background='/assets/arena.png'}) {
@@ -64,9 +65,11 @@ export default function GameShell({children,user,connected,pathname,navigate,set
   return <div className={`${styles.world} ${battleActive?styles.inBattle:''}`} style={{'--world-art':`url("${background}")`}}>
     <div className={styles.environment} aria-hidden="true"><div className={styles.worldLight}/><div className={styles.atmosphere}/><div className={styles.vignette}/></div>
     <header className={styles.hud} aria-label="Player HUD">
-      <button className={styles.crest} onClick={()=>go('/')} aria-label="Elemental Arena home"><Sparkles size={22}/><span>ELEMENTAL<small>ARENA</small></span></button>
+      <button className={styles.crest} onClick={()=>go('/')} aria-label="Elemental Arena home"><Swords size={22}/><span>ELEMENTAL<small>ARENA</small></span></button>
+      <div className={styles.playerStats} aria-label="Player rank and balances">
       <button className={styles.rank} onClick={()=>go('/leaderboard')} aria-label={`${rankLabel} rank, level ${user?.level||1}`}><Trophy size={18}/><span><strong>{rankLabel}</strong><small>LEVEL {user?.level||1}</small><i><b style={{width:`${Math.max(0,Math.min(100,rankProgress))}%`}}/></i></span></button>
-      <div className={styles.resources}><Resource value={user?.cups} icon={Trophy} label="Trophies" onClick={()=>go('/leaderboard')}/><Resource value={user?.coins} icon={Coins} label="Cosmetic coins" className={styles.gold} onClick={()=>go('/shop')}/></div>
+      <div className={styles.resources}><Resource key={`${user?.id||'anonymous'}:cups`} value={user?.cups} icon={Trophy} label="Trophies" onClick={()=>go('/leaderboard')}/><Resource key={`${user?.id||'anonymous'}:coins`} value={user?.coins} icon={Coins} label="Cosmetic coins" className={styles.gold} onClick={()=>go('/shop')}/></div>
+      </div>
       <span className={`connection ${connected?'online':''} ${styles.connection}`}><i/>{connected?'Arena connected':user?'Connecting':'Welcome, challenger'}</span>
       <div className={styles.hudTools}><button className={styles.iconButton} onClick={()=>go('/notifications')} aria-label="Notifications" title="Notifications"><Mail size={18}/></button><button className={styles.iconButton} onClick={onToggleSound} aria-label={settings?.sound?'Mute sound':'Unmute sound'} title={settings?.sound?'Mute sound':'Unmute sound'}>{settings?.sound?<Volume2 size={18}/>:<VolumeX size={18}/>}</button><button className={styles.iconButton} onClick={onSettings} aria-label="Settings" title="Settings"><Settings size={18}/></button><button className={styles.account} onClick={onAccount} aria-label="Player account" title={user?.name||'Player account'}>{avatar||<span>{(user?.name||'EA').slice(0,2).toUpperCase()}</span>}</button></div>
     </header>
