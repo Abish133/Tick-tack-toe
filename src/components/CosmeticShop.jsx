@@ -305,6 +305,14 @@ export default function CosmeticShop({
           </button>
         ))}
         <button
+          className={category === "collections" ? styles.selected : ""}
+          aria-pressed={category === "collections"}
+          onClick={() => setCategory("collections")}
+        >
+          <Layers3 size={18} />
+          Collections
+        </button>
+        <button
           className={category === "coins" ? styles.selected : ""}
           aria-pressed={category === "coins"}
           onClick={() => setCategory("coins")}
@@ -313,42 +321,44 @@ export default function CosmeticShop({
           Coins
         </button>
       </div>
-      <div className={styles.tools}>
-        <label className={styles.search}>
-          <Search size={18} />
-          <input
-            aria-label="Search cosmetics"
-            placeholder="Find a style…"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            maxLength={100}
-          />
-          {query && (
-            <button aria-label="Clear search" onClick={() => setQuery("")}>
-              <X size={18} />
-            </button>
-          )}
-        </label>
-        <button
-          className={styles.pickerButton}
-          aria-label="Collection theme"
-          data-value={theme}
-          onClick={() => setPicker("theme")}
-        >
-          {COSMETIC_THEMES.find((item) => item.id === theme)?.name ||
-            "Every world"}
-          <ChevronDown size={18} />
-        </button>
-        <button
-          className={styles.pickerButton}
-          aria-label="Sort cosmetics"
-          data-value={sort}
-          onClick={() => setPicker("sort")}
-        >
-          {sortOptions.find(([id]) => id === sort)?.[1]}
-          <ChevronDown size={18} />
-        </button>
-      </div>
+      {!["collections", "coins"].includes(category) && (
+        <div className={styles.tools}>
+          <label className={styles.search}>
+            <Search size={18} />
+            <input
+              aria-label="Search cosmetics"
+              placeholder="Find a style…"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              maxLength={100}
+            />
+            {query && (
+              <button aria-label="Clear search" onClick={() => setQuery("")}>
+                <X size={18} />
+              </button>
+            )}
+          </label>
+          <button
+            className={styles.pickerButton}
+            aria-label="Collection theme"
+            data-value={theme}
+            onClick={() => setPicker("theme")}
+          >
+            {COSMETIC_THEMES.find((item) => item.id === theme)?.name ||
+              "Every world"}
+            <ChevronDown size={18} />
+          </button>
+          <button
+            className={styles.pickerButton}
+            aria-label="Sort cosmetics"
+            data-value={sort}
+            onClick={() => setPicker("sort")}
+          >
+            {sortOptions.find(([id]) => id === sort)?.[1]}
+            <ChevronDown size={18} />
+          </button>
+        </div>
+      )}
       <div ref={catalogRef} className={styles.catalogScroll}>
         {category === "all" && theme === "all" && !query && (
           <GameFrame
@@ -369,6 +379,13 @@ export default function CosmeticShop({
               </span>
               <h2>CHOOSE YOUR LEGEND</h2>
               <p>90 collection styles · Equal powers</p>
+              <GameButton
+                variant="secondary"
+                className={styles.heroAction}
+                onClick={() => setCategory("collections")}
+              >
+                VIEW COLLECTIONS
+              </GameButton>
             </div>
             <div className={styles.heroArt} aria-hidden="true">
               <img src="/assets/collection/avatar-lunar.webp" alt="" />
@@ -376,13 +393,13 @@ export default function CosmeticShop({
             </div>
           </GameFrame>
         )}
-        {(category === "all" || category === "coins") && (
+        {(category === "collections" || category === "coins") && (
           <CommercePanel
             {...commerceProps}
             focus={category === "coins" ? "coins" : "featured"}
           />
         )}
-        {category !== "coins" && (
+        {!["collections", "coins"].includes(category) && (
           <>
             <div className={styles.heading}>
               <h2>The collection</h2>

@@ -139,7 +139,7 @@ export default function ProgressPanel({
           {(data.notifications || []).length ? (
             data.notifications.map((n) => (
               <article
-                className={`${panels.notificationRow} ${n.readAt ? panels.read : ""}`}
+                className={`notification-row ${panels.notificationRow} ${n.readAt ? panels.read : ""}`}
                 key={n.id}
               >
                 <Bell size={22} />

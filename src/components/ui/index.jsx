@@ -18,6 +18,7 @@ import { Check, ChevronDown, Info, Lock, Plus, X, Zap } from "lucide-react";
 import styles from "./GameUI.module.css";
 
 const Feedback = createContext(() => {});
+const modalStack = [];
 export function GameUIProvider({
   children,
   onFeedback,
@@ -44,15 +45,16 @@ export function GameFrame({
       className={`${styles.frame} ${styles[variant] || ""} ${className}`}
       {...props}
     >
-      <svg
-        className={styles.ornament}
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
-        <path d="M2 14V2h12M86 2h12v12M98 86v12H86M14 98H2V86" />
-        <path d="m2 8 6-6 6 6-6 6Zm84 0 6-6 6 6-6 6Zm0 84 6-6 6 6-6 6ZM2 92l6-6 6 6-6 6Z" />
-      </svg>
+      {["northwest", "northeast", "southeast", "southwest"].map((corner) => (
+        <svg
+          key={corner}
+          className={`${styles.corner} ${styles[corner]}`}
+          viewBox="0 0 32 32"
+          aria-hidden="true"
+        >
+          <path d="M2 24V2h22M5 18V5h13M7 2l5 5-5 5-5-5Zm10 0 5 5 5-5M2 17l5 5-5 5" />
+        </svg>
+      ))}
       {children}
     </Tag>
   );
@@ -70,7 +72,7 @@ export function GameButton({
   return (
     <button
       type="button"
-      className={`${styles.button} ${styles[variant]} ${styles[size] || ""} ${className}`}
+      className={`${styles.button} ${styles[variant] || ""} ${styles[size] || ""} ${className}`}
       data-game-ui="true"
       {...props}
       onClick={(event) => {
@@ -182,10 +184,10 @@ export function ResourcePill({
   }, [value, reduced]);
   const full = Number(value || 0).toLocaleString(),
     shown =
-      display >= 10000
+      display >= 1000
         ? new Intl.NumberFormat("en", {
             notation: "compact",
-            maximumFractionDigits: 1,
+            maximumFractionDigits: 0,
           }).format(display)
         : display.toLocaleString();
   return (
@@ -284,8 +286,11 @@ export function Modal({
   useEffect(() => {
     if (!open) return;
     const before = document.activeElement;
+    const panel = ref.current;
+    modalStack.push(panel);
     ref.current?.focus();
     const key = (event) => {
+      if (event.defaultPrevented || modalStack.at(-1) !== panel) return;
       if (event.key === "Escape") {
         event.preventDefault();
         closeRef.current?.();
@@ -293,7 +298,7 @@ export function Modal({
       if (event.key === "Tab") {
         const focusable = [
           ...(ref.current?.querySelectorAll(
-            'button:not(:disabled),a[href],input:not(:disabled),[tabindex="0"]',
+            'button:not(:disabled),a[href],input:not(:disabled),textarea:not(:disabled),[tabindex="0"]',
           ) || []),
         ].filter((el) => el.getClientRects().length);
         const first = focusable[0],
@@ -314,6 +319,8 @@ export function Modal({
     document.addEventListener("keydown", key);
     return () => {
       document.removeEventListener("keydown", key);
+      const index = modalStack.indexOf(panel);
+      if (index >= 0) modalStack.splice(index, 1);
       if (before?.isConnected) before.focus?.();
     };
   }, [open]);
@@ -459,11 +466,33 @@ export function CustomSelect({
   disabled = false,
 }) {
   const [open, setOpen] = useState(false),
+    [position, setPosition] = useState({}),
     root = useRef(null),
     listId = useId(),
     selected = options.find((item) => item.value === value);
   useEffect(() => {
     if (!open) return;
+    const anchor = root.current?.querySelector('[role="combobox"]');
+    const rect = anchor?.getBoundingClientRect();
+    if (rect) {
+      const available = window.innerHeight - rect.bottom - 12,
+        above = rect.top - 12,
+        height = Math.min(
+          240,
+          Math.max(96, available >= above ? available : above),
+        );
+      setPosition({
+        position: "fixed",
+        left: Math.min(rect.left, innerWidth - Math.max(rect.width, 180) - 12),
+        top:
+          available >= height
+            ? rect.bottom + 4
+            : Math.max(12, rect.top - height - 4),
+        width: Math.max(rect.width, 180),
+        maxHeight: height,
+        zIndex: 150,
+      });
+    }
     const outside = (event) => {
       if (!root.current?.contains(event.target)) setOpen(false);
     };
@@ -479,12 +508,16 @@ export function CustomSelect({
         role="combobox"
         aria-label={label}
         aria-expanded={open}
+        data-value={value}
         aria-controls={listId}
         aria-haspopup="listbox"
         disabled={disabled}
         onClick={() => setOpen((v) => !v)}
         onKeyDown={(event) => {
-          if (event.key === "Escape") setOpen(false);
+          if (event.key === "Escape") {
+            event.stopPropagation();
+            setOpen(false);
+          }
           if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault();
             const choices = options.filter((item) => !item.disabled),
@@ -502,6 +535,7 @@ export function CustomSelect({
       {open && (
         <div
           className={`${styles.frame} ${styles.selectList}`}
+          style={position}
           id={listId}
           role="listbox"
           aria-label={label}
@@ -511,6 +545,7 @@ export function CustomSelect({
               key={item.value}
               type="button"
               role="option"
+              data-value={item.value}
               aria-selected={value === item.value}
               disabled={item.disabled}
               onClick={() => {

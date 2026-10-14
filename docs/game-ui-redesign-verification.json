@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-14",
+  "scope": "Presentation-only game UI redesign",
+  "mechanicsPreserved": true,
+  "unchangedPaths": ["src/lib/game-engine", "src/server", "prisma", "server.mjs", "package.json", "package-lock.json", "src/lib/routes.js"],
+  "productionBuild": "passed",
+  "unitAndBackend": {"passed": 273, "failed": 0, "skipped": 0, "database": "isolated MySQL test database"},
+  "browserFlows": {"passed": 19, "failed": 0, "durationMinutes": 10.3, "command": "npm run test:e2e", "target": "local production server, isolated test database"},
+  "viewports": [{"width": 1440, "height": 900}, {"width": 1280, "height": 720}, {"width": 390, "height": 844}, {"width": 360, "height": 740}],
+  "coreDocumentOverflow": "none observed in four-viewport checks",
+  "minimumLocalSixBySixCellPixels": 48,
+  "minimumPowerLabCellPixels": 50.33,
+  "accessibility": {
+    "tool": "Lighthouse 13.5.0 user-flow accessibility snapshots",
+    "hubDesktop": 100,
+    "hubPhone": 100,
+    "battleDesktop": 100,
+    "battlePhone": 100,
+    "method": "Entered hub and actual guest Practice match; explicit viewport; no mocked API responses",
+    "reports": "screenshots/game-ui/lighthouse-summary.json",
+    "remainingGuidance": "Unweighted visible-label/accessibility-name recommendations are retained in the reports."
+  },
+  "screenshots": "screenshots/game-ui/README.md",
+  "fixtureDisclosure": "Rich Season, Leaderboard, Profile and Social screenshots include read-only visual data; no fixtures are written to production.",
+  "deployment": {"branch": "main", "provider": "Railway", "automatic": true, "waitForCI": true, "workflow": ".github/workflows/release.yml", "url": "https://elemental-arena-production.up.railway.app"}
+}

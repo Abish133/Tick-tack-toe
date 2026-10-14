@@ -274,6 +274,7 @@ function sound(type, settings) {
 export default function ArenaApp() {
   const router = useRouter(),
     pathname = usePathname();
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [armoryTab, setArmoryTab] = useState("deck");
   useEffect(() => {
     const lab = () => setArmoryTab("lab");
@@ -987,8 +988,42 @@ export default function ArenaApp() {
       "/tournaments": "Tournaments",
     }[pathname] ||
     "Arena";
+  const screenTitles = {
+    "/powers": "ARMORY",
+    "/leaderboard": "LEADERBOARD",
+    "/shop": "COLLECTION",
+    "/inventory": "INVENTORY",
+    "/friends": "SOCIAL",
+    "/history": "BATTLE LOG",
+    "/missions": "MISSIONS",
+    "/profile": "PROFILE",
+    "/achievements": "ACHIEVEMENTS",
+    "/notifications": "INBOX",
+    "/season-pass": "SEASON JOURNEY",
+    "/rules": "ARENA RULES",
+    "/tutorial": "TUTORIAL",
+    "/local-play": "LOCAL CLASSIC",
+    "/daily-puzzle": "DAILY PUZZLE",
+    "/tournaments": "TOURNAMENTS",
+    "/privacy": "PRIVACY",
+    "/terms": "TERMS",
+  };
   const screenHeading = (_eyebrow, heading, description, aside) => (
-    <ScreenHeading title={heading} description={description} aside={aside} />
+    <ScreenHeading
+      title={heading}
+      displayTitle={
+        screenTitles[pathname] ||
+        (pathname.startsWith("/players/")
+          ? "PLAYER CARD"
+          : pathname.startsWith("/replay/")
+            ? "REPLAY"
+            : pathname.startsWith("/tournaments/")
+              ? "TOURNAMENT"
+              : undefined)
+      }
+      description={description}
+      aside={aside}
+    />
   );
   const needAccount = (
     <Empty
@@ -1050,7 +1085,7 @@ export default function ArenaApp() {
             onContinue={continueGame}
             onSettings={() => {
               enterArena();
-              navigate("/settings");
+              setSettingsOpen(true);
             }}
             onAccount={() => {
               if (user) {
@@ -1070,7 +1105,7 @@ export default function ArenaApp() {
             onToggleSound={() =>
               setSettings((s) => ({ ...s, sound: !s.sound }))
             }
-            onSettings={() => navigate("/settings")}
+            onSettings={() => setSettingsOpen(true)}
             onAccount={() => (user ? navigate("/profile") : setAuth("guest"))}
             avatar={
               <Avatar
@@ -1414,41 +1449,6 @@ export default function ArenaApp() {
                 </>
               )}
 
-              {pathname === "/settings" && (
-                <SettingsScreen
-                  settings={settings}
-                  setSettings={setSettings}
-                  user={user}
-                  navigate={navigate}
-                  onClose={() => navigate("/")}
-                  onUpgrade={() => {
-                    navigate("/");
-                    setAuth("register");
-                  }}
-                  onSave={() =>
-                    run(async () => {
-                      localStorage.setItem(
-                        "ea:settings",
-                        JSON.stringify(settings),
-                      );
-                      if (user) await api("/settings", "PATCH", settings);
-                      setNotice("Settings saved.");
-                    })
-                  }
-                  onSignOut={() =>
-                    run(async () => {
-                      await api("/auth/logout", "POST");
-                      socketRef.current?.disconnect();
-                      setUser(null);
-                      settingsOwner.current = null;
-                      setMatch(null);
-                      sessionStorage.removeItem("ea:spectating");
-                      navigate("/");
-                    })
-                  }
-                />
-              )}
-
               {pathname === "/admin" && (
                 <>
                   {screenHeading(
@@ -1749,6 +1749,41 @@ export default function ArenaApp() {
             </motion.div>
           )}
         </AnimatePresence>
+        {(settingsOpen || pathname === "/settings") && (
+          <SettingsScreen
+            settings={settings}
+            setSettings={setSettings}
+            user={user}
+            navigate={navigate}
+            onClose={() => {
+              setSettingsOpen(false);
+              if (pathname === "/settings") navigate("/");
+            }}
+            onUpgrade={() => {
+              navigate("/");
+              setAuth("register");
+            }}
+            onSave={() =>
+              run(async () => {
+                localStorage.setItem("ea:settings", JSON.stringify(settings));
+                if (user) await api("/settings", "PATCH", settings);
+                setNotice("Settings saved.");
+              })
+            }
+            onSignOut={() =>
+              run(async () => {
+                await api("/auth/logout", "POST");
+                socketRef.current?.disconnect();
+                setUser(null);
+                settingsOwner.current = null;
+                setMatch(null);
+                sessionStorage.removeItem("ea:spectating");
+                navigate("/");
+              })
+            }
+          />
+        )}
+
         {auth && (
           <Modal
             title={

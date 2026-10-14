@@ -245,3 +245,17 @@
     color: #fff;
   }
 }
+/* Fit the training board inside the visible laboratory scroller. */
+.layout {
+  flex: 1;
+  container-type: size;
+  container-name: power-lab-stage;
+}
+.arena :global(.game-board) {
+  width: min(100%, 340px, max(188px, calc(100cqh - 18px)));
+}
+@media (max-width: 800px) {
+  .arena :global(.game-board) {
+    width: min(100%, 295px, max(188px, calc(100cqh - 14px)));
+  }
+}

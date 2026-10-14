@@ -855,3 +855,133 @@
 .previewStage :global(.collection-landscape-label) {
   font-size: 14px !important;
 }
+.heroAction {
+  margin-top: 14px;
+  font-size: 14px !important;
+  min-height: 48px;
+}
+.hero {
+  min-height: 160px;
+}
+.heroCopy {
+  padding: 20px 25px;
+}
+.hero h2 {
+  font-size: clamp(22px, 2.3vw, 31px);
+  margin: 12px 0 8px;
+}
+.hero p {
+  font-size: 14px;
+}
+.offerRibbon {
+  font-size: 12px;
+  padding: 4px 10px;
+}
+.heroArt img {
+  height: 135%;
+}
+.heroArt img + img {
+  height: 150%;
+}
+@media (max-width: 800px) {
+  .hero {
+    min-height: 190px;
+  }
+  .heroCopy {
+    padding: 15px;
+    width: 73%;
+  }
+  .hero h2 {
+    font-size: 22px;
+    line-height: 1.15;
+  }
+  .hero p {
+    font-size: 12px;
+    max-width: 190px;
+  }
+  .heroAction {
+    margin-top: 10px;
+    font-size: 12px !important;
+    min-height: 48px;
+  }
+  .heroArt {
+    left: 67%;
+  }
+  .heroArt img + img {
+    width: 175%;
+    height: 135%;
+    right: -45%;
+  }
+}
+@media (max-width: 800px) {
+  .hero {
+    min-height: 120px;
+    margin-bottom: 14px;
+  }
+  .heroCopy {
+    width: 100%;
+    padding: 15px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px 10px;
+  }
+  .heroCopy .offerRibbon {
+    display: none;
+  }
+  .heroCopy h2 {
+    grid-column: 1/-1;
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .heroCopy p {
+    margin: 0;
+    max-width: none;
+    font-family: var(--font-body, Arial, sans-serif);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: 0;
+    text-transform: none;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .heroAction {
+    margin: 0;
+    font-size: 12px !important;
+    min-height: 48px;
+    line-height: 1.2;
+    padding: 8px 10px !important;
+  }
+  .heroArt {
+    left: 73%;
+    opacity: 0.5;
+  }
+  .heroArt img + img {
+    height: 145%;
+    width: 170%;
+    right: -45%;
+    bottom: -24px;
+  }
+  .heroShade {
+    background: linear-gradient(90deg, #071223ed, #091626a8 80%, #07142144);
+  }
+}
+@media (max-width: 380px) {
+  .heroCopy {
+    padding: 12px;
+    gap: 8px;
+  }
+  .heroCopy p {
+    font-size: 12px;
+    letter-spacing: -0.25px;
+  }
+  .heroAction {
+    padding: 8px !important;
+    font-size: 12px !important;
+  }
+}

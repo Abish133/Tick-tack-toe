@@ -155,7 +155,12 @@ export default function SocialPanel({
   }
   function card(player, children) {
     return (
-      <GameFrame variant="card" className={styles.socialCard} key={player.id}>
+      <GameFrame
+        as="article"
+        variant="card"
+        className={styles.socialCard}
+        key={player.id}
+      >
         {identity(player)}
         <div className={styles.socialActions}>{children}</div>
       </GameFrame>
@@ -307,6 +312,7 @@ export default function SocialPanel({
                 player = received ? request.sender : request.receiver;
               return (
                 <GameFrame
+                  as="article"
                   variant="card"
                   className={styles.socialCard}
                   key={request.id}
@@ -356,6 +362,7 @@ export default function SocialPanel({
           {tab === "invites" &&
             challenges.map((challenge) => (
               <GameFrame
+                as="article"
                 variant="card"
                 className={styles.socialCard}
                 key={challenge.id}
@@ -413,6 +420,7 @@ export default function SocialPanel({
               const player = block.blocked || block;
               return (
                 <GameFrame
+                  as="article"
                   variant="card"
                   className={styles.socialCard}
                   key={player.id}

@@ -134,7 +134,11 @@ export default function GameEntrance({
                 </span>
                 <ChevronRight size={15} />
               </button>
-              <button className={styles.enter} onClick={onEnter}>
+              <button
+                className={styles.enter}
+                onClick={onEnter}
+                aria-label="Enter the arena"
+              >
                 <span>
                   Enter the arena
                   <small className={styles.tap}>TAP TO START</small>

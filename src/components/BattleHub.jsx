@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import {
   Swords,
@@ -161,6 +161,8 @@ export function ModeSelect({
 }
 
 export default function BattleHub({
+  api,
+  now = Date.now(),
   user,
   boardSize,
   setBoardSize,
@@ -181,6 +183,47 @@ export default function BattleHub({
     [selector, setSelector] = useState(false),
     [policy, setPolicy] = useState(false),
     reduce = useReducedMotion() || reducedMotion;
+  const [events, setEvents] = useState({});
+  useEffect(() => {
+    let active = true;
+    if (!user?.id || !api) {
+      setEvents({});
+      return;
+    }
+    Promise.allSettled([api("/missions"), api("/season-pass")]).then(
+      ([missions, season]) => {
+        if (active)
+          setEvents({
+            missions: missions.status === "fulfilled" ? missions.value : null,
+            season: season.status === "fulfilled" ? season.value : null,
+          });
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [api, user?.id, user?.coins, user?.xp]);
+  const seasonXp = Number(events.season?.xp || 0),
+    nextTier =
+      events.season?.tiers?.find((tier) => tier.requiredXp > seasonXp) ||
+      events.season?.tiers?.at(-1);
+  const readyMissions = [
+    ...(events.missions?.missions || []),
+    ...(events.missions?.weeklyMissions || []),
+  ].filter(
+    (mission) => !mission.claimed && mission.progress >= mission.target,
+  ).length;
+  const dailySeconds = Math.max(
+      0,
+      Math.ceil(
+        (new Date(
+          events.missions?.dailyResetAt || Math.ceil(now / 86400000) * 86400000,
+        ).getTime() -
+          now) /
+          1000,
+      ),
+    ),
+    dailyCountdown = `${Math.floor(dailySeconds / 3600)}:${String(Math.floor(dailySeconds / 60) % 60).padStart(2, "0")}:${String(dailySeconds % 60).padStart(2, "0")}`;
   const selected = modes.find((item) => item.id === mode) || modes[0];
   const launch = (id) => {
     if (["ranked", "classic", "quick"].includes(id)) queueUp(id);
@@ -255,18 +298,37 @@ export default function BattleHub({
             onClick={() => navigate("/missions")}
           >
             <Gift size={28} />
-            <span>DAILY REWARD</span>
+            <span>
+              DAILY REWARD
+              {events.missions?.daily?.claimedToday ? (
+                <small>{dailyCountdown}</small>
+              ) : events.missions?.daily ? (
+                <small className={styles.claimReady}>CLAIM</small>
+              ) : null}
+            </span>
           </button>
           <button
             aria-label="Season pass"
             onClick={() => navigate("/season-pass")}
           >
             <Crown size={28} />
-            <span>SEASON PASS</span>
+            <span>
+              SEASON PASS
+              {nextTier && (
+                <ProgressBar
+                  value={Math.min(seasonXp, nextTier.requiredXp)}
+                  max={nextTier.requiredXp}
+                  label="Current season tier progress"
+                />
+              )}
+            </span>
           </button>
           <button aria-label="Missions" onClick={() => navigate("/missions")}>
             <Target size={28} />
             <span>MISSIONS</span>
+            {readyMissions > 0 && (
+              <b className={styles.missionBadge}>{readyMissions}</b>
+            )}
           </button>
         </div>
         {activeMatch && (

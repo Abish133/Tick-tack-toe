@@ -265,7 +265,11 @@ export default function OfflineArena() {
   const size = boardSizeOf(game);
 
   return (
-    <GameFrame className={styles.root} aria-label="Local classic arena">
+    <GameFrame
+      className={styles.root}
+      aria-label="Local classic arena"
+      data-board-size={size}
+    >
       <div className={styles.heading}>
         <span className={styles.mode}>
           {config.opponent === "human" ? (
@@ -273,7 +277,7 @@ export default function OfflineArena() {
           ) : (
             <Bot size={22} />
           )}
-          SAME DEVICE CLASSIC
+          <span className={styles.modeText}>SAME DEVICE CLASSIC</span>
         </span>
         <span className={styles.offline} role="status">
           <WifiOff size={17} />
@@ -452,6 +456,15 @@ export default function OfflineArena() {
           <p>
             Local games award no cups, coins, XP, missions, or multiplayer
             results.
+          </p>
+          <p>
+            {offlineReady
+              ? "Available offline on this browser"
+              : "Local play · No account required"}
+          </p>
+          <p>
+            Local session score: X wins {data.score.X} · O wins {data.score.O} ·
+            Draws {data.score.draws}
           </p>
         </div>
       </Modal>

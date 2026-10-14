@@ -214,14 +214,15 @@ export default function LeaderboardPanel({
           items={scopes.map(([id, label, icon]) => ({ id, label, icon }))}
         />
         <div className={styles.ranking}>
-          <CustomSelect
+          <Tabs
             label="Leaderboard category"
             value={category}
             onChange={selectCategory}
-            options={categories.map(([value, label]) => ({
-              value,
+            className={styles.categories}
+            items={categories.map(([id, label]) => ({
+              id,
               label,
-              disabled: scope === "season" && value !== "cups",
+              disabled: scope === "season" && id !== "cups",
             }))}
           />
           <GameButton

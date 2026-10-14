@@ -268,7 +268,7 @@ export default function CommercePanel({
       aria-label="Cosmetic purchases and optional rewards"
     >
       <div className={styles.heading}>
-        <h2>{focus === "coins" ? "TREASURE VAULT" : "FEATURED COLLECTIONS"}</h2>
+        <h2>{focus === "coins" ? "TREASURE VAULT" : "COLLECTIONS"}</h2>
         <span>
           <ShieldCheck size={18} />
           COSMETIC ONLY
@@ -400,138 +400,146 @@ export default function CommercePanel({
               The listed price covers all nine styles, including those you own.
             </p>
           )}
-          <section
-            className={styles.extras}
-            aria-label="Coin packs and season pass"
-          >
-            <h3>
-              <Coins size={22} />
-              Coin packs & season pass
-            </h3>
-            <div className={styles.products}>
-              {extras.map((product, index) => (
-                <RarityTile
-                  as="article"
-                  rarity={product.coins ? "rare" : "legendary"}
-                  key={product.id}
-                  className={`${styles.product} ${!data.checkoutEnabled ? styles.locked : ""}`}
-                >
-                  <div
-                    className={styles.treasure}
-                    style={{ "--treasure-tier": index }}
-                    aria-hidden="true"
+          {focus === "coins" && (
+            <section
+              className={styles.extras}
+              aria-label="Coin packs and season pass"
+            >
+              <h3>
+                <Coins size={22} />
+                Coin packs & season pass
+              </h3>
+              <div className={styles.products}>
+                {extras.map((product, index) => (
+                  <RarityTile
+                    as="article"
+                    rarity={product.coins ? "rare" : "legendary"}
+                    key={product.id}
+                    className={`${styles.product} ${!data.checkoutEnabled ? styles.locked : ""}`}
                   >
-                    {product.coins ? (
-                      <>
-                        <div className={styles.treasureGlow} />
-                        <svg viewBox="0 0 180 140" className={styles.chest}>
-                          <defs>
-                            <linearGradient
-                              id={`chest-gold-${product.id}`}
-                              x2="0"
-                              y2="1"
+                    <div
+                      className={styles.treasure}
+                      style={{ "--treasure-tier": index }}
+                      aria-hidden="true"
+                    >
+                      {product.coins ? (
+                        <>
+                          <div className={styles.treasureGlow} />
+                          <svg viewBox="0 0 180 140" className={styles.chest}>
+                            <defs>
+                              <linearGradient
+                                id={`chest-gold-${product.id}`}
+                                x2="0"
+                                y2="1"
+                              >
+                                <stop stopColor="#fff0ad" />
+                                <stop offset=".45" stopColor="#e7bb56" />
+                                <stop offset="1" stopColor="#8b571c" />
+                              </linearGradient>
+                            </defs>
+                            <g
+                              fill={`url(#chest-gold-${product.id})`}
+                              stroke="#7b511e"
+                              strokeWidth="2"
                             >
-                              <stop stopColor="#fff0ad" />
-                              <stop offset=".45" stopColor="#e7bb56" />
-                              <stop offset="1" stopColor="#8b571c" />
-                            </linearGradient>
-                          </defs>
-                          <g
-                            fill={`url(#chest-gold-${product.id})`}
-                            stroke="#7b511e"
-                            strokeWidth="2"
-                          >
-                            <ellipse cx="53" cy="116" rx="26" ry="7" />
-                            <ellipse cx="140" cy="111" rx="23" ry="7" />
-                            <ellipse cx="43" cy="106" rx="23" ry="7" />
-                            <ellipse cx="147" cy="101" rx="21" ry="7" />
-                            <ellipse cx="46" cy="96" rx="20" ry="7" />
-                            <path d="M48 62Q47 21 91 20Q135 21 135 62Z" />
-                            <path d="M43 62H138L131 118H50Z" />
-                            <path
-                              d="M62 61V118M118 61V118"
-                              fill="none"
-                              stroke="#fff0ac"
-                              strokeWidth="9"
-                            />
-                            <path
-                              d="M43 64H138"
-                              fill="none"
-                              stroke="#fff0ac"
-                              strokeWidth="7"
-                            />
-                            <rect x="82" y="59" width="19" height="32" rx="5" />
-                            <path
-                              d="M90 68v14"
-                              stroke="#543519"
-                              strokeWidth="4"
-                            />
-                            <path
-                              d="M63 49Q69 32 88 31"
-                              fill="none"
-                              stroke="#fff8d5"
-                              strokeWidth="5"
-                              strokeLinecap="round"
-                            />
-                          </g>
-                          <g fill="#ffe6a0">
-                            <path d="M23 35l3 9 9 3-9 3-3 9-3-9-9-3 9-3Z" />
-                            <path d="M149 24l3 9 9 3-9 3-3 9-3-9-9-3 9-3Z" />
-                          </g>
-                        </svg>
-                      </>
-                    ) : (
-                      <>
-                        <span className={styles.passCrest}>
-                          <Crown size={68} />
-                          <Sparkles size={28} />
+                              <ellipse cx="53" cy="116" rx="26" ry="7" />
+                              <ellipse cx="140" cy="111" rx="23" ry="7" />
+                              <ellipse cx="43" cy="106" rx="23" ry="7" />
+                              <ellipse cx="147" cy="101" rx="21" ry="7" />
+                              <ellipse cx="46" cy="96" rx="20" ry="7" />
+                              <path d="M48 62Q47 21 91 20Q135 21 135 62Z" />
+                              <path d="M43 62H138L131 118H50Z" />
+                              <path
+                                d="M62 61V118M118 61V118"
+                                fill="none"
+                                stroke="#fff0ac"
+                                strokeWidth="9"
+                              />
+                              <path
+                                d="M43 64H138"
+                                fill="none"
+                                stroke="#fff0ac"
+                                strokeWidth="7"
+                              />
+                              <rect
+                                x="82"
+                                y="59"
+                                width="19"
+                                height="32"
+                                rx="5"
+                              />
+                              <path
+                                d="M90 68v14"
+                                stroke="#543519"
+                                strokeWidth="4"
+                              />
+                              <path
+                                d="M63 49Q69 32 88 31"
+                                fill="none"
+                                stroke="#fff8d5"
+                                strokeWidth="5"
+                                strokeLinecap="round"
+                              />
+                            </g>
+                            <g fill="#ffe6a0">
+                              <path d="M23 35l3 9 9 3-9 3-3 9-3-9-9-3 9-3Z" />
+                              <path d="M149 24l3 9 9 3-9 3-3 9-3-9-9-3 9-3Z" />
+                            </g>
+                          </svg>
+                        </>
+                      ) : (
+                        <>
+                          <span className={styles.passCrest}>
+                            <Crown size={68} />
+                            <Sparkles size={28} />
+                          </span>
+                        </>
+                      )}
+                      {!data.checkoutEnabled && (
+                        <span className={styles.lockBadge}>
+                          <LockKeyhole size={20} />
                         </span>
-                      </>
-                    )}
-                    {!data.checkoutEnabled && (
-                      <span className={styles.lockBadge}>
-                        <LockKeyhole size={20} />
-                      </span>
-                    )}
-                  </div>
-                  <h3>{product.name}</h3>
-                  <p>
-                    {product.coins ? (
-                      <>
-                        <strong>{product.coins.toLocaleString()}</strong>{" "}
-                        cosmetic coins
-                      </>
-                    ) : (
-                      "Five exclusive visual rewards through season XP"
-                    )}
-                  </p>
-                  <strong className={styles.productPrice}>
-                    {price(product)}
-                  </strong>
-                  <GameButton
-                    variant="secondary"
-                    disabled={!data.checkoutEnabled || Boolean(busy)}
-                    onClick={() => payment(product)}
-                  >
-                    {busy === product.id ? (
-                      <LoaderCircle className="spin" size={18} />
-                    ) : !data.checkoutEnabled ? (
-                      <LockKeyhole size={18} />
-                    ) : (
-                      <CreditCard size={18} />
-                    )}{" "}
-                    {data.checkoutEnabled
-                      ? "Checkout"
-                      : "Available after setup"}
-                  </GameButton>
-                </RarityTile>
-              ))}
-            </div>
-            <p className={styles.small}>
-              The pass can also be unlocked with {data.passCoinPrice} earned
-              coins in Season Journey.
-            </p>
-          </section>
+                      )}
+                    </div>
+                    <h3>{product.name}</h3>
+                    <p>
+                      {product.coins ? (
+                        <>
+                          <strong>{product.coins.toLocaleString()}</strong>{" "}
+                          cosmetic coins
+                        </>
+                      ) : (
+                        "Five exclusive visual rewards through season XP"
+                      )}
+                    </p>
+                    <strong className={styles.productPrice}>
+                      {price(product)}
+                    </strong>
+                    <GameButton
+                      variant="secondary"
+                      disabled={!data.checkoutEnabled || Boolean(busy)}
+                      onClick={() => payment(product)}
+                    >
+                      {busy === product.id ? (
+                        <LoaderCircle className="spin" size={18} />
+                      ) : !data.checkoutEnabled ? (
+                        <LockKeyhole size={18} />
+                      ) : (
+                        <CreditCard size={18} />
+                      )}{" "}
+                      {data.checkoutEnabled
+                        ? "Checkout"
+                        : "Available after setup"}
+                    </GameButton>
+                  </RarityTile>
+                ))}
+              </div>
+              <p className={styles.small}>
+                The pass can also be unlocked with {data.passCoinPrice} earned
+                coins in Season Journey.
+              </p>
+            </section>
+          )}
         </>
       )}
       {native && features.rewardedAds && (

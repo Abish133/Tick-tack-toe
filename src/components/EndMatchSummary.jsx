@@ -81,6 +81,7 @@ export default function EndMatchSummary({
   busy,
   reducedMotion = false,
   profile,
+  initialProgress,
   onSound,
 }) {
   const own = match.participants?.find(
@@ -98,12 +99,17 @@ export default function EndMatchSummary({
   const settled = match.settlement?.settled;
   const promotion =
     settled && delta > 0 && rank(before + delta) !== rank(before);
-  const initialLevel = ownPlayer?.profile?.level || 1;
-  const initialXp = ownPlayer?.profile?.xp || 0;
-  const afterXp = initialXp + (settled ? own?.xp || 0 : 0);
-  const level = 1 + Math.floor(afterXp / 500);
-  const levelUp =
-    settled && ownPlayer?.profile?.xp !== undefined && level > initialLevel;
+  const hasBaseline = initialProgress?.xp !== undefined;
+  const hasProgress = hasBaseline || profile?.xp !== undefined;
+  const initialLevel = initialProgress?.level ?? ownPlayer?.profile?.level ?? 1;
+  const initialXp = initialProgress?.xp ?? ownPlayer?.profile?.xp ?? 0;
+  const afterXp = hasBaseline
+    ? initialXp + (settled ? own?.xp || 0 : 0)
+    : (profile?.xp ?? 0);
+  const level = hasBaseline
+    ? 1 + Math.floor(afterXp / 500)
+    : (profile?.level ?? 1 + Math.floor(afterXp / 500));
+  const levelUp = settled && hasBaseline && level > initialLevel;
   const [celebrate, setCelebrate] = useState(!reducedMotion);
   const [milestone, setMilestone] = useState(null);
   const presented = useRef(new Set());
@@ -125,7 +131,7 @@ export default function EndMatchSummary({
     return () => clearTimeout(timer);
   }, [won, draw]);
   useEffect(() => {
-    const type = promotion ? "rank" : levelUp ? "level" : null;
+    const type = hasBaseline && promotion ? "rank" : levelUp ? "level" : null;
     if (!type || spectator || presented.current.has(type)) return;
     const timer = setTimeout(
       () => {
@@ -135,7 +141,7 @@ export default function EndMatchSummary({
       reducedMotion ? 0 : 1100,
     );
     return () => clearTimeout(timer);
-  }, [promotion, levelUp, spectator, reducedMotion]);
+  }, [promotion, levelUp, spectator, reducedMotion, hasBaseline]);
 
   return (
     <section
@@ -251,7 +257,7 @@ export default function EndMatchSummary({
                   value={roadProgress(before + delta)}
                   label="Trophy road progress"
                 />
-                {ownPlayer?.profile?.xp !== undefined && (
+                {hasProgress && (
                   <div className={styles.xpRoad}>
                     <span>
                       LEVEL {level}

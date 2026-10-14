@@ -63,7 +63,6 @@ export default function DailyPuzzle() {
           <Info size={22} />
         </GameButton>
       </div>
-      <h2>Find the finishing move.</h2>
       <p className={styles.help}>
         You are X. Place one mark to complete a winning line.
       </p>
@@ -115,6 +114,7 @@ export default function DailyPuzzle() {
       >
         <div className={styles.info}>
           <CalendarDays size={36} />
+          <h3>Find the finishing move.</h3>
           <p>Shared daily rotation · Resets at midnight UTC · Practice only</p>
           <p>You are X. Place one mark to complete a winning line.</p>
         </div>

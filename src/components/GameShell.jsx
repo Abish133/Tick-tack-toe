@@ -67,6 +67,7 @@ export default function GameShell({
   useEffect(() => setJourneyOpen(false), [pathname]);
   useEffect(() => {
     const back = (event) => {
+      if (event.defaultPrevented) return;
       if (
         event.key === "Escape" &&
         !document.querySelector('[role="dialog"]') &&
@@ -138,6 +139,7 @@ export default function GameShell({
             className={styles.account}
             onClick={onAccount}
             aria-label="Player account"
+            aria-description={`${user?.name || "Challenger"}, level ${user?.level || 1}`}
             title={user?.name || "Player account"}
           >
             <ProgressBar
@@ -192,7 +194,6 @@ export default function GameShell({
           </div>
           <span
             className={`connection ${connected ? "online" : ""} ${styles.connection}`}
-            role="status"
             aria-label={
               connected
                 ? "Arena connected"

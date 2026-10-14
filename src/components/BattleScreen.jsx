@@ -24,6 +24,8 @@ import {
   Target,
   Trophy,
   VolumeX,
+  Wifi,
+  WifiOff,
   X,
   Zap,
 } from "lucide-react";
@@ -224,9 +226,13 @@ function PlayerHUD({
           <Trophy size={11} />
           {subtitle}
         </small>
-        <small className={`turn-bank ${styles.bank}`}>
+        <small
+          className={`turn-bank ${styles.bank}`}
+          aria-label={`Thinking bank: ${bank}s`}
+        >
           <Hourglass size={11} />
-          Thinking bank: {bank}s
+          <span className={styles.bankPrefix}>Thinking bank:</span>{" "}
+          <b>{bank}s</b>
         </small>
       </div>
       <div className={styles.hudRight}>
@@ -238,6 +244,7 @@ function PlayerHUD({
         )}
         <div
           className={styles.roundGems}
+          role="group"
           aria-label={`${player?.name || "Opponent"}: ${scored ? game.roundScores?.[player?.id] || 0 : game.roundWins?.[player?.id] || 0} ${scored ? "points" : "round wins"}`}
         >
           {scored ? (
@@ -428,8 +435,11 @@ export default function BattleScreen({
 }) {
   const [drawer, setDrawer] = useState(null);
   const [roundBanner, setRoundBanner] = useState(null);
+  const [intro, setIntro] = useState(match?.state?.status === "active");
+  const [countdown, setCountdown] = useState("3");
   const game = match?.state;
   const previousRound = useRef(game?.round);
+  const progressAtStart = useRef(null);
   const warnedSecond = useRef(null);
   const battleSize = boardSizeOf(game);
   const scoredBattle = battleSize > 3;
@@ -450,6 +460,52 @@ export default function BattleScreen({
     ),
   );
   const urgent = seconds <= 5;
+  useEffect(() => {
+    if (
+      !spectator &&
+      user?.id === playerId &&
+      game?.status === "active" &&
+      match?.matchId &&
+      (progressAtStart.current?.matchId !== match.matchId ||
+        progressAtStart.current?.playerId !== playerId)
+    ) {
+      progressAtStart.current = {
+        matchId: match.matchId,
+        playerId,
+        xp: user?.xp ?? user?.profile?.xp ?? 0,
+        level: user?.level ?? user?.profile?.level ?? 1,
+      };
+    }
+  }, [match?.matchId, game?.status, user?.id, playerId, spectator]);
+  useEffect(() => {
+    if (!match?.matchId || game?.status !== "active") {
+      setIntro(false);
+      return;
+    }
+    try {
+      const key = `ea:battle-intro:${match.matchId}`;
+      if (sessionStorage.getItem(key) === "1") {
+        setIntro(false);
+        return;
+      }
+      sessionStorage.setItem(key, "1");
+    } catch {}
+    setIntro(true);
+    setCountdown("3");
+    let step = 0;
+    const count = setInterval(() => {
+      step += 1;
+      setCountdown(["3", "2", "1", "FIGHT"][Math.min(step, 3)]);
+    }, 550);
+    const finish = setTimeout(() => {
+      clearInterval(count);
+      setIntro(false);
+    }, 2300);
+    return () => {
+      clearInterval(count);
+      clearTimeout(finish);
+    };
+  }, [match?.matchId]);
   const powerCast = POWER_INFO.find(
     (power) =>
       power.id ===
@@ -502,6 +558,12 @@ export default function BattleScreen({
         onArena={() => navigate("/")}
         onReplay={() => navigate("/replay/" + match.matchId)}
         reducedMotion={settings.reducedMotion}
+        initialProgress={
+          progressAtStart.current?.matchId === match.matchId &&
+          progressAtStart.current?.playerId === playerId
+            ? progressAtStart.current
+            : undefined
+        }
         profile={user?.profile}
         onSound={onSound}
       />
@@ -540,12 +602,23 @@ export default function BattleScreen({
       <header className={styles.battleTop}>
         <GameButton
           variant="icon"
-          aria-label="Arena"
+          aria-label="Back to arena"
           onClick={() => (spectator ? navigate("/") : setSurrender(true))}
         >
           <ArrowLeft size={23} />
         </GameButton>
         <div className={styles.modePlate}>
+          <span
+            className={`connection ${styles.connectionSignal}`}
+            title={connected ? "Arena connected" : "Connecting"}
+          >
+            {connected ? (
+              <Wifi size={14} aria-hidden="true" />
+            ) : (
+              <WifiOff size={14} aria-hidden="true" />
+            )}
+            <span>{connected ? "Arena connected" : "Connecting"}</span>
+          </span>
           <strong>{mode}</strong>
           <span>
             {battleSize} × {battleSize} ·{" "}
@@ -1063,6 +1136,111 @@ export default function BattleScreen({
           )}
         </Modal>
       )}
+      <AnimatePresence>
+        {intro && (
+          <motion.div
+            className={styles.vsIntro}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            aria-label="Battle introduction"
+          >
+            <GameButton
+              variant="ghost"
+              className={styles.skipIntro}
+              onClick={() => setIntro(false)}
+              aria-label="Skip battle introduction"
+            >
+              Skip
+            </GameButton>
+            <motion.div
+              className={styles.vsPlayer}
+              initial={
+                settings.reducedMotion ? { opacity: 0 } : { x: -80, opacity: 0 }
+              }
+              animate={{ x: 0, opacity: 1 }}
+            >
+              <BattleAvatar
+                player={me}
+                profile={user?.profile}
+                active={false}
+                reducedMotion={settings.reducedMotion}
+              />
+              <strong>{me?.name}</strong>
+              <span>
+                <Trophy size={17} />
+                {rank(
+                  match.participants?.find((player) => player.id === me?.id)
+                    ?.initialCups,
+                )}{" "}
+                ·{" "}
+                {pretty(
+                  match.participants?.find((player) => player.id === me?.id)
+                    ?.initialCups,
+                )}
+              </span>
+            </motion.div>
+            <motion.b
+              className={styles.vsLightning}
+              initial={
+                settings.reducedMotion
+                  ? { opacity: 0 }
+                  : { scale: 1.8, opacity: 0 }
+              }
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.25 }}
+            >
+              <Zap size={74} />
+              VS
+            </motion.b>
+            <motion.div
+              className={`${styles.vsPlayer} ${styles.vsOpponent}`}
+              initial={
+                settings.reducedMotion ? { opacity: 0 } : { x: 80, opacity: 0 }
+              }
+              animate={{ x: 0, opacity: 1 }}
+            >
+              <BattleAvatar
+                player={opponent}
+                active={false}
+                reducedMotion={settings.reducedMotion}
+              />
+              <strong>{opponent?.name || "Opponent"}</strong>
+              <span>
+                {match.rankedBot ? (
+                  `${match.difficulty} · Competitive bot`
+                ) : match.mode === "ai" ? (
+                  `${match.difficulty || difficulty} AI · Practice`
+                ) : (
+                  <>
+                    <Trophy size={17} />
+                    {rank(
+                      match.participants?.find(
+                        (player) => player.id === opponent?.id,
+                      )?.initialCups,
+                    )}{" "}
+                    ·{" "}
+                    {pretty(
+                      match.participants?.find(
+                        (player) => player.id === opponent?.id,
+                      )?.initialCups,
+                    )}
+                  </>
+                )}
+              </span>
+            </motion.div>
+            <motion.strong
+              key={countdown}
+              className={styles.fightCountdown}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              {countdown}
+            </motion.strong>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

@@ -1,0 +1,252 @@
+{
+  "method": "Lighthouse user-flow snapshot of actual entered screens; accessibility category only; desktop form-factor with screen emulation disabled and explicit viewport; real isolated guest/practice match, no mock API responses.",
+  "summaries": [
+    {
+      "screen": "hub",
+      "label": "mobile",
+      "width": 390,
+      "height": 844,
+      "score": 100,
+      "lighthouseVersion": "13.5.0",
+      "url": "http://localhost:3100/",
+      "issues": [
+        {
+          "id": "label-content-name-mismatch",
+          "title": "Elements with visible text labels do not have matching accessible names.",
+          "description": "Visible text labels that do not match the accessible name can result in a confusing experience for screen reader users. [Learn more about accessible names](https://dequeuniversity.com/rules/axe/4.13/label-content-name-mismatch).",
+          "nodes": [
+            {
+              "selector": "div.app-shell > div.SzZrba_world > header.SzZrba_hud > button.SzZrba_account",
+              "snippet": "<button class=\"SzZrba_account\" aria-label=\"Player account\" aria-description=\"E2E A11y mv800jom, level 1\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.content > section.H1jvUG_hub > div.H1jvUG_hubTop > button.qVv1Pa_button",
+              "snippet": "<button type=\"button\" class=\"qVv1Pa_button qVv1Pa_secondary  \" data-game-ui=\"true\" aria-label=\"Select battle mode\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.content > section.H1jvUG_hub > div.H1jvUG_characterStage > button.H1jvUG_rankPlate",
+              "snippet": "<button class=\"H1jvUG_rankPlate\" aria-label=\"View leaderboards\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "section.H1jvUG_hub > div.H1jvUG_characterStage > div.H1jvUG_events > button",
+              "snippet": "<button aria-label=\"View rewards\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "section.H1jvUG_hub > div.H1jvUG_launchZone > div.H1jvUG_loadoutFan > button",
+              "snippet": "<button aria-label=\"Edit loadout: Fire Blast\" style=\"--power-color: #ff955f; --card-rotate: -7deg;\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "section.H1jvUG_hub > div.H1jvUG_launchZone > div.H1jvUG_loadoutFan > button",
+              "snippet": "<button aria-label=\"Edit loadout: Shield Guard\" style=\"--power-color: #7ecfff; --card-rotate: 0deg;\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "section.H1jvUG_hub > div.H1jvUG_launchZone > div.H1jvUG_loadoutFan > button",
+              "snippet": "<button aria-label=\"Edit loadout: Portal Shift\" style=\"--power-color: #9ae9cd; --card-rotate: 7deg;\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.H1jvUG_launchZone > section.board-size-picker > div.board-size-options > button.selected",
+              "snippet": "<button type=\"button\" aria-label=\"3 by 3 board\" aria-pressed=\"true\" class=\"selected\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.H1jvUG_launchZone > section.board-size-picker > div.board-size-options > button",
+              "snippet": "<button type=\"button\" aria-label=\"4 by 4 board\" aria-pressed=\"false\" class=\"\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.H1jvUG_launchZone > section.board-size-picker > div.board-size-options > button",
+              "snippet": "<button type=\"button\" aria-label=\"5 by 5 board\" aria-pressed=\"false\" class=\"\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.H1jvUG_launchZone > section.board-size-picker > div.board-size-options > button",
+              "snippet": "<button type=\"button\" aria-label=\"6 by 6 board\" aria-pressed=\"false\" class=\"\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.content > section.H1jvUG_hub > div.H1jvUG_launchZone > button.qVv1Pa_button",
+              "snippet": "<button type=\"button\" class=\"qVv1Pa_button undefined qVv1Pa_lg H1jvUG_battle\" data-game-ui=\"true\" aria-label=\"Play Ranked\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.app-shell > div.SzZrba_world > nav.SzZrba_dock > button.SzZrba_dockButton",
+              "snippet": "<button class=\"SzZrba_dockButton SzZrba_active\" aria-label=\"Arena\" aria-current=\"page\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "screen": "hub",
+      "label": "desktop",
+      "width": 1440,
+      "height": 900,
+      "score": 100,
+      "lighthouseVersion": "13.5.0",
+      "url": "http://localhost:3100/",
+      "issues": [
+        {
+          "id": "label-content-name-mismatch",
+          "title": "Elements with visible text labels do not have matching accessible names.",
+          "description": "Visible text labels that do not match the accessible name can result in a confusing experience for screen reader users. [Learn more about accessible names](https://dequeuniversity.com/rules/axe/4.13/label-content-name-mismatch).",
+          "nodes": [
+            {
+              "selector": "div.app-shell > div.SzZrba_world > header.SzZrba_hud > button.SzZrba_account",
+              "snippet": "<button class=\"SzZrba_account\" aria-label=\"Player account\" aria-description=\"E2E A11y mv800jom, level 1\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.app-shell > div.SzZrba_world > header.SzZrba_hud > button.SzZrba_crest",
+              "snippet": "<button class=\"SzZrba_crest\" aria-label=\"Elemental Arena home\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.content > section.H1jvUG_hub > div.H1jvUG_hubTop > button.qVv1Pa_button",
+              "snippet": "<button type=\"button\" class=\"qVv1Pa_button qVv1Pa_secondary  \" data-game-ui=\"true\" aria-label=\"Select battle mode\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.content > section.H1jvUG_hub > div.H1jvUG_characterStage > button.H1jvUG_rankPlate",
+              "snippet": "<button class=\"H1jvUG_rankPlate\" aria-label=\"View leaderboards\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "section.H1jvUG_hub > div.H1jvUG_characterStage > div.H1jvUG_events > button",
+              "snippet": "<button aria-label=\"View rewards\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "section.H1jvUG_hub > div.H1jvUG_launchZone > div.H1jvUG_loadoutFan > button",
+              "snippet": "<button aria-label=\"Edit loadout: Fire Blast\" style=\"--power-color: #ff955f; --card-rotate: -7deg;\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "section.H1jvUG_hub > div.H1jvUG_launchZone > div.H1jvUG_loadoutFan > button",
+              "snippet": "<button aria-label=\"Edit loadout: Shield Guard\" style=\"--power-color: #7ecfff; --card-rotate: 0deg;\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "section.H1jvUG_hub > div.H1jvUG_launchZone > div.H1jvUG_loadoutFan > button",
+              "snippet": "<button aria-label=\"Edit loadout: Portal Shift\" style=\"--power-color: #9ae9cd; --card-rotate: 7deg;\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.H1jvUG_launchZone > section.board-size-picker > div.board-size-options > button.selected",
+              "snippet": "<button type=\"button\" aria-label=\"3 by 3 board\" aria-pressed=\"true\" class=\"selected\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.H1jvUG_launchZone > section.board-size-picker > div.board-size-options > button",
+              "snippet": "<button type=\"button\" aria-label=\"4 by 4 board\" aria-pressed=\"false\" class=\"\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.H1jvUG_launchZone > section.board-size-picker > div.board-size-options > button",
+              "snippet": "<button type=\"button\" aria-label=\"5 by 5 board\" aria-pressed=\"false\" class=\"\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.H1jvUG_launchZone > section.board-size-picker > div.board-size-options > button",
+              "snippet": "<button type=\"button\" aria-label=\"6 by 6 board\" aria-pressed=\"false\" class=\"\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.content > section.H1jvUG_hub > div.H1jvUG_launchZone > button.qVv1Pa_button",
+              "snippet": "<button type=\"button\" class=\"qVv1Pa_button undefined qVv1Pa_lg H1jvUG_battle\" data-game-ui=\"true\" aria-label=\"Play Ranked\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.app-shell > div.SzZrba_world > nav.SzZrba_dock > button.SzZrba_dockButton",
+              "snippet": "<button class=\"SzZrba_dockButton SzZrba_active\" aria-label=\"Arena\" aria-current=\"page\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.app-shell > div.SzZrba_world > nav.SzZrba_dock > button.SzZrba_dockButton",
+              "snippet": "<button class=\"SzZrba_dockButton \" aria-label=\"Powers &amp; loadout\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.app-shell > div.SzZrba_world > nav.SzZrba_dock > button.SzZrba_dockButton",
+              "snippet": "<button class=\"SzZrba_dockButton \" aria-label=\"Cosmetic shop\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.app-shell > div.SzZrba_world > nav.SzZrba_dock > button.SzZrba_dockButton",
+              "snippet": "<button class=\"SzZrba_dockButton \" aria-label=\"Friends\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "screen": "battle",
+      "label": "desktop",
+      "width": 1440,
+      "height": 900,
+      "score": 100,
+      "lighthouseVersion": "13.5.0",
+      "url": "http://localhost:3100/battle",
+      "issues": [
+        {
+          "id": "label-content-name-mismatch",
+          "title": "Elements with visible text labels do not have matching accessible names.",
+          "description": "Visible text labels that do not match the accessible name can result in a confusing experience for screen reader users. [Learn more about accessible names](https://dequeuniversity.com/rules/axe/4.13/label-content-name-mismatch).",
+          "nodes": [
+            {
+              "selector": "div.app-shell > div.SzZrba_world > nav.SzZrba_dock > button.SzZrba_dockButton",
+              "snippet": "<button class=\"SzZrba_dockButton SzZrba_active\" aria-label=\"Arena\" aria-current=\"page\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.app-shell > div.SzZrba_world > nav.SzZrba_dock > button.SzZrba_dockButton",
+              "snippet": "<button class=\"SzZrba_dockButton \" aria-label=\"Powers &amp; loadout\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.app-shell > div.SzZrba_world > nav.SzZrba_dock > button.SzZrba_dockButton",
+              "snippet": "<button class=\"SzZrba_dockButton \" aria-label=\"Cosmetic shop\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            },
+            {
+              "selector": "div.app-shell > div.SzZrba_world > nav.SzZrba_dock > button.SzZrba_dockButton",
+              "snippet": "<button class=\"SzZrba_dockButton \" aria-label=\"Friends\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "screen": "battle",
+      "label": "mobile",
+      "width": 390,
+      "height": 844,
+      "score": 100,
+      "lighthouseVersion": "13.5.0",
+      "url": "http://localhost:3100/battle",
+      "issues": [
+        {
+          "id": "label-content-name-mismatch",
+          "title": "Elements with visible text labels do not have matching accessible names.",
+          "description": "Visible text labels that do not match the accessible name can result in a confusing experience for screen reader users. [Learn more about accessible names](https://dequeuniversity.com/rules/axe/4.13/label-content-name-mismatch).",
+          "nodes": [
+            {
+              "selector": "div.app-shell > div.SzZrba_world > nav.SzZrba_dock > button.SzZrba_dockButton",
+              "snippet": "<button class=\"SzZrba_dockButton SzZrba_active\" aria-label=\"Arena\" aria-current=\"page\">",
+              "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
