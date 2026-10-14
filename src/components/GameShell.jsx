@@ -1,80 +1,320 @@
-'use client';
+"use client";
 
-import {useEffect, useRef, useState} from 'react';
-import {Swords, WandSparkles, ShoppingBag, Users, Trophy, Coins, Mail, Volume2, VolumeX, Settings, Compass, Layers3, History, Gift, Medal, BookOpen, Crown, Target, X, Shield, ChevronRight, Sparkles} from 'lucide-react';
-import styles from './GameShell.module.css';
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import {
+  ArrowLeft,
+  Swords,
+  WandSparkles,
+  ShoppingBag,
+  Users,
+  Trophy,
+  Coins,
+  Mail,
+  Volume2,
+  VolumeX,
+  Settings,
+  Compass,
+  Layers3,
+  History,
+  Gift,
+  Medal,
+  BookOpen,
+  Crown,
+  Target,
+  Shield,
+  Wifi,
+  WifiOff,
+} from "lucide-react";
+import { GameButton, Modal, ResourcePill, ProgressBar, IconBadge } from "./ui";
+import styles from "./GameShell.module.css";
 
-const secondaryRoutes = [
-  {path:'/notifications',label:'Notifications',hint:'Challenges, rewards and arena notices',icon:Mail},
-  {path:'/inventory',label:'Inventory',hint:'Inspect and equip your treasures',icon:Layers3},
-  {path:'/season-pass',label:'Season journey',hint:'Follow this season’s reward track',icon:Crown},
-  {path:'/missions',label:'Missions & rewards',hint:'Daily rewards and battle objectives',icon:Gift},
-  {path:'/achievements',label:'Achievements',hint:'Your arena milestones',icon:Medal},
-  {path:'/leaderboard',label:'Leaderboards',hint:'Meet the arena’s strongest rivals',icon:Trophy},
-  {path:'/tournaments',label:'Tournaments',hint:'Enter a knockout competition',icon:Swords},
-  {path:'/history',label:'Match history',hint:'Revisit your recorded battles',icon:History},
-  {path:'/daily-puzzle',label:'Daily puzzle',hint:'Find today’s winning move',icon:Target},
-  {path:'/local-play',label:'Local & offline play',hint:'Play together on this device',icon:Layers3},
-  {path:'/tutorial',label:'Learn the arena',hint:'Three short interactive lessons',icon:BookOpen},
-  {path:'/rules',label:'Arena rules',hint:'The complete power field guide',icon:BookOpen},
-  {path:'/privacy',label:'Privacy',hint:'How your player information is handled',icon:Shield},
-  {path:'/terms',label:'Terms',hint:'Arena playtest information',icon:BookOpen},
+const destinations = [
+  { path: "/notifications", label: "Notifications", icon: Mail },
+  { path: "/inventory", label: "Inventory", icon: Layers3 },
+  { path: "/season-pass", label: "Season journey", icon: Crown },
+  { path: "/missions", label: "Missions & rewards", icon: Gift },
+  { path: "/achievements", label: "Achievements", icon: Medal },
+  { path: "/leaderboard", label: "Leaderboards", icon: Trophy },
+  { path: "/tournaments", label: "Tournaments", icon: Swords },
+  { path: "/history", label: "Match history", icon: History },
+  { path: "/daily-puzzle", label: "Daily puzzle", icon: Target },
+  { path: "/local-play", label: "Local & offline play", icon: Layers3 },
+  { path: "/tutorial", label: "Learn the arena", icon: BookOpen },
+  { path: "/profile", label: "Profile", icon: Users },
 ];
 
-function Resource({value=0,icon:Icon,label,className='',onClick}) {
-  const previous=useRef(Number(value)||0),timer=useRef(null);
-  const [delta,setDelta]=useState(0);
-  useEffect(()=>{
-    const next=Number(value)||0;
-    if(next!==previous.current){setDelta(next-previous.current);clearTimeout(timer.current);timer.current=setTimeout(()=>setDelta(0),1700);previous.current=next;}
-    return()=>clearTimeout(timer.current);
-  },[value]);
-  const fullValue=Number(value||0).toLocaleString(),compactValue=Number(value||0)>=10000?new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(Number(value)):fullValue;
-  return <button className={`${styles.resource} ${className} ${delta?styles.resourceChanged:''}`} onClick={onClick} aria-label={`${label}: ${fullValue}`} title={`${label}: ${fullValue}`}><Icon size={17}/><span className={styles.fullValue}>{fullValue}</span><span className={styles.compactValue}>{compactValue}</span>{delta!==0&&<i key={`${value}-${delta}`} className={`${styles.resourceDelta} ${delta<0?styles.loss:''}`} aria-hidden="true">{delta>0?'+':''}{delta}</i>}</button>;
-}
-
-export default function GameShell({children,user,connected,pathname,navigate,settings,onToggleSound,onSettings,onAccount,avatar,rankLabel='Rookie',rankProgress=0,battleActive=false,hasActiveMatch=false,background='/assets/arena.png'}) {
-  const [journeyOpen,setJourneyOpen]=useState(false);
-  const panelRef=useRef(null),triggerRef=useRef(null);
-  useEffect(()=>{setJourneyOpen(false);},[pathname]);
-  useEffect(()=>{
-    if(!journeyOpen)return;
-    const before=document.activeElement;
-    panelRef.current?.focus();
-    const handler=e=>{
-      if(e.key==='Escape'){setJourneyOpen(false);triggerRef.current?.focus();}
-      if(e.key==='Tab'){
-        const buttons=panelRef.current?.querySelectorAll('button:not([disabled]),[tabindex="0"]');
-        if(!buttons?.length)return;
-        const first=buttons[0],last=buttons[buttons.length-1];
-        if(e.shiftKey&&(document.activeElement===first||document.activeElement===panelRef.current)){e.preventDefault();last.focus();}
-        else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+export default function GameShell({
+  children,
+  user,
+  connected,
+  pathname,
+  navigate,
+  settings,
+  onToggleSound,
+  onSettings,
+  onAccount,
+  avatar,
+  rankLabel = "Rookie",
+  rankProgress = 0,
+  battleActive = false,
+  hasActiveMatch = false,
+  background = "/assets/arena.png",
+  notificationCount = 0,
+}) {
+  const [journeyOpen, setJourneyOpen] = useState(false),
+    reduced = useReducedMotion();
+  useEffect(() => setJourneyOpen(false), [pathname]);
+  useEffect(() => {
+    const back = (event) => {
+      if (
+        event.key === "Escape" &&
+        !document.querySelector('[role="dialog"]') &&
+        pathname !== "/" &&
+        !battleActive
+      ) {
+        event.preventDefault();
+        navigate("/");
       }
     };
-    document.addEventListener('keydown',handler);
-    return()=>{document.removeEventListener('keydown',handler);if(before?.isConnected)before.focus?.();};
-  },[journeyOpen]);
-  const go=path=>{setJourneyOpen(false);navigate(path);};
-  const dock=[
-    {path:hasActiveMatch?'/battle':'/',label:'Arena',title:'Battle',icon:Swords,active:pathname==='/'||pathname==='/battle'},
-    {path:'/powers',label:'Powers & loadout',title:'Armory',icon:WandSparkles,active:pathname==='/powers'},
-    {path:'/shop',label:'Cosmetic shop',title:'Collection',icon:ShoppingBag,active:pathname==='/shop'||pathname==='/inventory'},
-    {label:'Journey',title:'Journey',icon:Compass,active:secondaryRoutes.some(route=>route.path===pathname)},
-    {path:'/friends',label:'Friends',title:'Social',icon:Users,active:pathname==='/friends'},
+    document.addEventListener("keydown", back);
+    return () => document.removeEventListener("keydown", back);
+  }, [pathname, battleActive, navigate]);
+  const go = (path) => {
+    setJourneyOpen(false);
+    navigate(path);
+  };
+  const dock = [
+    {
+      path: hasActiveMatch ? "/battle" : "/",
+      label: "Arena",
+      title: "Battle",
+      icon: Swords,
+      active: pathname === "/" || pathname === "/battle",
+    },
+    {
+      path: "/powers",
+      label: "Powers & loadout",
+      title: "Armory",
+      icon: WandSparkles,
+      active: pathname === "/powers",
+    },
+    {
+      path: "/shop",
+      label: "Cosmetic shop",
+      title: "Collection",
+      icon: ShoppingBag,
+      active: pathname === "/shop" || pathname === "/inventory",
+    },
+    {
+      label: "Journey",
+      title: "Journey",
+      icon: Compass,
+      active:
+        destinations.some((route) => route.path === pathname) &&
+        !["/inventory", "/friends"].includes(pathname),
+    },
+    {
+      path: "/friends",
+      label: "Friends",
+      title: "Social",
+      icon: Users,
+      active: pathname === "/friends",
+    },
   ];
-  return <div className={`${styles.world} ${battleActive?styles.inBattle:''}`} style={{'--world-art':`url("${background}")`}}>
-    <div className={styles.environment} aria-hidden="true"><div className={styles.worldLight}/><div className={styles.atmosphere}/><div className={styles.vignette}/></div>
-    <header className={styles.hud} aria-label="Player HUD">
-      <button className={styles.crest} onClick={()=>go('/')} aria-label="Elemental Arena home"><Swords size={22}/><span>ELEMENTAL<small>ARENA</small></span></button>
-      <div className={styles.playerStats} aria-label="Player rank and balances">
-      <button className={styles.rank} onClick={()=>go('/leaderboard')} aria-label={`${rankLabel} rank, level ${user?.level||1}`}><Trophy size={18}/><span><strong>{rankLabel}</strong><small>LEVEL {user?.level||1}</small><i><b style={{width:`${Math.max(0,Math.min(100,rankProgress))}%`}}/></i></span></button>
-      <div className={styles.resources}><Resource key={`${user?.id||'anonymous'}:cups`} value={user?.cups} icon={Trophy} label="Trophies" onClick={()=>go('/leaderboard')}/><Resource key={`${user?.id||'anonymous'}:coins`} value={user?.coins} icon={Coins} label="Cosmetic coins" className={styles.gold} onClick={()=>go('/shop')}/></div>
+  return (
+    <div
+      className={`${styles.world} ${battleActive ? styles.inBattle : ""}`}
+      style={{ "--world-art": `url("${background}")` }}
+    >
+      <div className={styles.environment} aria-hidden="true">
+        <div className={styles.worldLight} />
+        <div className={styles.atmosphere} />
+        <div className={styles.vignette} />
       </div>
-      <span className={`connection ${connected?'online':''} ${styles.connection}`}><i/>{connected?'Arena connected':user?'Connecting':'Welcome, challenger'}</span>
-      <div className={styles.hudTools}><button className={styles.iconButton} onClick={()=>go('/notifications')} aria-label="Notifications" title="Notifications"><Mail size={18}/></button><button className={styles.iconButton} onClick={onToggleSound} aria-label={settings?.sound?'Mute sound':'Unmute sound'} title={settings?.sound?'Mute sound':'Unmute sound'}>{settings?.sound?<Volume2 size={18}/>:<VolumeX size={18}/>}</button><button className={styles.iconButton} onClick={onSettings} aria-label="Settings" title="Settings"><Settings size={18}/></button><button className={styles.account} onClick={onAccount} aria-label="Player account" title={user?.name||'Player account'}>{avatar||<span>{(user?.name||'EA').slice(0,2).toUpperCase()}</span>}</button></div>
-    </header>
-    <main className={styles.content}>{children}</main>
-    <nav className={styles.dock} aria-label="Game destinations">{dock.map(({path,label,title,icon:Icon,active})=><button key={label} ref={label==='Journey'?triggerRef:undefined} className={`${styles.dockButton} ${active?styles.active:''} ${label==='Arena'?styles.battleButton:''}`} aria-label={label} aria-current={active?'page':undefined} aria-expanded={label==='Journey'?journeyOpen:undefined} aria-controls={label==='Journey'?'arena-journey-panel':undefined} onClick={()=>path?go(path):setJourneyOpen(v=>!v)}><span className={styles.dockIcon}><Icon size={21}/></span><span>{title}</span></button>)}</nav>
-    {journeyOpen&&<div className={styles.panelBackdrop} onMouseDown={e=>{if(e.target===e.currentTarget)setJourneyOpen(false);}}><section id="arena-journey-panel" className={styles.journeyPanel} ref={panelRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Your arena journey"><div className={styles.panelHeading}><span><small>BEYOND THE BATTLE</small><h2>Your journey</h2></span><button className={styles.iconButton} aria-label="Close journey" onClick={()=>setJourneyOpen(false)}><X size={21}/></button></div><div className={styles.journeyRoutes}>{secondaryRoutes.map(({path,label,hint,icon:Icon})=><button key={path} className={`${styles.journeyRoute} ${pathname===path?styles.currentRoute:''}`} onClick={()=>go(path)} aria-label={label}><span><Icon size={21}/></span><div><strong>{label}</strong><small>{hint}</small></div><ChevronRight size={15}/></button>)}{user?.role==='ADMIN'&&<button className={styles.journeyRoute} onClick={()=>go('/admin')}><span><Shield size={21}/></span><div><strong>Administration</strong><small>Arena moderation tools</small></div><ChevronRight size={15}/></button>}</div></section></div>}
-  </div>;
+      {!battleActive && (
+        <header className={styles.hud} aria-label="Player HUD">
+          <button
+            className={styles.account}
+            onClick={onAccount}
+            aria-label="Player account"
+            title={user?.name || "Player account"}
+          >
+            <ProgressBar
+              radial
+              size={52}
+              value={(Number(user?.xp) || 0) % 500}
+              max={500}
+              label="Account level progress"
+            >
+              {avatar || <span>EA</span>}
+            </ProgressBar>
+            <b className={styles.level}>
+              {user?.level >= 1000 ? "1K+" : user?.level || 1}
+            </b>
+          </button>
+          <button
+            className={styles.crest}
+            onClick={() => go("/")}
+            aria-label="Elemental Arena home"
+          >
+            <Swords size={24} />
+            <span>
+              ELEMENTAL<small>ARENA</small>
+            </span>
+          </button>
+          <button
+            className={styles.rank}
+            onClick={() => go("/leaderboard")}
+            aria-label={`${rankLabel} rank, level ${user?.level || 1}`}
+          >
+            <Trophy size={20} />
+            <span>
+              <strong>{rankLabel}</strong>
+              <ProgressBar value={rankProgress} label="Trophy road progress" />
+            </span>
+          </button>
+          <div className={styles.resources}>
+            <ResourcePill
+              key={`${user?.id || "anonymous"}:cups`}
+              value={user?.cups}
+              icon={Trophy}
+              label="Trophies"
+              onClick={() => go("/leaderboard")}
+            />
+            <ResourcePill
+              key={`${user?.id || "anonymous"}:coins`}
+              value={user?.coins}
+              icon={Coins}
+              label="Cosmetic coins"
+              onClick={() => go("/shop")}
+            />
+          </div>
+          <span
+            className={`connection ${connected ? "online" : ""} ${styles.connection}`}
+            role="status"
+            aria-label={
+              connected
+                ? "Arena connected"
+                : user
+                  ? "Connecting"
+                  : "Welcome, challenger"
+            }
+            title={connected ? "Arena connected" : "Connecting"}
+          >
+            {connected ? <Wifi size={16} /> : <WifiOff size={16} />}
+            <span className={styles.srOnly}>
+              {connected
+                ? "Arena connected"
+                : user
+                  ? "Connecting"
+                  : "Welcome, challenger"}
+            </span>
+          </span>
+          <div className={styles.hudTools}>
+            <GameButton
+              variant="icon"
+              onClick={() => go("/notifications")}
+              aria-label="Notifications"
+              title="Notifications"
+            >
+              <IconBadge icon={Mail} count={notificationCount} />
+            </GameButton>
+            <GameButton
+              variant="icon"
+              onClick={onSettings}
+              aria-label="Settings"
+              title="Settings"
+            >
+              <Settings size={21} />
+            </GameButton>
+            <GameButton
+              variant="icon"
+              onClick={onToggleSound}
+              aria-label={settings?.sound ? "Mute sound" : "Unmute sound"}
+              title={settings?.sound ? "Mute sound" : "Unmute sound"}
+            >
+              {settings?.sound ? <Volume2 size={21} /> : <VolumeX size={21} />}
+            </GameButton>
+          </div>
+        </header>
+      )}
+      <main className={styles.stage} aria-label="Game screen">
+        {!battleActive && pathname !== "/" && (
+          <GameButton
+            variant="icon"
+            className={styles.back}
+            onClick={() => go("/")}
+            aria-label="Back to arena"
+          >
+            <ArrowLeft size={24} />
+          </GameButton>
+        )}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={pathname}
+            className={`${styles.screen} ${pathname !== "/" && !battleActive ? styles.withBack : ""}`}
+            initial={{
+              opacity: 0,
+              x: reduced || settings?.reducedMotion ? 0 : 22,
+            }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{
+              opacity: 0,
+              x: reduced || settings?.reducedMotion ? 0 : -22,
+            }}
+            transition={{ duration: 0.25 }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
+      </main>
+      <nav className={styles.dock} aria-label="Game destinations">
+        {dock.map(({ path, label, title, icon: Icon, active }) => (
+          <button
+            key={label}
+            className={`${styles.dockButton} ${active ? styles.active : ""}`}
+            aria-label={label}
+            aria-current={active ? "page" : undefined}
+            aria-expanded={label === "Journey" ? journeyOpen : undefined}
+            onClick={() => (path ? go(path) : setJourneyOpen((v) => !v))}
+          >
+            <span className={styles.dockIcon}>
+              <Icon size={27} />
+            </span>
+            <span className={styles.dockLabel}>{title}</span>
+            {label === "Journey" && notificationCount > 0 && (
+              <b className={styles.redDot} />
+            )}
+          </button>
+        ))}
+      </nav>
+      <Modal
+        open={journeyOpen}
+        title="Your arena journey"
+        onClose={() => setJourneyOpen(false)}
+        className={styles.journeyModal}
+      >
+        <div className={styles.journeyGrid}>
+          {destinations.map(({ path, label, icon: Icon }) => (
+            <button
+              key={path}
+              className={`${styles.journeyTile} ${pathname === path ? styles.currentRoute : ""}`}
+              onClick={() => go(path)}
+              aria-label={label}
+            >
+              <Icon size={30} />
+              <strong>{label}</strong>
+            </button>
+          ))}
+          {user?.role === "ADMIN" && (
+            <button className={styles.journeyTile} onClick={() => go("/admin")}>
+              <Shield size={28} />
+              <strong>Administration</strong>
+            </button>
+          )}
+        </div>
+      </Modal>
+    </div>
+  );
 }
