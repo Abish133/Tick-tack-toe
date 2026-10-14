@@ -4,8 +4,9 @@ import { usePathname, useRouter } from "next/navigation";
 import CosmeticShop from "./CosmeticShop";
 import GameShell from "./GameShell";
 import ScreenHeading from "./ScreenHeading";
-import { GameUIProvider } from "./ui";
+import { GameUIProvider, Modal as GameModal } from "./ui";
 import GameEntrance from "./GameEntrance";
+import BattleHub, { ModeSelect } from "./BattleHub";
 import BoardSizePicker from "./BoardSizePicker";
 import { boardSizeOf } from "../lib/game-engine/geometry";
 import {
@@ -993,7 +994,10 @@ export default function ArenaApp() {
   };
 
   return (
-    <GameUIProvider onFeedback={feedback}>
+    <GameUIProvider
+      onFeedback={feedback}
+      reducedMotion={settings.reducedMotion}
+    >
       <div
         className={`app-shell ${settings.reducedMotion ? "reduce-motion" : ""} ${settings.highContrast ? "high-contrast" : ""} ${user?.profile?.equippedBoard || ""} ${user?.profile?.equippedMark || ""} ${user?.profile?.avatar || ""} ${user?.profile?.equippedEffect || ""} ${user?.profile?.equippedFrame || ""} ${user?.profile?.equippedBanner || ""} ${user?.profile?.equippedArena || ""} quality-${settings.quality.toLowerCase()}`}
         onClickCapture={(event) => {
@@ -1062,349 +1066,23 @@ export default function ArenaApp() {
               className={`content route-${pathname.replaceAll("/", "-") || "hub"} ${pathname === "/battle" ? "battle-content" : ""}`}
             >
               {["/", "/login", "/register"].includes(pathname) && (
-                <>
-                  {pageIntro(
-                    "THINK. STRIKE. CONQUER.",
-                    <>
-                      A familiar board.
-                      <br className="mobile-break" /> An entirely new battle.
-                    </>,
-                    "Three in a row is only the beginning.",
-                  )}
-                  <>
-                    {game?.status === "active" && !spectator && (
-                      <div className="active-battle-banner">
-                        <Swords size={21} />
-                        <span>
-                          <strong>Your battle is still in progress</strong>
-                          <small>
-                            The turn clock continues. Return to your
-                            battlefield.
-                          </small>
-                        </span>
-                        <button
-                          className="button primary"
-                          onClick={() => navigate("/battle")}
-                        >
-                          Resume battle <ArrowRight size={16} />
-                        </button>
-                      </div>
-                    )}
-                  </>
-                  <BoardSizePicker
-                    value={boardSize}
-                    onChange={setBoardSize}
-                    disabled={busy || !!queue}
-                  />
-                  <p className="ranked-disclosure">
-                    <Shield size={15} />
-                    If no real world players are found you'll play against a
-                    competitive bot
-                    <span>Hard or above · difficulty scales with trophies</span>
-                  </p>
-                  <div className="lobby-grid">
-                    <section className="hero-panel">
-                      <div
-                        className="hero-image"
-                        style={
-                          cosmeticAsset(user?.profile?.equippedArena)
-                            ? {
-                                backgroundImage: `url("${cosmeticAsset(user.profile.equippedArena)}")`,
-                              }
-                            : undefined
-                        }
-                      />
-                      <div className="hero-shade" />
-                      <div className="hero-content">
-                        <div className="hero-label">
-                          <span className="live-dot" /> ELEMENTAL AWAKENING{" "}
-                          <span className="season-number">LAUNCH SEASON</span>
-                        </div>
-                        <Badge kind="violet">
-                          <Swords size={13} /> FLAGSHIP MODE
-                        </Badge>
-                        <h2>
-                          RANKED
-                          <br />
-                          <span>ELEMENTAL</span>
-                          <br />
-                          BATTLE
-                        </h2>
-                        <p>
-                          Outthink your opponent.
-                          <br />
-                          Turn the elements in your favor.
-                        </p>
-                        <div className="hero-actions">
-                          <button
-                            className="button primary large"
-                            disabled={busy}
-                            onClick={() => queueUp("ranked")}
-                          >
-                            <Swords size={18} /> Play Ranked{" "}
-                            <ArrowRight size={18} />
-                          </button>
-                          <button
-                            className="hero-rules"
-                            onClick={() => navigate("/tutorial")}
-                          >
-                            How to play <ChevronRight size={14} />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="hero-board" aria-hidden="true">
-                        <div className="orbit-ring" />
-                        <div
-                          className={`preview-board ${cosmeticTheme(user?.profile?.equippedBoard) ? "collection-board" : ""}`}
-                          style={cosmeticStyle(user?.profile?.equippedBoard)}
-                          data-cosmetic-theme={
-                            cosmeticTheme(user?.profile?.equippedBoard)?.id
-                          }
-                        >
-                          {[
-                            null,
-                            "O",
-                            null,
-                            "X",
-                            "X",
-                            null,
-                            "O",
-                            null,
-                            "X",
-                          ].map((m, i) => (
-                            <div
-                              key={i}
-                              className={`preview-cell ${m ? "filled" : ""}`}
-                            >
-                              {m && (
-                                <span
-                                  className={`mark ${m.toLowerCase()} ${cosmeticTheme(user?.profile?.equippedMark) ? "collection-marks" : ""}`}
-                                  style={cosmeticStyle(
-                                    user?.profile?.equippedMark,
-                                  )}
-                                >
-                                  <CosmeticMark
-                                    mark={m}
-                                    cosmeticId={user?.profile?.equippedMark}
-                                  />
-                                </span>
-                              )}
-                              {i === 2 && <span className="cell-spark" />}
-                            </div>
-                          ))}
-                        </div>
-                        <div className="board-caption">
-                          <span /> YOUR MOVE. YOUR MOMENT.
-                        </div>
-                      </div>
-                      <div className="hero-facts">
-                        <span>
-                          <Layers3 size={16} />
-                          <strong>3</strong> equipped powers
-                        </span>
-                        <span>
-                          <Clock3 size={16} />
-                          <strong>20s</strong> per turn
-                        </span>
-                        <span>
-                          <Swords size={16} />
-                          <strong>2–5 min</strong> target match
-                        </span>
-                      </div>
-                    </section>
-                    <aside className="lobby-aside">
-                      <section className="panel rank-panel">
-                        <div className="panel-top">
-                          <span>YOUR COMPETITIVE JOURNEY</span>
-                          <Trophy size={16} />
-                        </div>
-                        <div className="rank-emblem">
-                          <Sprite index={5} />
-                          <div className="emblem-glow" />
-                        </div>
-                        <h3>
-                          {rank(user?.cups)}
-                          <span>DIVISION</span>
-                        </h3>
-                        <div className="rank-score">
-                          {pretty(user?.cups)} <span>cups</span>
-                        </div>
-                        <div className="progress-track">
-                          <span
-                            style={{ width: `${rankProgress(user?.cups)}%` }}
-                          />
-                        </div>
-                        <div className="rank-next">
-                          <span>Every great player starts here.</span>
-                        </div>
-                        <button
-                          className="text-button"
-                          onClick={() => navigate("/leaderboard")}
-                        >
-                          View leaderboards <ArrowRight size={14} />
-                        </button>
-                      </section>
-                      <section className="panel daily-card">
-                        <div className="daily-icon">
-                          <Gift size={24} />
-                        </div>
-                        <div>
-                          <Badge kind="gold">DAILY REWARD</Badge>
-                          <h3>A spark for your journey</h3>
-                          <p>Claim your daily cosmetic coins.</p>
-                          <button
-                            className="text-button"
-                            onClick={() => navigate("/missions")}
-                          >
-                            View rewards <ArrowRight size={14} />
-                          </button>
-                        </div>
-                      </section>
-                    </aside>
-                  </div>
-                  <div className="section-heading">
-                    <div>
-                      <h2>Find your kind of battle</h2>
-                      <p>
-                        A quick warm-up, a friendly rivalry, or your next rank.
-                      </p>
-                    </div>
-                    <div className="arena-shortcuts">
-                      <button
-                        className="button secondary"
-                        onClick={() => queueUp("quick")}
-                      >
-                        <Swords size={14} />
-                        Quick Match
-                      </button>
-                      <button
-                        className="text-button"
-                        onClick={() => setWatchModal(true)}
-                      >
-                        <Eye size={14} />
-                        Spectate
-                      </button>
-                      <button
-                        className="text-button"
-                        onClick={() => navigate("/rules")}
-                      >
-                        All game rules <BookOpen size={15} />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="mode-grid">
-                    <button
-                      className="mode-card practice"
-                      onClick={() => setPracticeModal(true)}
-                    >
-                      <span className="mode-art">
-                        <Orbit size={43} />
-                      </span>
-                      <div>
-                        <Badge>SOLO · NO CUP RISK</Badge>
-                        <h3>Practice Arena</h3>
-                        <p>Seven AI levels. Sharpen your strategy.</p>
-                        <span className="mode-link">
-                          Choose your challenge <ArrowRight size={16} />
-                        </span>
-                      </div>
-                    </button>
-                    <button
-                      className="mode-card friend"
-                      onClick={() => setRoomModal(true)}
-                    >
-                      <span className="mode-art">
-                        <Users size={43} />
-                      </span>
-                      <div>
-                        <Badge>PRIVATE · REAL RIVALS</Badge>
-                        <h3>Challenge a Friend</h3>
-                        <p>Your room. Your rival. Your rematch.</p>
-                        <span className="mode-link">
-                          Create or join a room <ArrowRight size={16} />
-                        </span>
-                      </div>
-                    </button>
-                    <button
-                      className="mode-card classic"
-                      onClick={() => queueUp("classic")}
-                    >
-                      <span className="mode-art">
-                        <X size={39} />
-                        <Circle size={35} />
-                      </span>
-                      <div>
-                        <Badge>ONLINE · NO POWERS</Badge>
-                        <h3>Classic, reimagined</h3>
-                        <p>
-                          Your chosen board. Pure strategy. Human opponents.
-                        </p>
-                        <span className="mode-link">
-                          Play Classic <ArrowRight size={16} />
-                        </span>
-                      </div>
-                    </button>
-                  </div>
-                  <section className="local-play-banner panel">
-                    <Layers3 size={25} />
-                    <div>
-                      <h3>A rivalry on the same device</h3>
-                      <p>
-                        Offline Classic, two players or seven computer levels.
-                        Take your time.
-                      </p>
-                    </div>
-                    <button
-                      className="button secondary"
-                      onClick={() => navigate("/local-play")}
-                    >
-                      Play locally <ArrowRight size={14} />
-                    </button>
-                  </section>
-                  <div className="loadout-strip">
-                    <div className="strip-title">
-                      <span className="tiny-icon">
-                        <WandSparkles size={20} />
-                      </span>
-                      <div>
-                        <h3>Your battle loadout</h3>
-                        <p>Three powers. A world of possibilities.</p>
-                      </div>
-                    </div>
-                    <div className="strip-powers">
-                      {loadout.map((id) => {
-                        const p = POWER_INFO.find((p) => p.id === id);
-                        return (
-                          p && (
-                            <div key={id} className="strip-power">
-                              <span
-                                className="power-mini"
-                                style={{ color: p.color }}
-                              >
-                                <p.icon size={22} />
-                              </span>
-                              <span>
-                                {p.name}
-                                <small>{p.role}</small>
-                              </span>
-                            </div>
-                          )
-                        );
-                      })}
-                    </div>
-                    <button
-                      className="button secondary"
-                      onClick={() => navigate("/powers")}
-                    >
-                      Edit loadout <ChevronRight size={15} />
-                    </button>
-                  </div>
-                  <div className="fairplay">
-                    <Shield size={15} />
-                    <span>Built for fair play.</span> Cosmetic rewards. Equal
-                    powers. Your strategy makes the difference.
-                  </div>
-                </>
+                <BattleHub
+                  user={user}
+                  boardSize={boardSize}
+                  setBoardSize={setBoardSize}
+                  loadout={loadout}
+                  busy={busy}
+                  queue={queue}
+                  rankLabel={rank(user?.cups)}
+                  rankProgress={rankProgress(user?.cups)}
+                  navigate={navigate}
+                  queueUp={queueUp}
+                  onPractice={() => setPracticeModal(true)}
+                  onFriend={() => setRoomModal(true)}
+                  onSpectate={() => setWatchModal(true)}
+                  activeMatch={game?.status === "active" && !spectator}
+                  reducedMotion={settings.reducedMotion}
+                />
               )}
 
               {pathname === "/powers" && (
@@ -2892,60 +2570,29 @@ export default function ArenaApp() {
             </div>
           </Modal>
         )}
-        {newGameModal && (
-          <Modal
-            title="Choose your battle"
-            subtitle="Your board. Your strategy. Your next rival."
-            close={() => setNewGameModal(false)}
-          >
-            <BoardSizePicker value={boardSize} onChange={setBoardSize} />
-            <p className="ranked-disclosure">
-              If no real world players are found you'll play against a
-              competitive bot
-            </p>
-            <div className="game-mode-choices">
-              <button
-                className="button primary wide"
-                onClick={() => {
-                  setNewGameModal(false);
-                  queueUp("ranked");
-                }}
-              >
-                <Swords size={18} />
-                Play Ranked
-              </button>
-              <button
-                className="button secondary wide"
-                onClick={() => {
-                  setNewGameModal(false);
-                  setPracticeModal(true);
-                }}
-              >
-                <Orbit size={18} />
-                Practice Arena
-              </button>
-              <button
-                className="button secondary wide"
-                onClick={() => {
-                  setNewGameModal(false);
-                  setRoomModal(true);
-                }}
-              >
-                <Users size={18} />
-                Challenge a Friend
-              </button>
-              <button
-                className="text-button"
-                onClick={() => {
-                  setNewGameModal(false);
-                  navigate("/local-play");
-                }}
-              >
-                Local & offline play <ArrowRight size={15} />
-              </button>
-            </div>
-          </Modal>
-        )}
+        <ModeSelect
+          open={newGameModal}
+          onClose={() => setNewGameModal(false)}
+          boardSize={boardSize}
+          onBoardSize={setBoardSize}
+          busy={busy}
+          onChoose={(id) => {
+            setNewGameModal(false);
+            if (["ranked", "classic", "quick"].includes(id)) queueUp(id);
+            else if (id === "practice") setPracticeModal(true);
+            else if (id === "friend") setRoomModal(true);
+            else if (id === "spectate") setWatchModal(true);
+            else
+              navigate(
+                {
+                  local: "/local-play",
+                  puzzle: "/daily-puzzle",
+                  tutorial: "/tutorial",
+                  tournaments: "/tournaments",
+                }[id],
+              );
+          }}
+        />
         {practiceModal && (
           <Modal
             title="Sharpen your next move"
@@ -3185,6 +2832,7 @@ export default function ArenaApp() {
         {queue && (
           <Modal
             title="Finding your next rival"
+            fullScreen
             subtitle={
               queue.mode === "ranked"
                 ? `Ranked Elemental · ${queue.boardSize || boardSize} × ${queue.boardSize || boardSize}`
@@ -3197,6 +2845,7 @@ export default function ArenaApp() {
               })
             }
           >
+            <h2 className="queue-heading">SEARCHING FOR OPPONENT…</h2>
             <div className="queue-visual">
               <div className="queue-ring" />
               <Swords size={47} />
@@ -3276,70 +2925,18 @@ export default function ArenaApp() {
   );
 }
 
-function Modal({ title, subtitle, children, close }) {
-  const ref = useRef(null);
-  useEffect(() => {
-    const old = document.activeElement;
-    ref.current?.focus();
-    const key = (e) => {
-      if (e.key === "Escape") close();
-      if (e.key === "Tab") {
-        const focusable = ref.current?.querySelectorAll(
-          'button,input,select,a,[tabindex="0"]',
-        );
-        if (!focusable?.length) return;
-        const first = focusable[0],
-          last = focusable[focusable.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    };
-    document.addEventListener("keydown", key);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", key);
-      document.body.style.overflow = prev;
-      old?.focus?.();
-    };
-  }, []);
+function Modal({ title, subtitle, children, close, fullScreen = false }) {
   return (
-    <div
-      className="modal-backdrop"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) close();
-      }}
+    <GameModal
+      title={title}
+      subtitle={subtitle}
+      onClose={close}
+      fullScreen={fullScreen}
+      closeLabel="Close dialog"
+      className="modal legacy-modal"
     >
-      <motion.section
-        className="modal"
-        ref={ref}
-        tabIndex={-1}
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        initial={{ scale: 0.97, opacity: 0, y: 10 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-      >
-        <button
-          className="modal-close icon-button"
-          aria-label="Close dialog"
-          onClick={close}
-        >
-          <X size={20} />
-        </button>
-        <span className="modal-brand">
-          <Sparkles size={22} />
-        </span>
-        <h2>{title}</h2>
-        <p className="modal-subtitle">{subtitle}</p>
-        {children}
-      </motion.section>
-    </div>
+      {children}
+    </GameModal>
   );
 }
 function Replay({ replay, index, setIndex, playing, setPlaying }) {

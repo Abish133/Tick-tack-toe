@@ -8,16 +8,27 @@ import {
   useRef,
   useState,
 } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  MotionConfig,
+} from "motion/react";
 import { Check, ChevronDown, Info, Lock, Plus, X, Zap } from "lucide-react";
 import styles from "./GameUI.module.css";
 
 const Feedback = createContext(() => {});
-export function GameUIProvider({ children, onFeedback }) {
+export function GameUIProvider({
+  children,
+  onFeedback,
+  reducedMotion = false,
+}) {
   return (
-    <Feedback.Provider value={onFeedback || (() => {})}>
-      {children}
-    </Feedback.Provider>
+    <MotionConfig reducedMotion={reducedMotion ? "always" : "user"}>
+      <Feedback.Provider value={onFeedback || (() => {})}>
+        {children}
+      </Feedback.Provider>
+    </MotionConfig>
   );
 }
 
@@ -60,6 +71,7 @@ export function GameButton({
     <button
       type="button"
       className={`${styles.button} ${styles[variant]} ${styles[size] || ""} ${className}`}
+      data-game-ui="true"
       {...props}
       onClick={(event) => {
         feedback("click");
@@ -262,10 +274,13 @@ export function Modal({
   children,
   className = "",
   fullScreen = false,
+  closeLabel,
 }) {
   const ref = useRef(null),
+    closeRef = useRef(onClose),
     titleId = useId(),
     reduced = useReducedMotion();
+  closeRef.current = onClose;
   useEffect(() => {
     if (!open) return;
     const before = document.activeElement;
@@ -273,7 +288,7 @@ export function Modal({
     const key = (event) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        onClose?.();
+        closeRef.current?.();
       }
       if (event.key === "Tab") {
         const focusable = [
@@ -301,7 +316,7 @@ export function Modal({
       document.removeEventListener("keydown", key);
       if (before?.isConnected) before.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
   return (
     <AnimatePresence>
       {open && (
@@ -334,7 +349,7 @@ export function Modal({
               {onClose && (
                 <GameButton
                   variant="icon"
-                  aria-label={`Close ${title}`}
+                  aria-label={closeLabel || `Close ${title}`}
                   onClick={onClose}
                 >
                   <X size={22} />
