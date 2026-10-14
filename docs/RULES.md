@@ -1,6 +1,8 @@
 # Elemental Arena rules: ranked-elemental-v2
 
-Ranked Elemental Battle is the flagship: a visible three-power loadout, a 3 by 3 board, 20-second turns, and up to three rounds. All 22 catalog powers are implemented and available equally to every player. Cosmetic purchases never alter power strength, energy, targeting, clocks, or rewards. The initial match-duration target is 2–5 minutes; human playtests are needed to measure actual duration and balance.
+Ranked Elemental Battle is the flagship: a visible three-power loadout, a choice of 3×3 through 6×6 boards and 20-second turns. 3×3 retains up to three rounds; larger boards use one scored round. All 22 catalog powers are implemented and available equally to every player. Cosmetic purchases never alter power strength, energy, targeting, clocks, or rewards. The initial match-duration target is 2–5 minutes; human playtests are needed to measure actual duration and balance.
+
+The 4×4, 5×5 and 6×6 scoring rules and transparent Ranked bot fallback are detailed in [Game UI and scoring boards](GAME_UI.md). The first-line and three-round statements below apply to 3×3.
 
 ## Match and turn structure
 
@@ -15,7 +17,7 @@ Ranked Elemental Battle is the flagship: a visible three-power loadout, a 3 by 3
 
 ## Clocks and rejected actions
 
-The server sets a deadline of the smaller of the configured turn limit (default 20 seconds; permitted range 15–30) and the player's remaining match bank. Each player starts with a 120-second thinking bank across all rounds. Accepted actions charge elapsed thinking time. Time Warp can restore up to eight seconds to that bank, capped at 120 seconds, and extend the current deadline by up to eight seconds. Its absolute turn deadline remains capped at 30 seconds from the original start of the turn. It never grants another placement or power action.
+The server sets a deadline of the smaller of the configured turn limit (default 20 seconds; permitted range 15–30) and the player's remaining match bank. Each player starts with a 120-second thinking bank across all 3×3 rounds. Larger boards use 240/360/480-second banks for 4×4/5×5/6×6. Accepted actions charge elapsed thinking time. Time Warp can restore up to eight seconds to that bank, capped at the selected board’s initial bank, and extend the current deadline by up to eight seconds. Its absolute turn deadline remains capped at 30 seconds from the original start of the turn. It never grants another placement or power action.
 
 A turn timeout loses the current round; exhausting the bank loses the whole match. A delayed timer callback charges only up to the deadline. New-round clocks start when the server processes the transition. Animation and reconnect delays do not pause the clock; the client clock is a display.
 
@@ -32,7 +34,7 @@ Surrender ends the whole match and is allowed by either participant regardless o
 | Crystal Lock | 1 | Restrict an empty unlocked cell for both players. | Through the opponent's next main action. Purify removes it; Tide redirects it. |
 | Energy Surge | 0 | Activate while below six energy. Gain up to three. | The whole main action is spent; the opponent acts next. Invalid at full energy. |
 | Lightning Strike | 3 | Target an unfrozen enemy mark. Destroy it and electrify the resulting empty cell. | Terrain persists through one opponent action. Shield absorbs impact without terrain; Mirror may reflect impact and terrain. Purify or Tide counters terrain. |
-| Time Warp | 1 | Extend the current deadline and restore bank time. No board target. | Once per round; up to eight seconds, a 30-second absolute turn cap and 120-second bank cap. The same player retains the one main action. |
+| Time Warp | 1 | Extend the current deadline and restore bank time. No board target. | Once per round; up to eight seconds, a 30-second absolute turn cap and initial match-bank cap. The same player retains the one main action. |
 | Shadow Swap | 3 | Choose a friendly source, then an enemy destination, and exchange ownership, effects and mark provenance atomically. | Both marks must be movable: no freeze, root, shield or mirror. Both players' lines are checked. |
 | Meteor Crash | 4 | Target an unfrozen enemy mark. Destroy it and scorch the resulting empty cell. | Terrain persists through two opponent actions. Shield or Mirror counters impact; Purify or Tide counters terrain. |
 | Healing Bloom | 2 | Spend the oldest genuine destroyed-friendly-mark charge to restore a mark on any empty unlocked cell. | A real mark must first be destroyed in this round. Each charge restores at most one mark and is shared with Echo. |
@@ -62,7 +64,7 @@ The resolution order is authentication and membership in the server adapter; pha
 
 Destruction records the lost mark's owner, original placement and loss identifier as a restoration charge. Bloom and Echo consume this same inventory. Charges reset between rounds, so neither power can fabricate, duplicate or restore marks from earlier rounds. If temporary terrain leaves the incoming player with no legal main action, the engine clears terrain early instead of forcing a timeout. Time Warp alone does not count as an available main action for this safeguard.
 
-History records accepted actions with revision and server timestamp. Invalid actions never append history. Board coordinates are A1, B1, C1, then A2, B2, C2, then A3, B3, C3. Cell indices are 0–8 in the same order.
+History records accepted actions with revision and server timestamp. Invalid actions never append history. Board coordinates are A1, B1, C1, then A2, B2, C2, then A3, B3, C3. Cell indices are row-major, from zero to boardSize²−1. Larger boards extend columns through F and rows through 6.
 
 ## Practice, Classic and AI
 
@@ -70,7 +72,7 @@ The Power Lab on `/powers` offers one prepared scenario for each of the 22 power
 
 Classic uses authoritative alternating turns and deadlines with ordinary placement only. Online, private and AI Classic matches use one round. It evaluates all eight lines and full-board draws. Elemental matches use the three-round shell.
 
-AI has seven levels. Beginner uses mostly random legal choices; Easy mixes random actions with one-action tactics; Medium targets two-action search with occasional mistakes; Hard targets three elemental actions; Expert, Extreme and Nightmare target progressively deeper adversarial search, move ordering, alpha-beta pruning, memoization and bounded node/thinking-time budgets. Iterative deepening returns the strongest fully completed depth. Simulations use the same legal power transitions, targets and durations as multiplayer. This is bounded search, not a claim of a solved elemental ruleset. Hard and higher Classic AI use full-board minimax and cannot lose under ordinary Classic rules. AI actions carry the current revision and never award ranked cups or impersonate human opponents.
+AI has seven levels. Beginner uses mostly random legal choices; Easy mixes random actions with one-action tactics; Medium targets two-action search with occasional mistakes; Hard targets three elemental actions; Expert, Extreme and Nightmare target progressively deeper adversarial search, move ordering, alpha-beta pruning, memoization and bounded node/thinking-time budgets. Iterative deepening returns the strongest fully completed depth. Simulations use the same legal power transitions, targets and durations as multiplayer. This is bounded search, not a claim of a solved elemental ruleset. Hard and higher 3×3 Classic AI use full-board minimax and cannot lose under ordinary Classic rules. Larger boards use bounded search. AI actions carry the current revision. Practice awards no cups; explicitly labelled Ranked competitive bots use the existing cup formula. Bots never impersonate humans.
 
 ## Engine API
 

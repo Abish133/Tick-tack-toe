@@ -109,7 +109,7 @@ export async function startServer({bootstrap,exitOnShutdown=false}={}) {
     })();
     await bootWork;if (stopping) throw new Error('Startup interrupted.');
     services.attach(io);globalThis.__elementalArena=services;ready=true;
-    log('arena_ready',{host,port,database:'mysql',rankedOpponents:'humans only'});
+    log('arena_ready',{host,port,database:'mysql',rankedOpponents:'humans first, disclosed competitive bot fallback'});
     return {server,io,services,lock,shutdown,get ready(){return ready&&!stopping&&lock.owned;}};
   } catch(error) {await shutdown('startup_failed');throw error;}
 }

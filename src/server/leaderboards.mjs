@@ -39,7 +39,7 @@ export async function leaderboardPage({category='cups',scope,region,season,userI
     FROM User u JOIN PlayerRating r ON r.userId=u.id JOIN PlayerStats st ON st.userId=u.id JOIN PlayerProfile p ON p.userId=u.id
     LEFT JOIN SeasonParticipation sp ON sp.userId=u.id AND sp.seasonId=${selectedSeason||''}
     LEFT JOIN (SELECT mp.userId,COUNT(*) total FROM MatchParticipant mp JOIN \`Match\` m ON m.id=mp.matchId
-      WHERE mp.outcome='win' AND m.mode<>'ai' AND m.settledAt>=${new Date(periodKey('weekly'))}
+      WHERE mp.outcome='win' AND m.mode<>'ai' AND NOT EXISTS (SELECT 1 FROM MatchParticipant bot WHERE bot.matchId=m.id AND bot.isAI=true) AND m.settledAt>=${new Date(periodKey('weekly'))}
       GROUP BY mp.userId) ww ON ww.userId=u.id
     LEFT JOIN (SELECT tp.userId,COUNT(*) total FROM TournamentParticipant tp JOIN Tournament t ON t.id=tp.tournamentId
       WHERE t.status='finished' AND tp.eliminated=false GROUP BY tp.userId) tw ON tw.userId=u.id

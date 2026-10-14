@@ -3,10 +3,9 @@
 import styles from './PowerEffects.module.css';
 import {PowerIcon} from './PowerPresentation';
 import {POWER_CATALOG} from '../lib/game-engine/index';
+import {effectCellPosition,effectLinePosition,isEffectCell} from '../lib/power-effect-layout';
 
 const POWERS = new Set(POWER_CATALOG.map(power=>power.id));
-const position = cell => ({ left: `${((cell % 3) + 0.5) * 100 / 3}%`, top: `${(Math.floor(cell / 3) + 0.5) * 100 / 3}%` });
-const isCell = cell => Number.isInteger(cell) && cell >= 0 && cell < 9;
 
 function Particles({ count, variant }) {
   return Array.from({ length: count }, (_, index) => {
@@ -35,7 +34,8 @@ function Burst({ powerId, count, location, reversed = false }) {
 }
 
 /** Presentation only: no input handlers, timers, board mutations or game authority. */
-export default function PowerEffects({ event, revision, reducedMotion = false, quality = 'High' }) {
+export default function PowerEffects({ event, revision, boardSize = 3, reducedMotion = false, quality = 'High' }) {
+  const position=cell=>effectCellPosition(cell,boardSize),isCell=cell=>isEffectCell(cell,boardSize);
   const powerId = event?.powerId ?? event?.action?.powerId;
   const expirations=(event?.expired||[]).filter(item=>isCell(item.cell));
   if (!POWERS.has(powerId)&&!expirations.length) return null;
@@ -43,7 +43,7 @@ export default function PowerEffects({ event, revision, reducedMotion = false, q
   const cell = action.cell ?? action.target ?? event?.resolvedCell;
   const effectKey = `${revision ?? event?.revision ?? event?.at ?? 0}:${powerId}:${event?.at ?? 0}`;
   const count = String(quality).toLowerCase() === 'low' ? 4 : String(quality).toLowerCase() === 'medium' ? 8 : 12;
-  const location = isCell(cell) ? position(cell) : powerId==='dragon'&&Number.isInteger(action.index)?action.axis==='row'?{left:'50%',top:`${(action.index+.5)*100/3}%`}:{left:`${(action.index+.5)*100/3}%`,top:'50%'}:{ left: '50%', top: '50%' };
+  const location = isCell(cell) ? position(cell) : powerId==='dragon'?effectLinePosition(action.axis,action.index,boardSize):{ left: '50%', top: '50%' };
 
   return <span key={effectKey} className={`${styles.overlay} ${reducedMotion ? styles.reduced : ''}`} aria-hidden="true" data-power-effect={powerId}>
     {POWERS.has(powerId)&&(['portal','shadow','wind','tide'].includes(powerId) && isCell(action.from) && isCell(action.to) ? <>

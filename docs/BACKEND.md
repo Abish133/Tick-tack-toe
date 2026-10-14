@@ -56,7 +56,7 @@ The match row stores the initial state and current state. Each accepted transiti
 
 The state transition, result, participant rewards, rating history, profile XP, wallet ledger, mission progress and achievements commit in one transaction. `Match.settledAt`, one result per match and unique ledger references prevent duplicate settlement. A match that cannot commit its transaction does not broadcast a successful transition. Replays use recorded snapshots rather than accepting client board data.
 
-Players have 20-second turns and a 120-second thinking bank each, with up to three elemental rounds. The initial playtest target is 2–5 minutes. Classic matches use one standard round. Client countdowns are display only. Disconnecting does not pause the clock; reconnect sends the complete server state. AI actions use the same engine and never award ranked cups or match coins.
+On 3×3, players have 20-second turns and a 120-second thinking bank each, with up to three elemental rounds. Scored 4×4/5×5/6×6 boards use one round and 240/360/480-second banks. See [the scoring-board and Ranked fallback update](GAME_UI.md). The initial playtest target is 2–5 minutes. Classic matches use one standard round. Client countdowns are display only. Disconnecting does not pause the clock; reconnect sends the complete server state. AI actions use the same engine. Practice awards no cups or direct match coins. Clearly labelled Ranked competitive bots use the existing rating formula and preserve the current AI XP/coin and human-only mission rules.
 
 ### Rating formula
 

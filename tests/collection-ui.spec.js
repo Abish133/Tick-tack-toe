@@ -4,6 +4,9 @@ import path from 'node:path';
 import {test,expect} from '@playwright/test';
 import {COLLECTION_COSMETICS,COSMETIC_TYPES} from '../src/lib/cosmetic-collection.js';
 
+
+async function enterTitle(page){const enter=page.getByRole('button',{name:'Enter the arena',exact:true}),ranked=page.getByRole('button',{name:'Play Ranked',exact:true});await expect(enter.or(ranked)).toBeVisible();if(await enter.isVisible())await enter.click();}
+
 const target=new URL(process.env.E2E_BASE_URL||'http://localhost:3000');
 const database=process.env.DATABASE_URL?new URL(process.env.DATABASE_URL):null;
 const fixtureAllowed=['localhost','127.0.0.1','[::1]'].includes(target.hostname)&&database&&/^ea_(?:test|ci)_/.test(database.pathname.slice(1))&&!['false','0'].includes(String(process.env.E2E_ALLOW_DB_FIXTURES||'').toLowerCase());
@@ -56,7 +59,7 @@ test('earned coins buy every solar style once and equipped art appears in the ac
  test.skip(!fixtureAllowed,'Purchasing fixture requires an isolated local ea_test_ or ea_ci_ database.');
  test.setTimeout(180_000);
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
- await page.goto('/');await page.getByRole('button',{name:'Player account',exact:true}).click();
+ await page.goto('/');await enterTitle(page);await page.getByRole('button',{name:'Player account',exact:true}).click();
  const auth=page.getByRole('dialog');await auth.getByRole('button',{name:'Play as guest',exact:true}).click();
  const tag=Date.now().toString(36);await auth.getByLabel('Player name',{exact:true}).fill(`E2E Collection ${tag}`.slice(0,20));await auth.getByRole('button',{name:'Enter as a guest'}).click();await expect(auth).toBeHidden();
  const user=(await read(page,'/api/auth/session')).user;remember(user);
@@ -69,8 +72,8 @@ test('earned coins buy every solar style once and equipped art appears in the ac
  await page.goto('/inventory');
  for(const item of items){const card=page.locator('.shop-card').filter({has:page.getByRole('heading',{name:item.name,exact:true})});await card.getByRole('button',{name:'Equip cosmetic',exact:true}).click();await expect(card.getByRole('button',{name:'Equipped',exact:true})).toBeDisabled();}
  const equipped=(await read(page,'/api/auth/session')).user;expect(equipped.profile.avatar).toBe('avatar-collection-solar');expect(equipped.profile.equippedEmote).toBe('emote-collection-solar');expect(equipped.loadout).toEqual(user.loadout);
- await expect(page.locator('.top-avatar .avatar img')).toHaveAttribute('src','/assets/collection/avatar-solar.webp');
- await page.goto('/');await expect(page.locator('.hero-board .preview-board.collection-board')).toHaveAttribute('data-cosmetic-theme','solar');await expect(page.locator('.hero-board .collection-marks svg')).toHaveCount(5);await expect(page.locator('.hero-image')).toHaveCSS('background-image',/arena-solar.webp/);
+ await expect(page.locator('[aria-label="Player account"] .avatar img')).toHaveAttribute('src','/assets/collection/avatar-solar.webp');
+ await page.goto('/');await enterTitle(page);await expect(page.locator('.hero-board .preview-board.collection-board')).toHaveAttribute('data-cosmetic-theme','solar');await expect(page.locator('.hero-board .collection-marks svg')).toHaveCount(5);await expect(page.locator('.hero-image')).toHaveCSS('background-image',/arena-solar.webp/);
  await page.getByRole('button',{name:'Choose your challenge'}).click();await page.getByRole('dialog').getByRole('button',{name:'Enter Practice Arena'}).click();await expect(page).toHaveURL(/\/battle$/);
  await expect(page.getByRole('group',{name:'Three by three elemental game board'})).toHaveClass(/collection-board/);await expect(page.getByRole('button',{name:'Shine on!',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Royal move!',exact:true})).toBeVisible();
  await page.locator('.battle-controls').getByRole('button',{name:'Surrender',exact:true}).click();await page.getByRole('dialog',{name:'Leave this battle?'}).getByRole('button',{name:'Surrender',exact:true}).click();await expect(page.locator('.result-panel')).toBeVisible();

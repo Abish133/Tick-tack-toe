@@ -2,6 +2,7 @@
 import {ArrowUp,ArrowDown,ArrowLeft,ArrowRight,Target} from 'lucide-react';
 import {powerInfo} from './PowerPresentation';
 import styles from './PowerTargetControls.module.css';
+import {BOARD_SIZES} from '../lib/game-engine/index';
 
 export function targetHint(id,source){
  const power=powerInfo(id);if(!power)return '';
@@ -10,12 +11,13 @@ export function targetHint(id,source){
  if(id==='dragon')return 'Choose a row or column. Its first unfrozen enemy mark is attacked.';
  return `Select a target for ${power.name}.`;
 }
-export default function PowerTargetControls({id,actions=[],onAction,disabled=false}){
+export default function PowerTargetControls({id,actions=[],onAction,disabled=false,boardSize=3}){
  if(!['gravity','dragon'].includes(id))return null;
+ const size=BOARD_SIZES.includes(boardSize)?boardSize:3;
  const directionIcons={up:ArrowUp,down:ArrowDown,left:ArrowLeft,right:ArrowRight};
  return <div className={styles.controls} aria-label={`${powerInfo(id)?.name} targets`}>
   <span><Target size={14}/>{id==='gravity'?'Shift direction':'Attack line'}</span>
-  <div>{id==='gravity'?['up','left','down','right'].map(direction=>{const Icon=directionIcons[direction],action=actions.find(item=>item.direction===direction);return <button key={direction} disabled={disabled||!action} onClick={()=>onAction(action)} aria-label={`Shift ${direction}`}><Icon size={18}/><small>{direction}</small></button>;}):['row','column'].flatMap(axis=>Array.from({length:3},(_,index)=>{const action=actions.find(item=>item.axis===axis&&item.index===index);return <button key={`${axis}-${index}`} disabled={disabled||!action} onClick={()=>onAction(action)} aria-label={`Attack ${axis} ${index+1}`}><span>{axis==='row'?`${index+1} —`:`${'ABC'[index]} │`}</span><small>{axis} {index+1}</small></button>;}))}</div>
+  <div>{id==='gravity'?['up','left','down','right'].map(direction=>{const Icon=directionIcons[direction],action=actions.find(item=>item.direction===direction);return <button key={direction} disabled={disabled||!action} onClick={()=>onAction(action)} aria-label={`Shift ${direction}`}><Icon size={18}/><small>{direction}</small></button>;}):['row','column'].flatMap(axis=>Array.from({length:size},(_,index)=>{const action=actions.find(item=>item.axis===axis&&item.index===index);return <button key={`${axis}-${index}`} disabled={disabled||!action} onClick={()=>onAction(action)} aria-label={`Attack ${axis} ${index+1}`}><span>{axis==='row'?`${index+1} —`:`${'ABCDEF'[index]} │`}</span><small>{axis} {index+1}</small></button>;}))}</div>
  </div>;
 }
 export function CellStatuses({effect={},turn=0,players=[]}){

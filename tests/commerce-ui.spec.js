@@ -3,6 +3,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {test,expect} from '@playwright/test';
 
+
+async function enterTitle(page){const enter=page.getByRole('button',{name:'Enter the arena',exact:true}),ranked=page.getByRole('button',{name:'Play Ranked',exact:true});await expect(enter.or(ranked)).toBeVisible();if(await enter.isVisible())await enter.click();}
+
 const configuredBase=process.env.E2E_BASE_URL||'http://localhost:3000';
 const localTarget=['localhost','127.0.0.1','[::1]'].includes(new URL(configuredBase).hostname);
 const fixtureAllowed=localTarget&&Boolean(process.env.DATABASE_URL)&&!['false','0'].includes(String(process.env.E2E_ALLOW_DB_FIXTURES||'').toLowerCase());
@@ -13,7 +16,7 @@ test('earned-coin premium journey unlocks, claims once and equips its actual exc
  test.skip(!fixtureAllowed,'Local fixture test only; E2E_ALLOW_DB_FIXTURES=false disables all coin and XP fixture writes.');
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  const tag=`${Date.now().toString(36)}${Math.random().toString(36).slice(2,5)}`;
- await page.goto('/');await page.getByRole('button',{name:'Player account',exact:true}).click();
+ await page.goto('/');await enterTitle(page);await page.getByRole('button',{name:'Player account',exact:true}).click();
  const dialog=page.getByRole('dialog');await dialog.getByRole('button',{name:'Play as guest',exact:true}).click();
  await dialog.getByLabel('Player name',{exact:true}).fill(`E2E Pass ${tag}`.slice(0,20));await dialog.getByRole('button',{name:'Enter as a guest'}).click();await expect(dialog).toBeHidden();
  const user=(await read(page,'/api/auth/session')).user;expect(user?.id).toBeTruthy();remember(user);
@@ -41,7 +44,7 @@ test('earned-coin premium journey unlocks, claims once and equips its actual exc
  const item=page.locator('.shop-card').filter({has:page.getByRole('heading',{name:'Eclipse Halo',exact:true})});
  await item.getByRole('button',{name:'Equip cosmetic',exact:true}).click();await expect(item.getByRole('button',{name:'Equipped',exact:true})).toBeDisabled();
  await expect(page.locator('.app-shell')).toHaveClass(/frame-eclipse/);
- await expect(page.locator('.top-avatar .avatar')).toHaveCSS('border-top-color','rgb(213, 181, 242)');
+ await expect(page.locator('[aria-label="Player account"] .avatar')).toHaveCSS('border-top-color','rgb(213, 181, 242)');
  expect((await read(page,'/api/auth/session')).user.profile.equippedFrame).toBe('frame-eclipse');
  await page.goto('/profile');await expect(page.locator('[class*="portrait"].frame-eclipse')).toBeVisible();
  await page.setViewportSize({width:390,height:844});await page.goto('/season-pass');await page.getByRole('button',{name:/^Premium journey/}).click();

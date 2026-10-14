@@ -1,6 +1,8 @@
 # Implementation and verification status
 
-Updated 13 October 2026. The complete 22-power release is live at [Elemental Arena](https://elemental-arena-production.up.railway.app). All powers are implemented and available equally. Ranked equips exactly three powers, uses 20-second turns with bounded Time Warp and 120-second banks, and runs up to three rounds. The 2–5-minute duration remains an initial human-play target.
+Updated 14 October 2026. The game UI update adds the illustrated title screen, player HUD, game destination dock, expandable battle panels, scored 4×4/5×5/6×6 boards and clearly labelled Ranked bot fallback. It preserves 3×3 rules, all 22 powers, progression and commerce. Local verification passed 273 automated tests, all 16 distinct browser flows and the production build. [Game UI and board rules](GAME_UI.md) describe the changes; [GitHub release checks](https://github.com/Abish133/Tick-tack-toe/actions) gate Railway's automatic deployment to [Elemental Arena](https://elemental-arena-production.up.railway.app).
+
+The following deployed-release snapshot predates that update. All powers are implemented and available equally. Ranked equips exactly three powers. 3×3 uses 20-second turns with bounded Time Warp and 120-second banks, and runs up to three rounds. The 2–5-minute duration remains an initial human-play target.
 
 ## Implemented game
 

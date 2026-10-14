@@ -3,6 +3,9 @@ import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
+
+async function enterTitle(page){const enter=page.getByRole('button',{name:'Enter the arena',exact:true}),ranked=page.getByRole('button',{name:'Play Ranked',exact:true});await expect(enter.or(ranked)).toBeVisible();if(await enter.isVisible())await enter.click();}
+
 const screenshots = path.resolve('docs/screenshots');
 fs.mkdirSync(screenshots, { recursive: true });
 const manifest = path.resolve('.runtime/e2e-test-users.json');
@@ -40,7 +43,7 @@ async function snapshot(page, id) { return read(page, `/api/matches/${id}`); }
 async function connected(page) { await expect(page.locator('.connection')).toHaveText('Arena connected'); }
 
 async function register(page, name, email) {
-  await page.goto('/');
+  await page.goto('/');await enterTitle(page);
   await page.getByRole('button', { name: 'Player account', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await dialog.getByRole('button', { name: 'Create account', exact: true }).click();
@@ -145,7 +148,7 @@ test('two human accounts complete ranked play with synchronized powers, cups and
     await expect(b.locator('.replay-caption')).toContainText('Action 2');
     await b.getByRole('tab', { name: 'Tactical highlights', exact: true }).click();
     await expect(b.getByRole('tab', { name: 'Tactical highlights', exact: true })).toHaveAttribute('aria-selected', 'true');
-    await b.getByRole('button', { name: 'Leaderboards', exact: true }).click();
+    await b.getByRole('button',{name:'Journey',exact:true}).click();await b.getByRole('button', { name: 'Leaderboards', exact: true }).click();
     const ownProfile = b.getByRole('button', { name: `View ${userB.name}'s profile`, exact: true }).first();
     await expect(ownProfile).toBeVisible();
     const standings = await read(b, '/api/leaderboard?limit=100');
@@ -168,7 +171,7 @@ test('two human accounts complete ranked play with synchronized powers, cups and
     await connected(b);
     await expect(b.getByRole('textbox', { name: 'Player bio', exact: true })).toHaveValue('A patient challenger who guards the center.');
     expect((await session(b)).profile.region).toBe('IN');
-    await b.getByRole('button', { name: 'Leaderboards', exact: true }).click();
+    await b.getByRole('button',{name:'Journey',exact:true}).click();await b.getByRole('button', { name: 'Leaderboards', exact: true }).click();
     await b.getByRole('tab', { name: 'Country / region', exact: true }).click();
     await expect(ownProfile).toBeVisible();
     await expect(b.getByRole('combobox', { name: 'Country or region', exact: true })).toHaveValue('IN');
@@ -177,13 +180,13 @@ test('two human accounts complete ranked play with synchronized powers, cups and
     const ember = b.locator('.shop-card').filter({ has: b.getByRole('heading', { name: 'Ember Sovereign', exact: true }) });
     await ember.getByRole('button', { name: /350 coins/ }).click();
     await expect(b.getByRole('status')).toContainText('added to your collection');
-    await b.getByRole('button', { name: 'Inventory', exact: true }).click();
+    await b.getByRole('button',{name:'Journey',exact:true}).click();await b.getByRole('button', { name: 'Inventory', exact: true }).click();
     await connected(b);
     const ownedEmber = b.locator('.shop-card').filter({ has: b.getByRole('heading', { name: 'Ember Sovereign', exact: true }) });
     await ownedEmber.getByRole('button', { name: 'Equip cosmetic', exact: true }).click();
     await expect(ownedEmber.getByRole('button', { name: 'Equipped', exact: true })).toBeDisabled();
     expect((await session(b)).profile.avatar).toBe('avatar-ember');
-    await expect(b.locator('.top-avatar img')).toHaveAttribute('src', '/assets/avatar-fire.png');
+    await expect(b.locator('[aria-label="Player account"] img')).toHaveAttribute('src', '/assets/avatar-fire.png');
     expect((await session(b)).loadout).toEqual(userB.loadout);
     await b.getByRole('button', { name: 'Player account', exact: true }).click();
     const equippedAvatar = b.getByRole('combobox', { name: 'Equipped avatar', exact: true });
@@ -192,7 +195,7 @@ test('two human accounts complete ranked play with synchronized powers, cups and
     await expect(equippedAvatar).toBeEnabled();
     await equippedAvatar.selectOption('avatar-ember');
     await expect.poll(async () => (await session(b)).profile.avatar).toBe('avatar-ember');
-    await expect(b.locator('.top-avatar img')).toHaveAttribute('src', '/assets/avatar-fire.png');
+    await expect(b.locator('[aria-label="Player account"] img')).toHaveAttribute('src', '/assets/avatar-fire.png');
     if (process.env.DATABASE_URL && process.env.E2E_SKIP_ADMIN !== '1') {
       // A real local administrator fixture: no API bypass or mocked response is used for operations.
       const { PrismaClient } = await import('@prisma/client');
@@ -259,7 +262,7 @@ test('two human accounts complete ranked play with synchronized powers, cups and
 
 test('guest practice, three-power loadout, persisted settings and cosmetic purchases use real services', async ({ page }) => {
   const id = tag();
-  await page.goto('/');
+  await page.goto('/');await enterTitle(page);
   await page.getByRole('button', { name: 'Player account', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await dialog.getByRole('button', { name: 'Play as guest', exact: true }).click();
@@ -304,7 +307,7 @@ test('guest practice, three-power loadout, persisted settings and cosmetic purch
   const inventory = await read(page, '/api/inventory');
   expect(inventory.inventory.some(item => item.cosmeticId === 'title-strategist')).toBe(true);
   expect((await session(page)).coins).toBe(guest.coins - 250);
-  await page.getByRole('button', { name: 'Inventory', exact: true }).click();
+  await page.getByRole('button',{name:'Journey',exact:true}).click();await page.getByRole('button', { name: 'Inventory', exact: true }).click();
   await connected(page);
   const ownedTitle = page.locator('.shop-card').filter({ has: page.getByRole('heading', { name: 'The Strategist', exact: true }) });
   await ownedTitle.getByRole('button', { name: 'Equip cosmetic', exact: true }).click();
@@ -363,7 +366,7 @@ test('friends, daily rewards, private classic play, reconnect, emotes and rematc
     await expect(b.locator('.notification-row').filter({ hasText: userA.name })).toBeVisible();
     await b.getByRole('button', { name: 'Mark all read', exact: true }).click();
     await expect.poll(async () => (await read(b, '/api/notifications')).notifications.every(notification => !!notification.readAt)).toBe(true);
-    await a.getByRole('button', { name: 'Missions & rewards', exact: true }).click();
+    await a.getByRole('button',{name:'Journey',exact:true}).click();await a.getByRole('button', { name: 'Missions & rewards', exact: true }).click();
     const initialCoins = (await session(a)).coins;
     await a.getByRole('button', { name: 'Claim daily reward', exact: true }).click();
     await expect(a.getByRole('button', { name: 'Claimed today', exact: true })).toBeDisabled();
@@ -432,7 +435,7 @@ test('friends, daily rewards, private classic play, reconnect, emotes and rematc
     await a.getByRole('button', { name: `Remove ${userB.name}`, exact: true }).click();
     await expect.poll(async () => (await read(b, '/api/friends')).friends.length).toBe(0);
 
-    await a.getByRole('button', { name: 'Daily puzzle', exact: true }).click();
+    await a.getByRole('button',{name:'Journey',exact:true}).click();await a.getByRole('button', { name: 'Daily puzzle', exact: true }).click();
     const puzzle = a.locator('.puzzle-panel');
     await expect(puzzle.getByRole('button', { name: /^Puzzle row/ })).toHaveCount(9);
     const labels = await puzzle.getByRole('button', { name: /^Puzzle row/ }).evaluateAll(cells => cells.map(cell => cell.getAttribute('aria-label').split(': ')[1]));

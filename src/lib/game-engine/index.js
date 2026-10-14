@@ -1,14 +1,14 @@
 import { POWER_CATALOG, RANKED_POWER_IDS, DEFAULT_LOADOUT, POWER_BY_ID } from './powers.js';
+import { BOARD_SIZES, WIN_LINES, boardSizeOf, getWinningLines, lineCells, completedTriplets, scoresForBoard } from './geometry.js';
 export { POWER_CATALOG, RANKED_POWER_IDS, DEFAULT_LOADOUT };
-
-export const WIN_LINES = Object.freeze([[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]);
+export { BOARD_SIZES, WIN_LINES, boardSizeOf, getWinningLines, completedTriplets, scoresForBoard };
 export const RULESET = Object.freeze({ id: 'ranked-elemental-v2', turnSeconds: 20, maxTurnSeconds: 30, matchBankMs: 120000, maxEnergy: 6, initialEnergy: 3, maxRoundActions: 30, equippedPowers: 3, rounds: 3 });
 
 function fail(code, message) { const error = new Error(message); error.code = code; throw error; }
 const copy = value => structuredClone(value);
 const emptyEffect = () => ({ shield: false, frozenUntil: 0, locked: false, lockedUntil: 0, terrain: null, terrainOwner: null, mirrorUntil: 0, rootUntil: 0, poisonUntil: 0, poisonOwner: null, phantomOwner: null, phantomUntil: 0 });
-const emptyEffects = () => Array.from({ length: 9 }, emptyEffect);
-const validCell = cell => Number.isInteger(cell) && cell >= 0 && cell < 9;
+const emptyEffects = (size = 3) => Array.from({ length: size * size }, emptyEffect);
+const validCell = (state, cell) => Number.isInteger(cell) && cell >= 0 && cell < boardSizeOf(state) ** 2;
 const opponentOf = (state, id) => state.players.find(player => player.id !== id).id;
 const frozen = (state, cell) => (state.effects[cell]?.frozenUntil || 0) > state.turnNumber;
 const locked = (state, cell) => Boolean(state.effects[cell]?.locked);
@@ -17,9 +17,9 @@ const rooted = (state, cell) => (state.effects[cell]?.rootUntil || 0) > state.tu
 const anchored = (state, cell) => frozen(state, cell) || rooted(state, cell) || state.effects[cell]?.shield || mirrored(state, cell);
 const deadlineFor = (state, id, now) => now + Math.min(state.turnSeconds * 1000, state.remainingMs[id]);
 const valuesFor = (players, value) => Object.fromEntries(players.map(player => [player.id, typeof value === 'function' ? value() : value]));
-function assertCell(cell) { if (!validCell(cell)) fail('INVALID_TARGET', 'Choose a cell from 0 to 8.'); }
+function assertCell(state, cell) { if (!validCell(state, cell)) fail('INVALID_TARGET', `Choose a cell from 0 to ${state.board.length - 1}.`); }
 function assertEmpty(state, cell) {
-  assertCell(cell);
+  assertCell(state, cell);
   if (state.board[cell] != null) fail('CELL_OCCUPIED', 'The destination must be empty.');
   if (locked(state, cell)) fail('CELL_LOCKED', 'The destination is temporarily locked.');
 }
@@ -29,8 +29,12 @@ function assertMovable(state, cell) {
   if (state.effects[cell]?.shield || mirrored(state, cell)) fail('CELL_PROTECTED', 'A protected mark cannot move.');
 }
 function normalizeExtraState(state) {
+  state.boardSize ??= boardSizeOf(state);
+  state.scoringMode ??= state.boardSize === 3 ? 'line' : 'triplet-score';
+  state.matchBankMs ??= state.boardSize === 3 ? RULESET.matchBankMs : ({ 4: 240000, 5: 360000, 6: 480000 })[state.boardSize];
+  state.roundScores ??= scoresForBoard(state.board, state.players.map(player => player.id), state.boardSize);
   state.effects = state.effects.map(effect => ({ ...emptyEffect(), ...effect }));
-  state.markOrigins ??= Array(9).fill(null);
+  state.markOrigins ??= Array(state.board.length).fill(null);
   state.restorationCharges ??= valuesFor(state.players, () => []);
   state.matchUses ??= valuesFor(state.players, () => ({}));
   for (const player of state.players) {
@@ -41,12 +45,18 @@ function normalizeExtraState(state) {
   state.turnClockStartedAt ??= state.turnStartedAt;
 }
 
-export function createGame({ mode = 'elemental', players, turnSeconds = 20, now = Date.now(), rounds = 3, maxRoundActions = 30 } = {}) {
+export function createGame({ mode = 'elemental', players, turnSeconds = 20, now = Date.now(), rounds = 3, maxRoundActions, boardSize = 3, scoringMode } = {}) {
   if (!['classic', 'elemental'].includes(mode)) fail('INVALID_MODE', 'Choose classic or elemental rules.');
+  if (!BOARD_SIZES.includes(boardSize)) fail('INVALID_BOARD_SIZE', 'Choose a 3x3, 4x4, 5x5 or 6x6 board.');
+  maxRoundActions ??= boardSize === 3 ? RULESET.maxRoundActions : boardSize ** 2 + (mode === 'classic' ? 0 : 24);
+  scoringMode ??= boardSize === 3 ? 'line' : 'triplet-score';
+  if (scoringMode !== (boardSize === 3 ? 'line' : 'triplet-score')) fail('INVALID_SCORING_MODE', 'Use first-line wins on 3x3 or triplet scoring on larger boards.');
   if (!Array.isArray(players) || players.length !== 2 || players.some(player => !player || typeof player.id !== 'string' || !player.id.trim()) || players[0].id === players[1].id) fail('INVALID_PLAYERS', 'Exactly two different players are required.');
   if (!Number.isFinite(now) || !Number.isFinite(turnSeconds) || turnSeconds < 15 || turnSeconds > 30) fail('INVALID_CLOCK', 'Turn clocks must be between 15 and 30 seconds.');
   if (!Number.isInteger(rounds) || rounds < 1 || rounds > 5 || rounds % 2 !== 1) fail('INVALID_ROUNDS', 'Use an odd round count of one, three, or five.');
-  if (!Number.isInteger(maxRoundActions) || maxRoundActions < 9 || maxRoundActions > 60) fail('INVALID_ACTION_CAP', 'The round action cap must be between 9 and 60.');
+  if (boardSize > 3) rounds = 1;
+  const actionCapLimit = boardSize === 3 ? 60 : 96;
+  if (!Number.isInteger(maxRoundActions) || maxRoundActions < boardSize ** 2 || maxRoundActions > actionCapLimit) fail('INVALID_ACTION_CAP', `The round action cap must be between ${boardSize ** 2} and ${actionCapLimit}.`);
   const assignedPlayers = players.map((player, index) => {
     if (mode !== 'classic' && player.loadout != null && !Array.isArray(player.loadout)) fail('INVALID_LOADOUT', 'Equip exactly three different powers.');
     const loadout = mode === 'classic' ? [] : [...(player.loadout ?? DEFAULT_LOADOUT)];
@@ -54,20 +64,29 @@ export function createGame({ mode = 'elemental', players, turnSeconds = 20, now 
     return { id: player.id, name: String(player.name ?? `Player ${index + 1}`).slice(0, 40), mark: index === 0 ? 'X' : 'O', loadout };
   });
   return {
-    version: 1, ruleset: mode === 'classic' ? 'classic-v1' : RULESET.id, revision: 0, mode, status: 'active',
-    players: assignedPlayers, board: Array(9).fill(null), effects: emptyEffects(), markOrigins: Array(9).fill(null), currentPlayerId: assignedPlayers[0].id,
-    round: 1, maxRounds: rounds, roundWins: valuesFor(assignedPlayers, 0), roundHistory: [], turnNumber: 1, roundTurns: 0,
+    version: 1, ruleset: mode === 'classic' ? 'classic-v1' : RULESET.id, revision: 0, mode, status: 'active', boardSize, scoringMode,
+    players: assignedPlayers, board: Array(boardSize ** 2).fill(null), effects: emptyEffects(boardSize), markOrigins: Array(boardSize ** 2).fill(null), currentPlayerId: assignedPlayers[0].id,
+    round: 1, maxRounds: rounds, roundWins: valuesFor(assignedPlayers, 0), roundScores: valuesFor(assignedPlayers, 0), roundHistory: [], turnNumber: 1, roundTurns: 0,
     energy: valuesFor(assignedPlayers, mode === 'classic' ? 0 : RULESET.initialEnergy),
     uses: valuesFor(assignedPlayers, () => Object.fromEntries(RANKED_POWER_IDS.map(id => [id, 0]))), matchUses: valuesFor(assignedPlayers, () => ({})),
     restorationCharges: valuesFor(assignedPlayers, () => []), powerUses: valuesFor(assignedPlayers, 0),
-    remainingMs: valuesFor(assignedPlayers, RULESET.matchBankMs), turnSeconds, maxRoundActions, turnStartedAt: now, turnClockStartedAt: now, turnDeadline: now + turnSeconds * 1000,
+    matchBankMs: boardSize === 3 ? RULESET.matchBankMs : ({ 4: 240000, 5: 360000, 6: 480000 })[boardSize],
+    remainingMs: valuesFor(assignedPlayers, boardSize === 3 ? RULESET.matchBankMs : ({ 4: 240000, 5: 360000, 6: 480000 })[boardSize]), turnSeconds, maxRoundActions, turnStartedAt: now, turnClockStartedAt: now, turnDeadline: now + turnSeconds * 1000,
     matchWinnerId: null, finishReason: null, winningLines: [], history: [], lastEvent: { type: 'match-started', at: now },
   };
 }
 
 /** Phantom marks live in effects, so they can never enter this real-mark check. */
-export function detectOutcome(board) {
-  const winningLines = WIN_LINES.filter(line => board[line[0]] != null && line.every(cell => board[cell] === board[line[0]]));
+export function detectOutcome(board, options = {}) {
+  const boardSize = options.boardSize ?? boardSizeOf(board);
+  const winningLines = completedTriplets(board, boardSize);
+  if (options.scoringMode === 'triplet-score') {
+    const scores = scoresForBoard(board, options.playerIds, boardSize);
+    const ended = board.every(cell => cell != null);
+    const highest = Math.max(0, ...Object.values(scores));
+    const leaders = Object.keys(scores).filter(id => scores[id] === highest);
+    return { ended, winnerId: ended && leaders.length === 1 ? leaders[0] : null, reason: ended ? 'board-full-score' : null, winningLines, scores };
+  }
   const winners = [...new Set(winningLines.map(line => board[line[0]]))];
   if (winners.length > 1) return { ended: true, winnerId: null, reason: 'simultaneous-lines', winningLines };
   if (winners.length === 1) return { ended: true, winnerId: winners[0], reason: 'line', winningLines };
@@ -82,7 +101,7 @@ function finishMatch(state, winnerId, reason, now) {
 }
 function endRound(state, winnerId, reason, winningLines, now) {
   if (winnerId) state.roundWins[winnerId] += 1;
-  const result = { round: state.round, winnerId, reason, winningLines: copy(winningLines), board: [...state.board], effects: copy(state.effects), actions: state.roundTurns, endedAt: now };
+  const result = { round: state.round, winnerId, reason, winningLines: copy(winningLines), board: [...state.board], effects: copy(state.effects), scores: copy(state.roundScores), boardSize: state.boardSize, scoringMode: state.scoringMode, actions: state.roundTurns, endedAt: now };
   state.roundHistory.push(result); state.winningLines = copy(winningLines);
   state.lastEvent = { ...state.lastEvent, type: 'round-ended', result, at: now };
   const needed = Math.floor(state.maxRounds / 2) + 1;
@@ -91,7 +110,7 @@ function endRound(state, winnerId, reason, winningLines, now) {
     const matchWinner = state.roundWins[one] === state.roundWins[two] ? null : state.roundWins[one] > state.roundWins[two] ? one : two;
     return finishMatch(state, matchWinner, 'rounds-complete', now);
   }
-  state.round += 1; state.board = Array(9).fill(null); state.effects = emptyEffects(); state.markOrigins = Array(9).fill(null); state.roundTurns = 0; state.turnNumber += 1;
+  state.round += 1; state.board = Array(state.boardSize ** 2).fill(null); state.effects = emptyEffects(state.boardSize); state.markOrigins = Array(state.boardSize ** 2).fill(null); state.roundScores = valuesFor(state.players, 0); state.roundTurns = 0; state.turnNumber += 1;
   state.currentPlayerId = state.players[(state.round - 1) % 2].id;
   for (const player of state.players) {
     state.energy[player.id] = state.mode === 'classic' ? 0 : RULESET.initialEnergy;
@@ -140,27 +159,24 @@ function echoSource(state, actor) {
   const chargeIndex = charges.findIndex(charge => charge.origin?.placementRevision === placement.revision);
   return chargeIndex >= 0 ? { cell: placement.action.cell, chargeIndex, placement } : null;
 }
-function lineCells(axis, index) {
-  return axis === 'row' ? [index * 3, index * 3 + 1, index * 3 + 2] : [index, index + 3, index + 6];
-}
 function dragonTarget(state, actor, axis, index) {
-  return lineCells(axis, index).find(cell => state.board[cell] === opponentOf(state, actor) && !frozen(state, cell));
+  return lineCells(boardSizeOf(state), axis, index).find(cell => state.board[cell] === opponentOf(state, actor) && !frozen(state, cell));
 }
 const DIRECTION_OFFSETS = Object.freeze({ up: [-1, 0], down: [1, 0], left: [0, -1], right: [0, 1] });
 function gravityPlan(state, direction) {
-  const [dr, dc] = DIRECTION_OFFSETS[direction]; const board = [...state.board]; const moves = [];
-  const order = Array.from({ length: 9 }, (_, cell) => cell).sort((a, b) => ((Math.floor(b / 3) * dr + (b % 3) * dc) - (Math.floor(a / 3) * dr + (a % 3) * dc)) || a - b);
+  const size = boardSizeOf(state); const [dr, dc] = DIRECTION_OFFSETS[direction]; const board = [...state.board]; const moves = [];
+  const order = Array.from({ length: board.length }, (_, cell) => cell).sort((a, b) => ((Math.floor(b / size) * dr + (b % size) * dc) - (Math.floor(a / size) * dr + (a % size) * dc)) || a - b);
   for (const from of order) {
     if (board[from] == null || anchored(state, from)) continue;
-    const row = Math.floor(from / 3) + dr; const col = from % 3 + dc; if (row < 0 || row > 2 || col < 0 || col > 2) continue;
-    const to = row * 3 + col;
+    const row = Math.floor(from / size) + dr; const col = from % size + dc; if (row < 0 || row >= size || col < 0 || col >= size) continue;
+    const to = row * size + col;
     if (board[to] != null || locked(state, to)) continue;
     board[to] = board[from]; board[from] = null; moves.push({ from, to });
   }
   return moves;
 }
 function expireEffects(state, event) {
-  for (let cell = 0; cell < 9; cell += 1) {
+  for (let cell = 0; cell < state.board.length; cell += 1) {
     const effect = state.effects[cell];
     for (const key of ['frozenUntil', 'rootUntil', 'mirrorUntil']) if (effect[key] && effect[key] <= state.turnNumber) { effect[key] = 0; event.expired.push({ cell, effect: key }); }
     if (effect.locked && effect.lockedUntil <= state.turnNumber) { event.expired.push({ cell, effect: effect.terrain || 'crystal' }); clearTerrain(effect); }
@@ -215,12 +231,12 @@ function validateAction(state, playerId, action, now, checkClock = true) {
     return;
   }
   if (power.id === 'dragon') {
-    if (!['row', 'column'].includes(action.axis) || !Number.isInteger(action.index) || action.index < 0 || action.index > 2) fail('INVALID_LINE', 'Choose a row or column from 0 to 2.');
+    if (!['row', 'column'].includes(action.axis) || !Number.isInteger(action.index) || action.index < 0 || action.index >= boardSizeOf(state)) fail('INVALID_LINE', `Choose a row or column from 0 to ${boardSizeOf(state) - 1}.`);
     if (dragonTarget(state, playerId, action.axis, action.index) == null) fail('INVALID_TARGET', 'That line has no unfrozen enemy mark.');
     return;
   }
   if (['portal', 'wind', 'shadow', 'tide'].includes(power.id)) {
-    assertCell(action.from); assertCell(action.to);
+    assertCell(state, action.from); assertCell(state, action.to);
     if (action.from === action.to) fail('INVALID_TARGET', 'Choose two different cells.');
     if (power.id === 'tide') {
       if (state.board[action.from] != null || !locked(state, action.from) || state.effects[action.from].terrainOwner !== opponentOf(state, playerId)) fail('INVALID_TARGET', 'Redirect an enemy-created empty terrain restriction.');
@@ -233,11 +249,12 @@ function validateAction(state, playerId, action, now, checkClock = true) {
       assertMovable(state, action.to);
     } else {
       assertEmpty(state, action.to);
-      if (power.id === 'wind' && (Math.abs(Math.floor(action.from / 3) - Math.floor(action.to / 3)) !== 1 || Math.abs(action.from % 3 - action.to % 3) !== 1)) fail('INVALID_TARGET', 'Wind Step moves exactly one square diagonally.');
+      const size = boardSizeOf(state);
+      if (power.id === 'wind' && (Math.abs(Math.floor(action.from / size) - Math.floor(action.to / size)) !== 1 || Math.abs(action.from % size - action.to % size) !== 1)) fail('INVALID_TARGET', 'Wind Step moves exactly one square diagonally.');
     }
     return;
   }
-  const cell = action.cell ?? action.target; assertCell(cell);
+  const cell = action.cell ?? action.target; assertCell(state, cell);
   if (['crystal', 'phantom', 'bloom'].includes(power.id)) {
     assertEmpty(state, cell);
     if (power.id === 'phantom' && state.effects[cell].phantomUntil > state.turnNumber) fail('CELL_ILLUSION', 'That cell already has an illusion.');
@@ -263,16 +280,16 @@ function candidateActions(state, playerId) {
     const base = { type: 'power', powerId, revision };
     if (['surge', 'time', 'echo'].includes(powerId)) actions.push(base);
     else if (['portal', 'wind', 'shadow', 'tide'].includes(powerId)) {
-      for (let from = 0; from < 9; from += 1) {
+      for (let from = 0; from < state.board.length; from += 1) {
         if (powerId === 'tide' ? state.board[from] != null || !locked(state, from) : state.board[from] !== playerId) continue;
-        for (let to = 0; to < 9; to += 1) {
+        for (let to = 0; to < state.board.length; to += 1) {
           if (powerId === 'shadow' ? state.board[to] !== opponentOf(state, playerId) : state.board[to] != null) continue;
           actions.push({ ...base, from, to });
         }
       }
     } else if (powerId === 'gravity') for (const direction of Object.keys(DIRECTION_OFFSETS)) actions.push({ ...base, direction });
-    else if (powerId === 'dragon') for (const axis of ['row', 'column']) for (let index = 0; index < 3; index += 1) actions.push({ ...base, axis, index });
-    else for (let cell = 0; cell < 9; cell += 1) actions.push({ ...base, cell });
+    else if (powerId === 'dragon') for (const axis of ['row', 'column']) for (let index = 0; index < boardSizeOf(state); index += 1) actions.push({ ...base, axis, index });
+    else for (let cell = 0; cell < state.board.length; cell += 1) actions.push({ ...base, cell });
   }
   return actions;
 }
@@ -328,7 +345,7 @@ export function applyAction(state, playerId, action, now = Date.now()) {
     else if (power.id === 'crystal') setTerrain(next, cell, 'crystal', playerId, 2);
     else if (power.id === 'surge') next.energy[playerId] = Math.min(RULESET.maxEnergy, next.energy[playerId] + 3);
     else if (power.id === 'time') {
-      next.remainingMs[playerId] = Math.min(RULESET.matchBankMs, next.remainingMs[playerId] + 8000);
+      next.remainingMs[playerId] = Math.min(next.matchBankMs, next.remainingMs[playerId] + 8000);
       next.turnStartedAt = now;
       next.turnDeadline = Math.min(state.turnDeadline + 8000, next.turnClockStartedAt + RULESET.maxTurnSeconds * 1000, now + next.remainingMs[playerId]);
       event.addedTimeMs = next.turnDeadline - state.turnDeadline;
@@ -363,11 +380,23 @@ export function applyAction(state, playerId, action, now = Date.now()) {
     next.roundTurns += 1; next.turnNumber += 1; next.currentPlayerId = opponentOf(next, playerId); next.turnStartedAt = now; next.turnClockStartedAt = now;
     expireEffects(next, event);
   }
+  const previousScores = scoresForBoard(state.board, state.players.map(player => player.id), next.boardSize);
+  next.roundScores = scoresForBoard(next.board, next.players.map(player => player.id), next.boardSize);
+  event.scoreChanges = Object.fromEntries(next.players.map(player => [player.id, next.roundScores[player.id] - previousScores[player.id]]));
+  event.scores = copy(next.roundScores);
   next.lastEvent = event;
   next.history.push({ ...copy(event), round: state.round, turnNumber: state.turnNumber, revision: next.revision });
-  const outcome = detectOutcome(next.board);
+  const outcome = detectOutcome(next.board, { boardSize: next.boardSize, scoringMode: next.scoringMode, playerIds: next.players.map(player => player.id) });
+  next.winningLines = copy(outcome.winningLines);
   if (outcome.ended) return endRound(next, outcome.winnerId, outcome.reason, outcome.winningLines, now);
-  if (next.roundTurns >= next.maxRoundActions) return endRound(next, null, 'action-limit', [], now);
+  if (next.roundTurns >= next.maxRoundActions) {
+    if (next.scoringMode === 'triplet-score') {
+      const [one, two] = next.players.map(player => player.id);
+      const winner = next.roundScores[one] === next.roundScores[two] ? null : next.roundScores[one] > next.roundScores[two] ? one : two;
+      return endRound(next, winner, 'action-limit-score', outcome.winningLines, now);
+    }
+    return endRound(next, null, 'action-limit', [], now);
+  }
   if (consumesTurn) next.turnDeadline = deadlineFor(next, next.currentPlayerId, now);
   return next;
 }
@@ -388,18 +417,21 @@ export function tick(state, now = Date.now()) {
 const AI_LEVELS = ['beginner', 'easy', 'medium', 'hard', 'expert', 'extreme', 'nightmare'];
 function evaluatePosition(state, rootId) {
   const other = opponentOf(state, rootId); let score = 0;
-  for (const line of WIN_LINES) {
+  const size = boardSizeOf(state); const scoring = state.scoringMode === 'triplet-score';
+  for (const line of getWinningLines(size)) {
     const own = line.filter(cell => state.board[cell] === rootId).length;
     const enemy = line.filter(cell => state.board[cell] === other).length;
-    if (!enemy) score += [0, 3, 28, 10000][own];
-    if (!own) score -= [0, 3, 32, 10000][enemy];
+    if (!enemy) score += [0, 3, 28, scoring ? 180 : 10000][own];
+    if (!own) score -= [0, 3, 32, scoring ? 180 : 10000][enemy];
   }
   state.board.forEach((owner, cell) => {
     if (owner == null) return;
     const effect = state.effects[cell];
     const protection = (effect.shield ? 4 : 0) + (mirrored(state, cell) ? 3 : 0) + (frozen(state, cell) ? 2 : 0);
     const curse = effect.poisonUntil > state.turnNumber && !effect.shield ? 8 : 0;
-    score += (owner === rootId ? 1 : -1) * ((cell === 4 ? 4 : cell % 2 === 0 ? 2 : 1) + protection - curse);
+    const row = Math.floor(cell / size); const col = cell % size;
+    const positionWeight = size === 3 ? (cell === 4 ? 4 : cell % 2 === 0 ? 2 : 1) : 1 + Math.min(row, col, size - row - 1, size - col - 1);
+    score += (owner === rootId ? 1 : -1) * (positionWeight + protection - curse);
   });
   if (state.mode !== 'classic') {
     score += (state.energy[rootId] - state.energy[other]) * 0.45;
@@ -436,7 +468,7 @@ export function chooseAIAction(state, difficulty = 'medium', config = {}) {
   const level = Number.isInteger(difficulty) ? Math.max(0, Math.min(6, difficulty - 1)) : Math.max(0, AI_LEVELS.indexOf(String(difficulty).toLowerCase()));
   const rng = config.rng ?? Math.random; const mistakeRate = [0.92, 0.55, 0.14, 0, 0, 0, 0][level];
   if (rng() < mistakeRate) return actions[Math.min(actions.length - 1, Math.floor(Math.max(0, rng()) * actions.length))];
-  if (state.mode === 'classic' && level >= 3) return classicBestAction(state, actions);
+  if (state.mode === 'classic' && boardSizeOf(state) === 3 && level >= 3) return classicBestAction(state, actions);
   const rootId = state.currentPlayerId; const baseRounds = state.roundHistory.length;
   const depthLimit = config.depth ?? [1, 1, 2, 3, 4, 5, 6][level];
   const nodeLimit = config.maxNodes ?? [30, 90, 300, 700, 1400, 2600, 4500][level];
@@ -452,9 +484,41 @@ export function chooseAIAction(state, difficulty = 'medium', config = {}) {
     return null;
   }
   function simulation(position, action) { return applyAction(position, position.currentPlayerId, action, position.turnStartedAt); }
+  // Large boards can expose hundreds of legal transfers. Rank them using a
+  // lightweight projection before copying complete histories for real search.
+  // Every placement is retained; the selected powers still use applyAction.
+  function projectedValue(position, action) {
+    const actor = position.currentPlayerId; const board = [...position.board]; const cell = action.cell ?? action.target;
+    let bonus = 0;
+    if (action.type === 'place') board[cell] = actor;
+    else if (['portal', 'wind'].includes(action.powerId)) { board[action.to] = board[action.from]; board[action.from] = null; }
+    else if (action.powerId === 'shadow') [board[action.from], board[action.to]] = [board[action.to], board[action.from]];
+    else if (action.powerId === 'gravity') for (const move of gravityPlan(position, action.direction)) { board[move.to] = board[move.from]; board[move.from] = null; }
+    else if (action.powerId === 'bloom') board[cell] = actor;
+    else if (action.powerId === 'echo') board[echoSource(position, actor).cell] = actor;
+    else if (['fire', 'lightning', 'meteor', 'eclipse', 'dragon', 'poison'].includes(action.powerId)) {
+      const target = action.powerId === 'dragon' ? dragonTarget(position, actor, action.axis, action.index) : cell;
+      if (!position.effects[target].shield) {
+        const reflectable = !['dragon', 'poison'].includes(action.powerId);
+        if (reflectable && mirrored(position, target)) {
+          const reflection = board.findIndex((owner, index) => owner === actor && !frozen(position, index) && !position.effects[index].shield && !mirrored(position, index));
+          if (reflection >= 0) board[reflection] = null;
+        } else board[target] = null;
+      }
+    } else if (['shield', 'mirror', 'root', 'ice', 'purify'].includes(action.powerId)) bonus = 6;
+    else if (action.powerId === 'surge') bonus = 1;
+    const value = evaluatePosition({ ...position, board }, rootId);
+    return value + (actor === rootId ? bonus : -bonus);
+  }
   function ordered(position, limit = Infinity) {
     const maximize = position.currentPlayerId === rootId;
-    return legalActions(position).map(action => { const child = simulation(position, action); return { action, child, score: terminalValue(child, 0) ?? evaluatePosition(child, rootId) }; }).sort((a, b) => maximize ? b.score - a.score : a.score - b.score).slice(0, limit);
+    let candidates = legalActions(position);
+    if (boardSizeOf(position) > 3 && candidates.length > 96) {
+      const placements = candidates.filter(action => action.type === 'place');
+      const powers = candidates.filter(action => action.type === 'power').map(action => ({ action, value: projectedValue(position, action) })).sort((a, b) => maximize ? b.value - a.value : a.value - b.value).slice(0, 64).map(item => item.action);
+      candidates = [...placements, ...powers];
+    }
+    return candidates.map(action => { const child = simulation(position, action); return { action, child, score: terminalValue(child, 0) ?? evaluatePosition(child, rootId) }; }).sort((a, b) => maximize ? b.score - a.score : a.score - b.score).slice(0, limit);
   }
   function search(position, depth, alpha, beta) {
     const terminal = terminalValue(position, depth); if (terminal != null) return terminal;

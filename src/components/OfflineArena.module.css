@@ -14,7 +14,7 @@
 .options small { color: var(--muted); font-size: 11px; line-height: 1.8; }
 .arena { text-align: center; }
 .turn { font-size: 14px; color: #d6dcf1; min-height: 34px; font-weight: 600; }
-.board { width: min(100%, 380px); margin: 10px auto 24px; }
+.board { width: min(100%, 450px); margin: 10px auto 24px; }
 .winning { border-color: #dfc477 !important; box-shadow: inset 0 0 22px #dfc47715, 0 0 14px #dfc47714 !important; }
 .score { display: flex; justify-content: center; gap: 35px; margin: 24px 0 16px; }
 .score > span { display: grid; grid-template-columns: auto auto; gap: 7px; align-items: center; font-weight: 700; font-size: 17px; }
@@ -22,4 +22,4 @@
 .score > span:first-child svg { color: #a892ff; }
 .score > span:last-child svg { color: #70e3ef; }
 .caption { color: var(--muted); font-size: 11px; display: flex; gap: 7px; align-items: center; justify-content: center; line-height: 1.8; }
-@media (max-width: 760px) { .root { padding: 20px; } .heading { display: block; } .offline { display: inline-block; margin-top: 14px; } .layout { grid-template-columns: 1fr; gap: 24px; } .options { max-width: 450px; } .info { margin: 16px 0; } .board { width: min(100%, 350px); } }
+@media (max-width: 760px) { .root { padding: 16px; } .heading { display: block; } .offline { display: inline-block; margin-top: 14px; } .layout { grid-template-columns: 1fr; gap: 24px; } .options { max-width: 450px; grid-row:2; } .arena{grid-row:1} .info { margin: 16px 0; } .board { width: min(100%, 350px); } }
