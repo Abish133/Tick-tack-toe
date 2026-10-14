@@ -1,16 +1,211 @@
-'use client';
-import CosmeticArt from './CosmeticArt';
-import {useEffect,useState} from 'react';
-import {Check,Sparkles,ArrowRight,LoaderCircle,ShoppingBag} from 'lucide-react';
-import {cosmeticTheme,cosmeticStyle} from '../lib/cosmetic-collection';
-export default function InventoryPanel({api,user,refresh,onError,onNotice,navigate}){
- const [inventory,setInventory]=useState([]),[loading,setLoading]=useState(true),[busy,setBusy]=useState(null),[category,setCategory]=useState('all');
- useEffect(()=>{if(!user){setLoading(false);return;}api('/inventory').then(d=>setInventory(d.inventory||[])).catch(e=>onError(e.message)).finally(()=>setLoading(false));},[user?.id]);
- const fieldFor={board:'equippedBoard',marks:'equippedMark',avatar:'avatar',effect:'equippedEffect',title:'title',frame:'equippedFrame',banner:'equippedBanner',arena:'equippedArena',emote:'equippedEmote'};
- function equipped(item){return item.type==='title'?user?.profile?.title===item.name:user?.profile?.[fieldFor[item.type]]===item.id;}
- async function equip(item){setBusy(item.id);try{await api('/inventory/equip','POST',{cosmeticId:item.id});await refresh();onNotice(`${item.name} equipped. Your gameplay rules stay the same.`);}catch(e){onError(e.message);}finally{setBusy(null);}}
- if(loading)return <div className="loading-state"><LoaderCircle className="spin"/>Opening your collection…</div>;
- if(!user)return <div className="empty"><ShoppingBag size={36}/><h3>A collection that is yours</h3><p>Create a player to view your owned cosmetics.</p></div>;
- const entries=inventory.filter(entry=>entry.cosmetic&&(category==='all'||entry.cosmetic.type===category));
- return <><div className="section-heading"><div><h2>{inventory.length} expressions of you</h2><p>Equip your avatars, boards, marks, arenas, frames, banners, effects, emotes and titles.</p></div><button className="button secondary" onClick={()=>navigate('/shop')}>Visit shop <ArrowRight size={15}/></button></div><div className="collection-inventory-filters" aria-label="Inventory categories">{[['all','All styles'],['avatar','Avatars'],['board','Boards'],['marks','Marks'],['arena','Arenas'],['frame','Frames'],['banner','Banners'],['effect','Effects'],['emote','Emotes'],['title','Titles']].map(([value,label])=><button key={value} className={category===value?'selected':''} aria-pressed={category===value} onClick={()=>setCategory(value)}>{label}</button>)}</div><div className="shop-grid">{entries.map((entry,i)=>{const item=entry.cosmetic;const theme=cosmeticTheme(item.id);return <article key={entry.id||item.id} className={`shop-card panel ${theme?`collection-owned-card collection-theme-${theme.id}`:`theme-${i%4}`}`} style={cosmeticStyle(item.id)}><div className={`shop-art cosmetic-${item.id}`}><span className="shop-orbit"/><CosmeticArt item={item}/></div><div className="shop-info"><span className="badge">{item.type} · {item.rarity}</span><h3>{item.name}</h3><p>{item.description}</p><button className={`button ${equipped(item)?'primary':'secondary'}`} disabled={busy===item.id||equipped(item)} onClick={()=>equip(item)}>{equipped(item)?<><Check size={15}/>Equipped</>:<><Sparkles size={15}/>Equip cosmetic</>}</button></div></article>;})}</div>{!entries.length&&<section className="panel empty"><ShoppingBag size={28}/><h3>No {category==='all'?'cosmetics':category+' styles'} yet</h3><p>Find your next style in The collection.</p><button className="button secondary" onClick={()=>navigate('/shop')}>Browse collection <ArrowRight size={15}/></button></section>}</>;
+"use client";
+import { useEffect, useState } from "react";
+import {
+  Check,
+  Sparkles,
+  ArrowRight,
+  LoaderCircle,
+  ShoppingBag,
+  Eye,
+  Layers3,
+} from "lucide-react";
+import CosmeticArt from "./CosmeticArt";
+import { CosmeticPreview } from "./CosmeticShop";
+import { GameFrame, GameButton, RarityTile } from "./ui";
+import { cosmeticTheme, cosmeticStyle } from "../lib/cosmetic-collection";
+import styles from "./CosmeticShop.module.css";
+
+const categories = [
+  ["all", "All styles"],
+  ["avatar", "Avatars"],
+  ["board", "Boards"],
+  ["marks", "Marks"],
+  ["arena", "Arenas"],
+  ["frame", "Frames"],
+  ["banner", "Banners"],
+  ["effect", "Effects"],
+  ["emote", "Emotes"],
+  ["title", "Titles"],
+];
+const fieldFor = {
+  board: "equippedBoard",
+  marks: "equippedMark",
+  avatar: "avatar",
+  effect: "equippedEffect",
+  title: "title",
+  frame: "equippedFrame",
+  banner: "equippedBanner",
+  arena: "equippedArena",
+  emote: "equippedEmote",
+};
+export default function InventoryPanel({
+  api,
+  user,
+  refresh,
+  onError,
+  onNotice,
+  navigate,
+}) {
+  const [inventory, setInventory] = useState([]),
+    [loading, setLoading] = useState(true),
+    [busy, setBusy] = useState(null),
+    [category, setCategory] = useState("all"),
+    [preview, setPreview] = useState(null);
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    api("/inventory")
+      .then((d) => setInventory(d.inventory || []))
+      .catch((e) => onError(e.message))
+      .finally(() => setLoading(false));
+  }, [user?.id]);
+  function equipped(item) {
+    return item.type === "title"
+      ? user?.profile?.title === item.name
+      : user?.profile?.[fieldFor[item.type]] === item.id;
+  }
+  async function equip(item) {
+    setBusy(item.id);
+    try {
+      await api("/inventory/equip", "POST", { cosmeticId: item.id });
+      await refresh();
+      onNotice(`${item.name} equipped. Your gameplay rules stay the same.`);
+    } catch (e) {
+      onError(e.message);
+    } finally {
+      setBusy(null);
+    }
+  }
+  if (loading)
+    return (
+      <GameFrame className="loading-state">
+        <LoaderCircle className="spin" />
+        Opening your collection…
+      </GameFrame>
+    );
+  if (!user)
+    return (
+      <GameFrame className={styles.empty}>
+        <ShoppingBag size={36} />
+        <h3>A collection that is yours</h3>
+        <p>Create a player to view your owned cosmetics.</p>
+      </GameFrame>
+    );
+  const entries = inventory.filter(
+    (entry) =>
+      entry.cosmetic &&
+      (category === "all" || entry.cosmetic.type === category),
+  );
+  return (
+    <section className={styles.store} aria-label="Owned cosmetic collection">
+      <div className={styles.heading}>
+        <h2>
+          <Layers3 size={22} /> {inventory.length} expressions of you
+        </h2>
+        <GameButton variant="secondary" onClick={() => navigate("/shop")}>
+          Visit shop <ArrowRight size={18} />
+        </GameButton>
+      </div>
+      <div
+        className={`collection-inventory-filters ${styles.categories}`}
+        aria-label="Inventory categories"
+      >
+        {categories.map(([value, label]) => (
+          <button
+            key={value}
+            className={category === value ? `selected ${styles.selected}` : ""}
+            aria-pressed={category === value}
+            onClick={() => setCategory(value)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className={styles.catalogScroll}>
+        <div className={`shop-grid ${styles.grid}`}>
+          {entries.map((entry, i) => {
+            const item = entry.cosmetic,
+              theme = cosmeticTheme(item.id),
+              active = equipped(item);
+            return (
+              <RarityTile
+                as="article"
+                rarity={item.rarity || "rare"}
+                key={entry.id || item.id}
+                className={`shop-card ${styles.card} ${theme ? `collection-owned-card collection-theme-${theme.id}` : `theme-${i % 4}`}`}
+                style={{
+                  ...cosmeticStyle(item.id),
+                  "--collection-color": theme?.primary,
+                }}
+              >
+                <button
+                  className={`shop-art cosmetic-${item.id} ${styles.art}`}
+                  aria-label={`Preview ${item.name}`}
+                  onClick={() => setPreview(item)}
+                >
+                  <span className={styles.artHalo} />
+                  <CosmeticArt item={item} />
+                  <span className={styles.rarity} data-rarity={item.rarity}>
+                    {item.rarity}
+                  </span>
+                  <span className={styles.owned}>
+                    <Check size={14} />
+                    {active ? "Equipped" : "Owned"}
+                  </span>
+                  <span className={styles.previewLabel}>
+                    <Eye size={16} /> Preview
+                  </span>
+                </button>
+                <div className={`shop-info ${styles.info}`}>
+                  <span className={styles.itemType}>{item.type}</span>
+                  <h3>{item.name}</h3>
+                  <GameButton
+                    variant={active ? "primary" : "secondary"}
+                    disabled={busy === item.id || active}
+                    onClick={() => equip(item)}
+                  >
+                    {active ? (
+                      <>
+                        <Check size={18} />
+                        Equipped
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={18} />
+                        Equip cosmetic
+                      </>
+                    )}
+                  </GameButton>
+                </div>
+              </RarityTile>
+            );
+          })}
+        </div>
+        {!entries.length && (
+          <GameFrame className={styles.empty}>
+            <ShoppingBag size={32} />
+            <h3>
+              No {category === "all" ? "cosmetics" : category + " styles"} yet
+            </h3>
+            <p>Find your next style in The collection.</p>
+            <GameButton variant="secondary" onClick={() => navigate("/shop")}>
+              Browse collection <ArrowRight size={18} />
+            </GameButton>
+          </GameFrame>
+        )}
+      </div>
+      {preview && (
+        <CosmeticPreview
+          item={preview}
+          owned
+          busy={busy === preview.id}
+          onEquip={equip}
+          onClose={() => setPreview(null)}
+          user={user}
+        />
+      )}
+    </section>
+  );
 }
