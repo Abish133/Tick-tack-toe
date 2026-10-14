@@ -1,4 +1,5 @@
 .board-size-picker{margin:10px 0 20px;max-width:760px}
+.active-battle-banner{display:flex;align-items:center;gap:14px;padding:18px;margin:0 0 20px;border:1px solid #e4c47780;background:#163047dd;border-radius:3px;color:#f0d397}.active-battle-banner span{flex:1}.active-battle-banner strong,.active-battle-banner small{display:block}.active-battle-banner small{color:#b8ced8;font-size:11px;margin-top:4px}.active-battle-banner .button{flex-shrink:0}@media(max-width:600px){.active-battle-banner{flex-wrap:wrap}.active-battle-banner .button{width:100%}}
 .board-size-picker>div:first-child{display:flex;align-items:center;gap:9px;color:#e1c780;font-size:10px;letter-spacing:2px;font-weight:800;margin-bottom:10px}
 .board-size-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .board-size-options button{min-height:66px;position:relative;background:linear-gradient(160deg,#142738e8,#081622f0);color:#bfcad4;border:1px solid #53687770;border-radius:3px;padding:10px 8px;cursor:pointer;box-shadow:inset 0 1px #c4def511}

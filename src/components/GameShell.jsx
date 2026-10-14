@@ -5,6 +5,7 @@ import {Swords, WandSparkles, ShoppingBag, Users, Trophy, Coins, Mail, Volume2, 
 import styles from './GameShell.module.css';
 
 const secondaryRoutes = [
+  {path:'/notifications',label:'Notifications',hint:'Challenges, rewards and arena notices',icon:Mail},
   {path:'/inventory',label:'Inventory',hint:'Inspect and equip your treasures',icon:Layers3},
   {path:'/season-pass',label:'Season journey',hint:'Follow this season’s reward track',icon:Crown},
   {path:'/missions',label:'Missions & rewards',hint:'Daily rewards and battle objectives',icon:Gift},
@@ -16,6 +17,8 @@ const secondaryRoutes = [
   {path:'/local-play',label:'Local & offline play',hint:'Play together on this device',icon:Layers3},
   {path:'/tutorial',label:'Learn the arena',hint:'Three short interactive lessons',icon:BookOpen},
   {path:'/rules',label:'Arena rules',hint:'The complete power field guide',icon:BookOpen},
+  {path:'/privacy',label:'Privacy',hint:'How your player information is handled',icon:Shield},
+  {path:'/terms',label:'Terms',hint:'Arena playtest information',icon:BookOpen},
 ];
 
 function Resource({value=0,icon:Icon,label,className='',onClick}) {
@@ -29,7 +32,7 @@ function Resource({value=0,icon:Icon,label,className='',onClick}) {
   return <button className={`${styles.resource} ${className} ${delta?styles.resourceChanged:''}`} onClick={onClick} aria-label={`${label}: ${Number(value||0).toLocaleString()}`}><Icon size={17}/><span>{Number(value||0).toLocaleString()}</span>{delta!==0&&<i key={`${value}-${delta}`} className={`${styles.resourceDelta} ${delta<0?styles.loss:''}`} aria-hidden="true">{delta>0?'+':''}{delta}</i>}</button>;
 }
 
-export default function GameShell({children,user,connected,pathname,navigate,settings,onToggleSound,onSettings,onAccount,avatar,rankLabel='Rookie',rankProgress=0,battleActive=false,background='/assets/arena.png'}) {
+export default function GameShell({children,user,connected,pathname,navigate,settings,onToggleSound,onSettings,onAccount,avatar,rankLabel='Rookie',rankProgress=0,battleActive=false,hasActiveMatch=false,background='/assets/arena.png'}) {
   const [journeyOpen,setJourneyOpen]=useState(false);
   const panelRef=useRef(null),triggerRef=useRef(null);
   useEffect(()=>{setJourneyOpen(false);},[pathname]);
@@ -52,7 +55,7 @@ export default function GameShell({children,user,connected,pathname,navigate,set
   },[journeyOpen]);
   const go=path=>{setJourneyOpen(false);navigate(path);};
   const dock=[
-    {path:'/',label:'Arena',title:'Battle',icon:Swords,active:pathname==='/'||pathname==='/battle'},
+    {path:hasActiveMatch?'/battle':'/',label:'Arena',title:'Battle',icon:Swords,active:pathname==='/'||pathname==='/battle'},
     {path:'/powers',label:'Powers & loadout',title:'Armory',icon:WandSparkles,active:pathname==='/powers'},
     {path:'/shop',label:'Cosmetic shop',title:'Collection',icon:ShoppingBag,active:pathname==='/shop'||pathname==='/inventory'},
     {label:'Journey',title:'Journey',icon:Compass,active:secondaryRoutes.some(route=>route.path===pathname)},
