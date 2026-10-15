@@ -14,6 +14,10 @@ async function read(page,route){return page.evaluate(async route=>{const respons
 
 test('earned-coin premium journey unlocks, claims once and equips its actual exclusive frame',async({page})=>{
  test.skip(!fixtureAllowed,'Local fixture test only; E2E_ALLOW_DB_FIXTURES=false disables all coin and XP fixture writes.');
+ // CI runs the purchase/equip collection flows on one shared localhost IP.
+ // Give their proven 240-request/minute window time to reset; keep the real
+ // production limits and every individual claim/equip attempt unchanged.
+ if(process.env.CI)await new Promise(resolve=>setTimeout(resolve,60000));
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  const tag=`${Date.now().toString(36)}${Math.random().toString(36).slice(2,5)}`;
  await page.goto('/');await enterTitle(page);await page.getByRole('button',{name:'Player account',exact:true}).click();
@@ -54,7 +58,8 @@ test('earned-coin premium journey unlocks, claims once and equips its actual exc
  await premiumTab.click();await expect(freeTrack).toHaveCount(0);await expect(reward.getByRole('button',{name:'Claimed',exact:true})).toBeDisabled();
  await page.goto('/inventory');
  const item=page.locator('.shop-card').filter({has:page.getByRole('heading',{name:'Eclipse Halo',exact:true})});
- await item.getByRole('button',{name:'Equip cosmetic',exact:true}).click();await expect(item.getByRole('button',{name:'Equipped',exact:true})).toBeDisabled();
+ const equipResponse=page.waitForResponse(response=>response.url().endsWith('/api/inventory/equip')&&response.request().method()==='POST');
+ await item.getByRole('button',{name:'Equip cosmetic',exact:true}).click();expect((await equipResponse).status(),'The owned frame equip request must succeed').toBe(200);await expect(item.getByRole('button',{name:'Equipped',exact:true})).toBeDisabled();
  await expect(page.locator('.app-shell')).toHaveClass(/frame-eclipse/);
  await expect(page.locator('[aria-label="Player account"] .avatar')).toHaveCSS('border-top-color','rgb(213, 181, 242)');
  expect((await read(page,'/api/auth/session')).user.profile.equippedFrame).toBe('frame-eclipse');
