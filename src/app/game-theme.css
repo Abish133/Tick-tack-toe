@@ -8,7 +8,7 @@
   --rarity-common:#849ab3; --rarity-rare:#54b8ff; --rarity-epic:#b78bff; --rarity-legendary:#f2c86b;
   --element-fire:#ff9061; --element-ice:#8ce8ff; --element-lightning:#e2cbff; --element-nature:#85e3ad; --element-void:#b19aff;
   --font-body:var(--font-inter,Arial,sans-serif); --font-ui:var(--font-rajdhani,Arial,sans-serif); --font-display:var(--font-cinzel,Georgia,serif);
-  --hud-height:80px; --dock-height:76px; --screen-gap:20px;
+  --hud-height:72px; --dock-height:64px; --screen-gap:16px;
 }
 html,body{height:100%;overflow:hidden;background:var(--void);font-family:var(--font-body);font-size:14px}
 button,input,textarea{font:inherit}button{min-height:48px}button:disabled{cursor:not-allowed}
@@ -35,3 +35,37 @@ input:not([type=range]):not([type=checkbox]),textarea{min-height:48px;border:2px
 @media(max-width:600px){.legacy-modal>header h2{font-size:20px}.legacy-modal:has(.queue-heading) .queue-heading{font-size:21px}.legacy-modal:has(.queue-heading) .queue-visual{width:120px;height:120px}.legacy-modal:has(.queue-heading)>div{padding:14px}.legacy-modal .board-size-picker .battlefield-info{min-height:48px}.legacy-modal p{font-size:12px}}
 .content:is(.route--profile,.route--season-pass,.route--missions,.route--history,.route--friends,.route--achievements,.route--notifications,.route--tutorial,.route--local-play,.route--daily-puzzle),.content[class*='route--players-']{display:flex;flex-direction:column;overflow:hidden}.content:is(.route--profile,.route--season-pass,.route--missions,.route--history,.route--friends,.route--achievements,.route--notifications,.route--tutorial,.route--local-play,.route--daily-puzzle)>:not(.screen-heading):not([class*='backdrop']),.content[class*='route--players-']>:not(.screen-heading):not([class*='backdrop']){flex:1;min-height:0}.screen-heading{position:relative;z-index:2}.screen-heading>h1{min-width:0}.screen-heading .help-info{flex-shrink:0}.content.route--powers .screen-heading .button{white-space:nowrap}
 .screen-action-copy{display:inline-flex;align-items:center;justify-content:center;gap:8px}.screen-action-glyph{display:none}@media(max-width:600px){.screen-heading h1{font-size:18px;overflow-wrap:anywhere;line-height:1.25}.screen-heading .screen-action{width:48px;min-width:48px;height:48px;padding:0;font-size:14px}.screen-action-copy{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.screen-action-glyph{display:flex;align-items:center;justify-content:center}.screen-action-glyph svg{width:22px;height:22px}}
+
+/* Compact presentation: reduce visual bulk without scaling touch targets. */
+h1{font-size:clamp(20px,2.2vw,28px)}h2{font-size:22px}h3{font-size:16px}
+.screen-heading{gap:12px;padding-block:4px 10px}
+.button{padding:8px 14px;font-size:15px;border-radius:8px}
+.armory-tabs{gap:6px;margin-bottom:6px}
+.board-size-picker{margin-bottom:4px}
+@media(max-width:600px){
+  :root{--hud-height:58px;--dock-height:56px;--screen-gap:8px}
+  h1,h2{font-size:18px}h3{font-size:15px}
+  .screen-heading{gap:6px;padding-block:2px 6px}
+  .screen-heading h1{font-size:16px;letter-spacing:.6px}
+  .screen-action-glyph svg{width:18px;height:18px}
+  .button{padding:6px 10px;font-size:13px;border-width:1px}
+  .text-button,.hero-rules{font-size:13px}
+  input:not([type=range]):not([type=checkbox]),textarea{padding:8px 10px;font-size:13px}
+  .modal-backdrop{padding:8px}
+  .modal{max-height:calc(100dvh - 16px);padding:16px 12px}
+  .modal h2,.legacy-modal>header h2{font-size:18px}
+  .modal .button{font-size:13px}
+  .board-size-picker>div:first-child{margin-bottom:6px;letter-spacing:.6px}
+  .board-size-options{gap:5px}
+  .board-size-options button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:4px;border-width:1px;border-radius:8px}
+  .board-size-options button>span{font-size:16px}
+  .board-mini{width:18px;height:18px;margin:0}
+  .battlefield-info{gap:4px}
+  .battlefield-info>button{border-color:#a3865455}
+  .battlefield-info>button svg{width:16px;height:16px}
+  .auth-tabs button,.segmented button,.difficulty-grid button{font-size:13px}
+  .queue-time,.legacy-modal:has(.queue-heading) .queue-time{font-size:38px}
+  .legacy-modal:has(.queue-heading) .queue-heading{font-size:18px}
+  .legacy-modal:has(.queue-heading) .queue-visual{width:96px;height:96px}
+  .legacy-modal:has(.queue-heading) .queue-player{margin:10px}
+}

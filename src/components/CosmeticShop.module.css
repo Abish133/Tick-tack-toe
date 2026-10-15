@@ -246,7 +246,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)) !important;
-  gap: 18px !important;
+  gap: 14px !important;
 }
 .card {
   overflow: hidden !important;
@@ -259,7 +259,7 @@
   position: relative;
 }
 .art {
-  height: 215px !important;
+  height: 185px !important;
   min-height: 0 !important;
   width: 100%;
   border: 0;
@@ -664,7 +664,7 @@
 @media (max-width: 800px) {
   .tools {
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
   }
   .search {
     flex-basis: 100%;
@@ -674,6 +674,8 @@
     max-width: none;
     min-width: 0;
     font-size: 12px;
+    padding: 6px 10px;
+    gap: 6px;
   }
   .heroCopy {
     padding: 20px;
@@ -702,18 +704,53 @@
   }
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 12px !important;
+    gap: 8px !important;
   }
   .art {
-    height: 168px !important;
+    height: 128px !important;
+  }
+  .art :global(.collection-portrait-art),
+  .art :global(.collection-effect-art) {
+    min-height: 0;
+  }
+  .art :global(.collection-frame-art) {
+    width: 88px;
+    height: 88px;
+  }
+  .art :global(.collection-title-art) {
+    padding: 8px;
+    gap: 4px;
+  }
+  .art :global(.collection-title-art > svg) {
+    width: 30px;
+    height: 30px;
+  }
+  .art :global(.collection-title-art strong) {
+    font-size: 14px;
+  }
+  .art :global(.collection-banner-art) {
+    padding: 10px;
+    gap: 6px;
+  }
+  .art :global(.collection-banner-crest) {
+    width: 32px;
+    height: 32px;
+  }
+  .art :global(.collection-banner-crest > svg) {
+    width: 24px;
+    height: 24px;
+  }
+  .art :global(.collection-banner-copy strong) {
+    font-size: 12px;
   }
   .info {
-    padding: 12px 9px !important;
-    gap: 8px;
+    padding: 8px !important;
+    gap: 5px;
   }
   .info h3 {
-    font-size: 16px !important;
-    min-height: 40px;
+    font-size: 14px !important;
+    min-height: 35px;
+    margin-bottom: 0 !important;
   }
   .info button {
     font-size: 14px !important;
@@ -750,30 +787,62 @@
   .heading {
     align-items: flex-start;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
+    margin: 16px 0 8px;
   }
   .heading h2 {
-    font-size: 22px;
+    font-size: 18px;
   }
   .results {
     font-size: 12px;
+    margin: 8px 0;
   }
   .categories button {
-    font-size: 14px;
-    padding: 8px 12px;
+    font-size: 12px;
+    padding: 6px 10px;
+    gap: 5px;
+  }
+  .categories {
+    gap: 5px;
+    padding-bottom: 4px;
+    min-height: 52px;
   }
   .catalogScroll {
     padding: 3px 2px 20px;
   }
   .previewStage {
-    height: 260px;
+    min-height: 180px;
+    height: 210px;
   }
   .previewStage :global(.collection-portrait-art .collection-portrait) {
-    width: 235px;
-    height: 235px;
+    width: 195px;
+    height: 195px;
+  }
+  .previewStage :global(.collection-frame-art) {
+    width: 150px;
+    height: 150px;
+  }
+  .previewStage :global(.collection-effect-art > span) {
+    width: 170px;
+    height: 170px;
+  }
+  .previewStage :global(.collection-title-art strong) {
+    font-size: 20px;
+  }
+  .previewBoard {
+    width: min(190px, 90%);
+    height: 190px;
+    padding: 10px !important;
+    gap: 6px !important;
+  }
+  .themeName {
+    margin: 10px 0 6px;
+    font-size: 13px;
   }
   .previewActions {
     flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 12px;
   }
   .previewActions button {
     flex: 1;
@@ -790,13 +859,16 @@
     flex: none;
   }
   .store {
-    gap: 8px;
+    gap: 6px;
   }
   .previewRarity {
     font-size: 12px;
+    margin-bottom: 10px;
   }
   .previewDescription {
     font-size: 13px;
+    line-height: 1.5;
+    margin: 8px 0 12px;
   }
   .previewClose {
     right: 65px;
@@ -844,12 +916,12 @@
   font-size: 12px !important;
 }
 .art :global(.collection-title-art strong) {
-  font-size: 20px;
+  font-size: clamp(14px, 1.6vw, 20px);
   line-height: 1.2;
   max-width: 100%;
 }
 .art :global(.collection-banner-copy strong) {
-  font-size: 16px;
+  font-size: clamp(12px, 1.3vw, 16px);
   line-height: 1.2;
 }
 .previewStage :global(.collection-landscape-label) {
@@ -915,16 +987,16 @@
 }
 @media (max-width: 800px) {
   .hero {
-    min-height: 120px;
-    margin-bottom: 14px;
+    min-height: 104px;
+    margin-bottom: 10px;
   }
   .heroCopy {
     width: 100%;
-    padding: 15px;
+    padding: 10px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 8px 10px;
+    gap: 6px 8px;
   }
   .heroCopy .offerRibbon {
     display: none;
@@ -932,7 +1004,7 @@
   .heroCopy h2 {
     grid-column: 1/-1;
     margin: 0;
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1.2;
     letter-spacing: 0;
     text-align: left;
@@ -973,8 +1045,8 @@
 }
 @media (max-width: 380px) {
   .heroCopy {
-    padding: 12px;
-    gap: 8px;
+    padding: 9px;
+    gap: 6px;
   }
   .heroCopy p {
     font-size: 12px;

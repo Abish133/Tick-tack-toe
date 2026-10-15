@@ -3,22 +3,22 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  gap: 12px;
+  padding: 12px;
+  gap: 8px;
   overflow: hidden;
   background: linear-gradient(135deg, #263950d9, #102035e8);
 }
 .heading {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 9px;
   flex-shrink: 0;
 }
 .mode {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
+  font-size: 14px;
   color: #e5c984;
   font-weight: 700;
   letter-spacing: 0.8px;
@@ -41,18 +41,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   overflow: hidden;
 }
 .turn {
   font-family: var(--font-ui);
-  font-size: 23px;
+  font-size: 20px;
   font-weight: 700;
   text-shadow: 0 2px #0008;
   text-align: center;
   color: #f3e4bd;
   flex-shrink: 0;
-  min-height: 34px;
+  min-height: 29px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,12 +65,12 @@
   overflow: auto;
   display: grid;
   place-items: center;
-  padding: 5px 8px 10px;
+  padding: 3px 6px 8px;
   overscroll-behavior: contain;
   scrollbar-width: thin;
 }
 .board {
-  width: min(100%, 440px, calc(100dvh - 380px));
+  width: min(100%, 380px, calc(100dvh - 340px));
   min-width: calc(
     var(--board-size) * 48px + (var(--board-size) - 1) * 4px + 24px
   );
@@ -127,14 +127,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 30px;
+  gap: 22px;
   flex-shrink: 0;
   width: 100%;
   padding-top: 5px;
 }
 .score {
   display: flex;
-  gap: 24px;
+  gap: 18px;
   align-items: center;
 }
 .score > span {
@@ -144,7 +144,7 @@
   gap: 4px 6px;
   color: #f2d895;
   font-family: var(--font-ui);
-  font-size: 24px;
+  font-size: 21px;
   font-weight: 700;
 }
 .score small {
@@ -163,7 +163,7 @@
 }
 .lineScore {
   display: flex;
-  gap: 20px;
+  gap: 15px;
   align-items: center;
   flex-shrink: 0;
 }
@@ -175,7 +175,7 @@
   color: #c8d9eb;
 }
 .lineScore strong {
-  font-size: 27px;
+  font-size: 23px;
   color: #f2d78e;
   font-family: var(--font-ui);
   font-weight: 800;
@@ -188,7 +188,7 @@
 }
 .options {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 .options p,
 .info p,
@@ -200,7 +200,7 @@
 }
 .info {
   display: grid;
-  gap: 15px;
+  gap: 11px;
   justify-items: center;
 }
 .info > svg {
@@ -209,7 +209,7 @@
 .confirmActions {
   display: flex;
   gap: 12px;
-  margin-top: 20px;
+  margin-top: 14px;
 }
 .error {
   font-size: 14px;
@@ -223,8 +223,8 @@
 }
 @media (max-width: 760px) {
   .root {
-    padding: 10px;
-    gap: 8px;
+    padding: 7px;
+    gap: 6px;
   }
   .heading {
     gap: 8px;
@@ -246,19 +246,19 @@
     padding-inline: 10px;
   }
   .turn {
-    font-size: 19px;
-    min-height: 29px;
+    font-size: 17px;
+    min-height: 25px;
   }
   .boardStage {
     padding-inline: 0;
   }
   .board {
-    width: min(100%, 370px, calc(100dvh - 340px));
+    width: min(100%, 310px, calc(100dvh - 310px));
     border-radius: 12px !important;
     transform: none;
   }
   .bottom {
-    gap: 12px;
+    gap: 8px;
     flex-direction: column;
     padding-top: 0;
   }
@@ -267,22 +267,22 @@
     max-width: 360px;
   }
   .score {
-    gap: 30px;
+    gap: 22px;
   }
   .score > span {
-    font-size: 22px;
+    font-size: 20px;
   }
   .arena {
-    gap: 7px;
+    gap: 5px;
   }
   .confirmActions {
     flex-direction: column;
   }
   .lineScore {
-    gap: 18px;
+    gap: 14px;
   }
   .lineScore strong {
-    font-size: 23px;
+    font-size: 21px;
   }
 }
 @media (max-height: 760px) and (max-width: 760px) {
@@ -290,7 +290,7 @@
     display: none;
   }
   .root {
-    padding: 8px;
+    padding: 6px;
   }
   .heading {
     gap: 6px;
@@ -329,15 +329,15 @@
 
 @supports (width: 1cqh) {
   .board {
-    width: min(100cqw, calc(100cqh - 10px), 440px);
+    width: min(100cqw, calc(100cqh - 8px), 380px);
   }
 }
 @media (min-width: 761px) {
   .arena {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 240px;
+    grid-template-columns: minmax(0, 1fr) 210px;
     grid-template-rows: auto auto minmax(0, 1fr) auto;
-    gap: 14px 24px;
+    gap: 10px 18px;
     align-items: center;
   }
   .boardStage {
@@ -359,14 +359,14 @@
     grid-column: 2;
     grid-row: 3;
     flex-direction: column;
-    gap: 24px;
+    gap: 18px;
     padding: 0;
   }
   .bottom > button {
     width: 100%;
   }
   .score {
-    gap: 20px;
+    gap: 16px;
   }
   .error {
     grid-column: 2;
@@ -417,4 +417,7 @@
   .root[data-board-size="6"] .boardStage {
     padding-block: 0;
   }
+}
+@media (max-width: 760px) {
+  .board { width: min(100cqw, calc(100cqh - 8px), 310px); }
 }

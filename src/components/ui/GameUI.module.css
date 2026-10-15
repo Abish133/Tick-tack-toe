@@ -5,3 +5,27 @@
 @media(prefers-reduced-motion:reduce){.button,.button:before,.progress>span,.radial circle,.toggle>span{transition:none}.legendary:after{animation:none}.button:active{transform:none}}
 :global(.reduce-motion) .legendary:after{animation:none}:global(.reduce-motion) .button:before{transition:none}:global(.high-contrast) .frame{background:#050c17;border-color:#fff1b1}:global(.high-contrast) .setting small{color:white}
 .corner{position:absolute;width:24px;height:24px;fill:none;stroke:var(--gold-light);stroke-width:1;pointer-events:none;opacity:.52;z-index:1}.northwest{top:5px;left:5px}.northeast{top:5px;right:5px;transform:rotate(90deg)}.southeast{bottom:5px;right:5px;transform:rotate(180deg)}.southwest{bottom:5px;left:5px;transform:rotate(270deg)}
+
+.button{padding:8px 16px;font-size:15px}.button>span{gap:6px}.lg{min-height:56px;font-size:21px;padding-inline:26px}
+.modalHeader,.modalBody{padding:16px}.modalHeader h2{font-size:22px}
+@media(max-width:600px){
+  .frame,.rarityTile{border-radius:9px}.card{border-width:2px}.corner{width:18px;height:18px;opacity:.4}
+  .button{font-size:13px;padding:6px 10px;border-width:1px;border-radius:8px}
+  .button svg{width:18px;height:18px}.icon{padding:0}
+  .lg{min-height:52px;font-size:18px;padding-inline:20px}.sm{font-size:12px;padding-inline:8px}
+  .banner{padding:10px 14px;letter-spacing:1px}
+  .tabs{gap:4px;padding-block:2px 5px}
+  .tabs>button{font-size:13px;padding:6px 10px;border-radius:7px;gap:5px}
+  .tabs>button svg{width:17px;height:17px}
+  .backdrop{padding:8px}.modal{max-height:calc(100dvh - 16px)}
+  .modalHeader,.modalBody{padding:10px}.modalHeader{gap:8px}.modalHeader h2{font-size:17px;line-height:1.3}.modalHeader p{margin-top:4px}
+  .fullBackdrop{padding:0}.fullScreen{max-height:100dvh}
+  .setting{gap:10px;padding-block:8px}.setting strong{font-size:15px}.setting small{font-size:12px}
+  .toggle{position:relative;min-width:56px;display:flex;align-items:center;padding:6px;border:0;background:transparent;box-shadow:none}
+  .toggle:before{content:'';position:absolute;inset:9px 0;border:1px solid #63788d;border-radius:20px;background:#132437;box-shadow:inset 0 2px #0005}
+  .toggle>span{position:relative;width:24px;height:24px;z-index:1}
+  .toggle.on:before{border-color:#f2c86b;background:#635127}.toggle.on>span{transform:translateX(18px)}
+  .slider{gap:3px;padding-block:8px;font-size:15px}
+  .selectLabel{font-size:12px;margin-bottom:3px}.select>button{font-size:13px;padding:6px 10px;border-width:1px}.selectList>button{font-size:13px;padding:6px 10px}
+  .toast{padding:8px 12px;font-size:12px;gap:8px;bottom:calc(var(--dock-height) + env(safe-area-inset-bottom) + 8px)}
+}

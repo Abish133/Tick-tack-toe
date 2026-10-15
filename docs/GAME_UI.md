@@ -1,5 +1,13 @@
 # Elemental Arena game UI
 
+## Compact density update — 15 October 2026
+
+The compact pass changes CSS presentation only. On phones the HUD is 58px (previously 66px), the dock is 56px (previously 64px), the battlefield controls are 48px (previously 70px) and the main Battle button is 56px. Guardian artwork is capped at 200px. Cards, portraits, offer banners, tabs, dialogs and internal panel spacing are smaller throughout Armory, Collection, battle, progression, profiles, social screens and training. Desktop framing is slightly tighter too.
+
+Interactive targets retain a 48px minimum and visible text stays at least 12px. Board cells remain usable; measured 6×6 battle cells exceed 50px on both 360px and 390px phones. No page zoom, transform-based screen scaling or gameplay/data changes are used. Smaller artwork and padding create the denser layout.
+
+The production build passed. All nine targeted browser flows passed, including real cosmetic purchases/equipping and all 22 powers, plus an actual 6×6 battle, emotes, drawers and surrender. A separate check covered eight core screens at six viewport sizes (48 combinations) with no body/horizontal overflow, undersized visible text or browser errors. The normal GitHub release gate reruns the full backend and browser suites before automatic deployment. Current compact captures and measurements are in [screenshots/compact-ui](screenshots/compact-ui/README.md) and [compact-ui-verification.json](compact-ui-verification.json).
+
 The October 2026 presentation refresh turns the existing application into a screen-based game interface. It does not add or rebalance game mechanics. All 22 powers, three equipped slots, 3×3–6×6 rules, ranked matchmaking, rewards, cosmetic ownership and payment validation continue to use the existing engine and services. Food, health, morale, survival events and other examples in the visual references are not game mechanics.
 
 ## Screen layout and navigation

@@ -3,7 +3,7 @@
   flex-direction: column;
   min-height: 0;
   height: 100%;
-  padding: 20px;
+  padding: 16px;
   overflow: hidden;
   background:
     radial-gradient(ellipse at 10% 50%, #35244377, transparent 60%), #0c1627d9;
@@ -42,8 +42,8 @@
 .layout {
   display: grid;
   grid-template-columns: minmax(220px, 0.9fr) minmax(300px, 1.2fr);
-  gap: 24px;
-  padding-top: 18px;
+  gap: 18px;
+  padding-top: 14px;
   min-height: 0;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -186,47 +186,86 @@
 @media (max-width: 800px) {
   .layout {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 12px;
   }
   .header {
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 10px;
+  }
+  .header > div {
+    min-width: 0;
   }
   .header > button {
-    width: 100%;
+    width: 42%;
+    min-width: 0;
+    max-width: 175px;
+    flex: none;
+    font-size: 12px;
+    padding: 8px;
+    gap: 5px;
+    white-space: normal;
   }
   .details > svg {
     display: none;
   }
   .details h3 {
-    font-size: 20px;
+    font-size: 18px;
+    margin: 8px 0;
   }
   .details > small {
     font-size: 12px;
   }
   .details h4 {
-    margin-top: 14px;
+    margin-top: 12px;
+    font-size: 13px;
   }
   .root {
-    padding: 14px;
+    padding: 10px;
   }
   .header h2 {
-    font-size: 20px;
+    font-size: 18px;
+    margin: 5px 0;
   }
   .header p {
     font-size: 12px;
   }
   .layout {
-    padding-top: 14px;
+    padding-top: 10px;
   }
   .details p,
   .hint {
     font-size: 13px;
+    line-height: 1.5;
+  }
+  .details p {
+    margin: 8px 0;
   }
   .details > span {
     font-size: 12px;
   }
-  .arena :global(.game-board) {
-    width: min(100%, 295px);
+  .details :global(.text-button) {
+    margin-top: 8px;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  .details > small {
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  .hint {
+    margin-bottom: 8px;
+  }
+  .resources {
+    gap: 10px;
+    margin-top: 12px;
+    font-size: 12px;
+  }
+  .resources strong {
+    font-size: 17px;
+  }
+  .cast {
+    margin: 14px auto 8px;
   }
   .picker {
     grid-template-columns: 1fr;
@@ -256,6 +295,6 @@
 }
 @media (max-width: 800px) {
   .arena :global(.game-board) {
-    width: min(100%, 295px, max(188px, calc(100cqh - 14px)));
+    width: min(100%, 260px, max(188px, calc(100cqh - 14px)));
   }
 }

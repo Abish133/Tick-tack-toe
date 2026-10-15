@@ -76,7 +76,7 @@
 .podium {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  gap: 14px;
   padding-top: 8px;
   align-items: end;
   flex-shrink: 0;
@@ -148,13 +148,13 @@
   cursor: pointer;
 }
 .compactPlayer .avatar {
-  width: 86px;
-  height: 86px;
+  width: 74px;
+  height: 74px;
   border: 3px solid #aab8d2;
 }
 .champion .compactPlayer .avatar {
-  width: 100px;
-  height: 100px;
+  width: 86px;
+  height: 86px;
   border-color: #f9d67c;
   box-shadow: 0 0 18px #e7b44c44;
 }
@@ -228,14 +228,14 @@
   grid-template-columns: 44px minmax(0, 1fr) 115px 85px 70px;
   gap: 12px;
   align-items: center;
-  padding: 10px 15px;
+  padding: 8px 13px;
   border: 2px solid #5c6c82;
   border-radius: 8px;
   background: linear-gradient(110deg, #2c3f55, #152336);
   box-shadow:
     inset 0 1px #ffffff22,
     0 3px #060c17;
-  min-height: 80px;
+  min-height: 70px;
   flex-shrink: 0;
 }
 .row.isYou {
@@ -450,34 +450,34 @@
     font-size: 12px;
   }
   .podium {
-    gap: 7px;
-    padding-top: 4px;
+    gap: 6px;
+    padding-top: 2px;
   }
   .podiumCard {
-    padding: 8px 5px 10px;
+    padding: 6px 4px 8px;
   }
   .podiumCard.champion {
-    padding-top: 12px;
+    padding-top: 9px;
   }
   .podiumRank {
     font-size: 14px;
     gap: 4px;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
   .podiumRank svg {
     width: 20px;
     height: 20px;
   }
   .compactPlayer {
-    gap: 5px;
+    gap: 4px;
   }
   .compactPlayer .avatar {
-    width: 53px;
-    height: 53px;
+    width: 44px;
+    height: 44px;
   }
   .champion .compactPlayer .avatar {
-    width: 66px;
-    height: 66px;
+    width: 54px;
+    height: 54px;
   }
   .compactPlayer strong {
     font-size: 14px;
@@ -487,11 +487,11 @@
     line-height: 1.2;
   }
   .podiumScore {
-    font-size: 23px;
-    margin-top: 6px;
+    font-size: 20px;
+    margin-top: 4px;
   }
   .champion .podiumScore {
-    font-size: 25px;
+    font-size: 22px;
   }
   .metricName {
     font-size: 12px;
@@ -501,31 +501,31 @@
     display: none;
   }
   .row {
-    grid-template-columns: 30px minmax(0, 1fr) 65px;
-    gap: 8px;
-    padding: 9px 10px;
-    min-height: 76px;
+    grid-template-columns: 26px minmax(0, 1fr) 61px;
+    gap: 7px;
+    padding: 7px 8px;
+    min-height: 66px;
   }
   .position {
-    width: 29px;
-    height: 37px;
-    font-size: 16px;
+    width: 25px;
+    height: 32px;
+    font-size: 15px;
   }
   .player {
-    gap: 8px;
+    gap: 7px;
   }
   .player strong {
-    font-size: 15px;
+    font-size: 14px;
   }
   .player small {
     font-size: 12px;
   }
   .avatar {
-    width: 43px;
-    height: 43px;
+    width: 37px;
+    height: 37px;
   }
   .score {
-    font-size: 19px;
+    font-size: 17px;
     gap: 4px;
   }
   .score svg {
@@ -544,7 +544,7 @@
     padding: 8px;
   }
   .filterRow {
-    gap: 8px;
+    gap: 6px;
   }
   .filterRow label {
     font-size: 12px;
@@ -615,7 +615,7 @@
   }
   .podiumScore,
   .champion .podiumScore {
-    font-size: 23px;
+    font-size: 20px;
     line-height: 1;
     margin: 5px 0 0;
   }

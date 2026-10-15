@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  gap: 12px;
+  gap: 10px;
   flex: 1;
   height: 100%;
   color: var(--text, #f8ecd0);
@@ -192,7 +192,7 @@
 }
 .grid {
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
-  gap: 16px !important;
+  gap: 12px !important;
   overflow-y: auto;
   min-height: 0;
   padding: 4px 6px 18px;
@@ -213,7 +213,7 @@
   isolation: isolate;
   padding: 20px 10px 12px !important;
   aspect-ratio: 3/4;
-  min-height: 250px;
+  min-height: 225px;
   border: 2px solid color-mix(in srgb, var(--power-color) 70%, #24324b);
   border-radius: 12px 12px 0 0;
   background:
@@ -294,8 +294,8 @@
   color: #f2c86b;
 }
 .art {
-  height: 98px;
-  width: 98px;
+  height: 86px;
+  width: 86px;
   display: grid;
   place-items: center;
   position: relative;
@@ -310,8 +310,8 @@
   z-index: 1;
 }
 .art :global(.sprite) {
-  width: 94px;
-  height: 94px;
+  width: 82px;
+  height: 82px;
 }
 .orbit {
   position: absolute;
@@ -456,25 +456,38 @@
 }
 @media (max-width: 780px) {
   .filters {
-    flex-direction: column;
+    flex-direction: row;
     align-items: stretch;
     gap: 6px;
   }
   .filters > label {
-    max-width: none;
+    flex: 0 0 42%;
+    max-width: 160px;
     min-width: 0;
+    gap: 6px;
+    padding: 0 8px;
+  }
+  .filters input {
+    font-size: 13px;
   }
   .families {
-    flex: none;
+    flex: 1;
+    padding: 0 0 4px;
+    gap: 4px;
+  }
+  .families button {
+    font-size: 12px;
+    padding: 6px 9px;
+    gap: 4px;
   }
   .slots {
-    gap: 8px;
+    gap: 6px;
   }
   .slotChoice {
     flex-direction: column;
-    gap: 5px;
-    min-height: 118px;
-    padding: 12px 7px;
+    gap: 3px;
+    min-height: 88px;
+    padding: 8px 5px;
   }
   .slotChoice strong {
     font-size: 13px;
@@ -482,7 +495,7 @@
     max-width: 100%;
   }
   .slotChoice > span:last-child {
-    font-size: 13px;
+    font-size: 12px;
   }
   .remove {
     width: 48px;
@@ -490,17 +503,9 @@
     top: -2px;
     right: -2px;
   }
-  .smallArt {
-    width: 42px;
-    height: 42px;
-  }
-  .smallArt :global(.sprite) {
-    width: 42px;
-    height: 42px;
-  }
   .summary {
-    padding: 12px !important;
-    gap: 10px !important;
+    padding: 8px !important;
+    gap: 6px !important;
   }
   .summaryTitle {
     font-size: 14px;
@@ -516,48 +521,78 @@
   }
   .grid {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
-    gap: 12px !important;
+    gap: 8px !important;
+    padding: 3px 3px 12px;
   }
   .card {
-    min-height: 240px;
-    aspect-ratio: 3/4;
+    min-height: 190px;
+    aspect-ratio: auto;
+    padding: 14px 8px 8px !important;
   }
   .card h3 {
-    font-size: 16px !important;
+    font-size: 14px !important;
+    min-height: 34px;
+    margin: 5px 0 3px !important;
   }
   .art {
-    height: 90px;
-    width: 90px;
+    height: 68px;
+    width: 68px;
+  }
+  .art > svg {
+    width: 46px;
+    height: 46px;
   }
   .art :global(.sprite) {
-    width: 88px;
-    height: 88px;
+    width: 66px;
+    height: 66px;
+  }
+  .cost {
+    top: 6px;
+    left: 6px;
+    min-width: 28px;
+    height: 32px;
+    font-size: 17px;
+  }
+  .cardAction {
+    margin-top: 5px;
   }
   .inspectBody {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
   .inspectCard {
     padding: 12px;
     gap: 8px;
   }
   .inspectCard .art {
-    width: 110px;
-    height: 110px;
+    width: 90px;
+    height: 90px;
   }
   .inspectCard .art :global(.sprite) {
-    width: 108px;
-    height: 108px;
+    width: 88px;
+    height: 88px;
   }
   .inspectCard .art > svg {
-    width: 76px;
-    height: 76px;
+    width: 64px;
+    height: 64px;
+  }
+  .inspectCard > strong {
+    font-size: 18px;
+  }
+  .rules h3 {
+    margin: 10px 0 5px;
+  }
+  .rules p {
+    font-size: 13px;
+    line-height: 1.5;
   }
   .inspectActions {
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    margin-top: 16px;
   }
   .deck {
-    gap: 8px;
+    gap: 6px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -595,14 +630,15 @@
 }
 @media (max-width: 780px) {
   .art.smallArt {
-    width: 42px;
-    height: 42px;
+    width: 32px;
+    height: 32px;
   }
   .art.smallArt :global(.sprite) {
-    width: 42px;
-    height: 42px;
+    width: 32px;
+    height: 32px;
   }
-  .slotChoice {
-    min-height: 104px;
+  .art.smallArt > svg {
+    width: 26px;
+    height: 26px;
   }
 }

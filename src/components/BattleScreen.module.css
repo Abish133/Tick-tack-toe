@@ -51,3 +51,107 @@
 @media(max-width:620px){.vsIntro{grid-template-columns:1fr 56px 1fr;gap:5px;padding:10px}.vsPlayer .avatarRing{width:90px;height:90px;flex-basis:90px;padding:7px}.vsPlayer .avatar{width:76px;height:76px}.vsPlayer>strong{font-size:18px;word-break:break-word;max-width:135px}.vsPlayer>span{font-size:12px;flex-wrap:wrap;gap:3px}.vsPlayer{gap:10px}.vsLightning{font-size:29px}.vsLightning svg{height:100px;width:88px;left:-15px;top:-27px}.fightCountdown{font-size:44px;margin-top:25px}}
 @media(min-width:621px) and (max-height:780px){.screen:global(.battle-arena){padding-block:2px 6px}}
 :global(.high-contrast) .screen .playerHUD,:global(.high-contrast) .screen .board,:global(.high-contrast) .screen .cell,:global(.high-contrast) .screen .powerCard{border-color:#fff;border-width:2px;background:#071426}:global(.high-contrast) .screen small,:global(.high-contrast) .battleStatus,:global(.high-contrast) .modePlate span{color:white}:global(.high-contrast) .resultScreen p,:global(.high-contrast) .resultRewards span{color:white}
+
+/* Compact chrome leaves the board and every interactive target usable. */
+.screen {
+  grid-template-rows: 48px 60px 24px minmax(0, 1fr) 60px 64px;
+  gap: 4px;
+  padding: 2px 10px 6px;
+}
+.screen:global(.battle-arena) { padding: 2px 10px 6px; }
+.screen .playerHUD { height: 60px; padding: 3px 10px; gap: 8px; }
+.avatarRing { width: 50px; height: 50px; flex-basis: 50px; padding: 4px; }
+.avatarRing .avatar { width: 42px; height: 42px; }
+.screen .playerHUD .namePlate strong { font-size: 14px; }
+.hudRight { gap: 8px; }
+.roundGems b { font-size: 23px; }
+.screen .turnBar { font-size: 12px; }
+.screen .turnBar .clock { font-size: 20px; }
+.pedestal { width: min(calc(100cqh - 290px), calc(100cqw - 24px), 420px); }
+.screen .powerCard { height: 62px; padding: 6px; gap: 5px; grid-template-columns: 34px minmax(0, 1fr); }
+.powerArt { width: 32px; height: 34px; }
+.powerArt svg { width: 25px; height: 25px; }
+.screen .powerName { font-size: 13px; }
+.screen .powerName small { margin-top: 3px; }
+.drawer p, .opponentPowers p, .timelineEntry p { font-size: 13px; line-height: 1.4; }
+.intelContent { gap: 12px; }
+.intelContent h3 { font-size: 16px; }
+.intelItem { gap: 8px; }
+.intelItem strong, .opponentPowers strong, .timelineEntry strong { font-size: 14px; }
+.opponentPowers { gap: 7px; }
+.opponentPowers > div { padding: 9px; gap: 8px; }
+.timelineEntry { padding-block: 5px 14px; gap: 10px; }
+.scoreRow { padding: 8px; font-size: 14px; }
+.scoreRow strong { font-size: 21px; }
+.tip { padding: 10px; gap: 9px; }
+.menuControls { gap: 8px !important; }
+.emoteWheel { height: 268px; min-width: 260px; }
+.emoteWheel > button { left: calc(50% + cos(var(--angle)) * 91px); top: calc(50% + sin(var(--angle)) * 91px); height: 64px; width: 82px; }
+.emoteWheelCenter { width: 48px; height: 48px; }
+.powerCallout { font-size: 17px; padding: 9px 15px; }
+.roundBanner { font-size: 25px; padding: 13px; }
+.resultScreen { gap: 9px; padding: 10px 16px !important; }
+.resultScreen .resultHeading h2 { font-size: clamp(29px, 4.2vw, 50px); }
+.resultPortrait { height: 138px; width: 148px; flex-basis: 138px; }
+.rewardsFrame { padding: 11px 14px; max-width: 530px; }
+.resultRewards { gap: 8px; }
+.resultRewards strong { font-size: 26px; }
+.rewardRoad { margin-top: 9px; padding-top: 8px; }
+.xpRoad { margin-top: 8px; }
+.resultActions { max-width: 590px; gap: 8px; }
+.vsIntro { gap: 10px; padding: 18px; }
+.vsPlayer { gap: 10px; }
+.vsPlayer .avatarRing { width: 116px; height: 116px; flex-basis: 116px; padding: 8px; }
+.vsPlayer .avatar { width: 100px; height: 100px; }
+.vsPlayer > strong { font-size: 22px; }
+.vsPlayer > span { font-size: 14px; }
+.fightCountdown { font-size: 48px; margin-top: 15px; }
+@media (max-width: 620px) {
+  .screen { grid-template-rows: 48px 52px 22px minmax(0, 1fr) 52px 58px; padding: 0 5px 4px; gap: 3px; }
+  .screen:global(.battle-arena) { padding: 0 5px 4px; }
+  .screen .playerHUD { height: 52px; padding: 2px 6px; gap: 6px; border-radius: 8px; }
+  .avatarRing { width: 44px; height: 44px; flex-basis: 44px; padding: 3px; }
+  .avatarRing .avatar { width: 38px; height: 38px; }
+  .avatarTimer { width: 20px; height: 20px; font-size: 12px; border-width: 1px; }
+  .screen .playerHUD .namePlate strong { font-size: 13px; }
+  .hudRight { gap: 5px; }
+  .energy :global(.energy-pips) { margin-top: 3px; }
+  .energy :global(.energy-pips i) { width: 10px; height: 10px; }
+  .roundGems b { font-size: 20px; }
+  .screen .turnBar .clock { font-size: 19px; }
+  .pedestal { width: min(calc(100cqh - 250px), calc(100cqw - 12px), 350px); }
+  .screen .powerCard { height: 56px; padding: 3px; gap: 1px; }
+  .powerArt { width: 25px; height: 23px; }
+  .powerArt svg { width: 21px; height: 21px; }
+  .screen .powerName { font-size: 12px; }
+  .screen .emoteTrigger { margin-bottom: 4px; }
+  .costGem { width: 20px; height: 20px; font-size: 12px; }
+  .resultScreen { padding: 7px 5px !important; gap: 7px; }
+  .resultScreen .resultHeading h2 { font-size: 30px; }
+  .resultPortrait { height: 104px; width: 116px; flex-basis: 104px; }
+  .rewardsFrame { padding: 9px 8px; }
+  .resultRewards strong { font-size: 23px; }
+  .resultActions { gap: 7px; }
+  .resultActions > button:first-child { min-height: 48px; }
+  .resultScreen .settlementNote { margin-top: 7px; }
+  .vsIntro { padding: 8px; gap: 4px; }
+  .vsPlayer .avatarRing { width: 76px; height: 76px; flex-basis: 76px; padding: 6px; }
+  .vsPlayer .avatar { width: 64px; height: 64px; }
+  .vsPlayer > strong { font-size: 16px; }
+  .vsPlayer > span { font-size: 12px; }
+  .fightCountdown { font-size: 36px; margin-top: 18px; }
+}
+@media (max-width: 380px) {
+  .screen, .screen:global(.battle-arena) { padding-inline: 2px; }
+  .screen .playerHUD { padding-inline: 5px; gap: 5px; }
+  .pedestal { width: min(calc(100cqh - 250px), calc(100cqw - 4px), 350px); }
+}
+@media (min-width: 621px) and (max-height: 780px) {
+  .screen { grid-template-rows: 48px 54px 22px minmax(0, 1fr) 54px 60px; gap: 3px; }
+  .screen .playerHUD { height: 54px; }
+  .avatarRing { width: 46px; height: 46px; flex-basis: 46px; padding: 3px; }
+  .avatarRing .avatar { width: 40px; height: 40px; }
+  .pedestal { width: min(calc(100cqh - 270px), 400px); }
+  .screen .powerCard { height: 58px; }
+  .resultPortrait { height: 98px; width: 110px; flex-basis: 98px; }
+}

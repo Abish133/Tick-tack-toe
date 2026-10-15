@@ -4,3 +4,31 @@
 @media(max-height:760px){.guardian{max-height:240px}.launchZone{padding-top:12px}.loadoutFan>button:not(.editLoadout){min-height:58px}.loadoutFan>button>svg{width:19px;height:19px}.policy{height:48px}.disclosureCopy{font-size:12px}.rankPlate{min-height:110px}.rankPlate small{display:none}.modeCarousel{min-height:240px}}
 @media(prefers-reduced-motion:reduce){.events>button:hover{transform:none}}
 .events>button{position:relative}.events span>small{display:block;font-family:var(--font-ui);font-size:12px;line-height:1.3;color:#d5e1f2;font-variant-numeric:tabular-nums}.events span>[role=progressbar]{height:6px;margin-top:5px}.events .claimReady{color:#a7ffc6}.missionBadge{position:absolute;top:-6px;right:-6px;background:#d84660;border:2px solid #ecca87;border-radius:50%;height:22px;min-width:22px;display:grid;place-items:center;font-size:12px;color:#fff}.events>button:nth-child(2)>span{flex:1}@media(max-width:600px){.events>button{height:auto;min-height:52px}.events span>[role=progressbar]{width:42px;margin-top:3px}.events span>small{font-size:12px}}
+
+.rankPlate{min-height:170px;padding:18px 14px}.rankPlate b{font-size:30px}.events>button{min-height:56px;padding:8px 12px}.battle{min-height:60px!important}.battle span>span{font-size:24px}.modeCard>button{min-height:190px;padding:22px 10px 12px}.modeCard{min-height:190px}
+@media(max-width:600px){
+  .hubTop{gap:6px}.season{font-size:12px;letter-spacing:.4px;max-width:100px}
+  .hubTop>button{font-size:13px;padding:6px 8px}
+  .characterStage{display:flex;align-items:center;justify-content:center;margin-top:4px;min-height:125px}
+  .guardian{width:calc(100% - 124px);height:100%;max-height:200px;min-height:110px;margin:auto}
+  .guardian img{max-height:200px;max-width:110%}
+  .rankPlate{top:50%;transform:translateY(-50%);width:64px;min-height:104px;padding:6px 4px;gap:3px;border-width:1px;border-radius:8px}
+  .rankPlate>svg{width:21px;height:21px}.rankPlate strong{font-size:12px}.rankPlate b{font-size:21px}
+  .events{top:50%;transform:translateY(-50%);width:60px;gap:5px}
+  .events>button{min-height:48px;height:auto;padding:4px;gap:2px;border-radius:8px}
+  .events>button>svg{width:18px;height:18px}
+  .events span{font-size:12px;letter-spacing:-.3px}
+  .events span>[role=progressbar]{height:4px;width:38px}
+  .nameplate{padding:4px 8px;letter-spacing:.4px;bottom:0}
+  .launchZone{padding-top:8px;max-width:360px}
+  .loadoutFan{max-width:272px;gap:4px;margin-bottom:6px;padding-right:38px}
+  .loadoutFan>button:not(.editLoadout){width:72px;min-height:56px;gap:1px;border-width:1px;border-radius:8px}
+  .loadoutFan>button>svg{width:18px;height:18px}.loadoutFan>button>span{font-size:12px}
+  .editLoadout{right:-4px;bottom:3px}
+  .battle{min-height:56px!important;margin-top:2px}.battle span>span{font-size:22px}.battle small{font-size:12px;margin-top:2px}
+  .policy{font-size:12px;gap:4px}.disclosureCopy{line-height:1.2}
+  .modeSelector{gap:8px}.modeCarousel{gap:10px;min-height:230px;padding-bottom:8px}
+  .modeCard{min-width:210px;width:210px;max-height:320px;height:85%;min-height:220px}
+  .modeCard>button{padding:20px 12px 12px;gap:10px;min-height:100%}
+  .modeCard>button>svg{width:30px;height:30px}.modeCard h3{font-size:18px}.modeCard p{font-size:12px}.modeCard button>span{font-size:15px;padding:10px}
+}

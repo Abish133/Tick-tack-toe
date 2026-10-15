@@ -1,13 +1,13 @@
 .modal {
-  width: min(860px, calc(100vw - 28px));
+  width: min(760px, calc(100vw - 28px));
   max-height: calc(100dvh - 32px);
 }
 .settings {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  max-height: min(580px, calc(100dvh - 200px));
+  gap: 10px;
+  max-height: min(520px, calc(100dvh - 200px));
   overflow: hidden;
 }
 .content {
@@ -21,13 +21,13 @@
 }
 .options {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 .actions {
   display: flex;
   justify-content: flex-end;
   border-top: 1px solid #c7a96a4d;
-  padding-top: 14px;
+  padding-top: 10px;
   flex-shrink: 0;
 }
 .actions > button {
@@ -36,9 +36,9 @@
 .tip,
 .player {
   display: flex;
-  gap: 15px;
+  gap: 12px;
   align-items: center;
-  padding: 18px;
+  padding: 15px;
   background: linear-gradient(110deg, #28394f, #131f33);
 }
 .tip > svg,
@@ -74,10 +74,10 @@
   text-align: center;
   display: grid;
   justify-items: center;
-  gap: 12px;
+  gap: 9px;
 }
 .about h3 {
-  font-size: 25px;
+  font-size: 22px;
   color: #f2c86b;
   letter-spacing: 2px;
   margin: 0;
@@ -88,8 +88,8 @@
   margin: 0;
 }
 .crest {
-  width: 82px;
-  height: 92px;
+  width: 70px;
+  height: 78px;
   display: grid;
   place-items: center;
   background: linear-gradient(#836b42, #1c2638);
@@ -114,7 +114,7 @@
     max-height: calc(100dvh - 20px);
   }
   .settings {
-    gap: 10px;
+    gap: 8px;
     max-height: calc(100dvh - 165px);
   }
   .content {
@@ -125,21 +125,44 @@
     min-width: 0;
   }
   .aboutLinks {
-    gap: 8px;
+    gap: 6px;
+    margin-top: 8px;
   }
   .tip,
   .player {
-    padding: 14px;
+    padding: 10px;
+    gap: 9px;
+  }
+  .tip > svg,
+  .player > svg {
+    width: 24px;
+    height: 24px;
   }
   .tip h3,
   .player h3 {
-    font-size: 16px;
+    font-size: 14px;
   }
   .tip p,
   .player p {
     font-size: 12px;
   }
   .about h3 {
-    font-size: 21px;
+    font-size: 18px;
+    letter-spacing: 1px;
+  }
+  .about p {
+    font-size: 12px;
+  }
+  .crest {
+    width: 58px;
+    height: 64px;
+    border-radius: 15px;
+  }
+  .crest > svg {
+    width: 34px;
+    height: 34px;
+  }
+  .account {
+    gap: 9px;
   }
 }

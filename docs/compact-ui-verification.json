@@ -1,0 +1,96 @@
+{
+  "date": "2026-10-15",
+  "scope": "CSS-only compact presentation",
+  "productionBuild": "passed",
+  "targetedBrowserFlows": {
+    "passed": 9,
+    "failed": 0
+  },
+  "realBattleReview": {
+    "boardSize": 6,
+    "errors": [],
+    "flows": [
+      "real guest practice",
+      "emotes",
+      "intel and timeline drawers",
+      "surrender and settlement"
+    ]
+  },
+  "viewportChecks": {
+    "screens": 48,
+    "viewports": [
+      "390x844",
+      "360x740",
+      "430x932",
+      "768x1024",
+      "1280x720",
+      "1440x900"
+    ],
+    "bodyOverflow": false,
+    "horizontalOverflow": false,
+    "undersizedVisibleText": false,
+    "browserErrors": []
+  },
+  "phoneHub": {
+    "before": {
+      "width": 390,
+      "height": 844,
+      "route": "/",
+      "bodyScroll": false,
+      "horizontalScroll": false,
+      "hud": {
+        "width": 390,
+        "height": 66
+      },
+      "dock": {
+        "width": 390,
+        "height": 64
+      },
+      "guardian": {
+        "width": 236,
+        "height": 239.109375
+      },
+      "battlefield": {
+        "width": 87,
+        "height": 70
+      },
+      "battle": {
+        "width": 366,
+        "height": 67.890625
+      },
+      "powerCard": null,
+      "smallText": []
+    },
+    "after": {
+      "width": 390,
+      "height": 844,
+      "route": "/",
+      "bodyScroll": false,
+      "horizontalScroll": false,
+      "hud": {
+        "width": 390,
+        "height": 58
+      },
+      "dock": {
+        "width": 390,
+        "height": 56
+      },
+      "guardian": {
+        "width": 250,
+        "height": 200
+      },
+      "battlefield": {
+        "width": 86.25,
+        "height": 48
+      },
+      "battle": {
+        "width": 360,
+        "height": 56
+      },
+      "powerCard": null,
+      "smallText": []
+    }
+  },
+  "screenshots": "screenshots/compact-ui/README.md",
+  "pipeline": "Full GitHub release gate required by Railway automatic deployment."
+}

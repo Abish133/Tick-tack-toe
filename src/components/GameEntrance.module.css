@@ -25,3 +25,18 @@
 @media(max-height:760px){.entrance{padding-top:48px}.seal{height:50px;width:50px;margin-bottom:10px}.titleContent h1 strong{font-size:62px}.titleContent h1>span{font-size:27px}.tagline{margin-bottom:12px}.promise{font-size:12px;max-width:280px}.menu{gap:7px}.footer{display:none}}
 @media(prefers-reduced-motion:reduce){.tap,.loadingTrack i,.guardian{animation:none}}
 .reducedMotion .tap,.reducedMotion .loadingTrack i,.reducedMotion .guardian{animation:none}
+
+@media(max-width:600px){
+  .entrance{padding:56px 16px 24px}
+  .seal{width:46px;height:46px;margin-bottom:12px}.seal>svg{width:25px;height:25px}
+  .eyebrow{font-size:12px;letter-spacing:.15em;margin-bottom:10px}
+  .titleContent h1>span{font-size:26px}.titleContent h1 strong{font-size:54px}
+  .tagline{font-size:12px;margin:10px 0 16px}
+  .titleRule{margin-top:10px;gap:10px}
+  .menu{width:min(250px,100%);gap:6px}.menu button{min-height:48px;padding:8px 12px;gap:8px}
+  .primary,.continue,.enter{font-size:15px!important}
+  .tap{letter-spacing:1px}.promise{font-size:12px;margin-top:10px;max-width:270px}
+  .howButton{font-size:12px;margin-top:2px}.intro{padding:12px;gap:8px;max-width:290px}
+  .toolbar{gap:4px;top:max(8px,env(safe-area-inset-top));right:8px}
+  .toolbar button{min-width:48px;padding:8px}.toolbar button svg{width:18px;height:18px}
+}
