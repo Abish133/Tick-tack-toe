@@ -1,5 +1,6 @@
 "use client";
 
+import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -90,6 +91,8 @@ const EMOTE_LABELS = {
   aurora: "Brilliant play!",
   planet: "Out of this world!",
   comet: "Star streak!",
+  supernova: "Supernova play!",
+  infinity: "Beyond the stars!",
 };
 
 function BattleAvatar({
@@ -127,7 +130,8 @@ function BattleAvatar({
         style={{ ...cosmeticStyle(skin), ...cosmeticStyle(frame) }}
       >
         <span>{(player?.name || "Opponent").slice(0, 2).toUpperCase()}</span>
-        <img
+        <AnimatedCosmeticImage
+          cosmeticId={skin}
           src={asset}
           alt=""
           onError={(event) => {

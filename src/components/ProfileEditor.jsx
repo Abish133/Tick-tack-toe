@@ -1,5 +1,6 @@
 "use client";
 
+import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useEffect, useState } from "react";
 import {
   ArrowRight,
@@ -81,7 +82,8 @@ function ProfilePortrait({ profile = {}, name, level }) {
     <div
       className={`${styles.portrait} collection-profile-portrait ${profile.equippedFrame || ""}`}
     >
-      <img
+      <AnimatedCosmeticImage
+        cosmeticId={profile.avatar}
         src={avatarAsset(profile.avatar)}
         alt={`${name}'s equipped avatar`}
       />

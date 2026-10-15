@@ -16,6 +16,7 @@ import {
 } from "motion/react";
 import { Check, ChevronDown, Info, Lock, Plus, X, Zap } from "lucide-react";
 import styles from "./GameUI.module.css";
+import { CosmeticMotionProvider } from "../AnimatedCosmeticImage";
 
 const Feedback = createContext(() => {});
 const modalStack = [];
@@ -26,9 +27,11 @@ export function GameUIProvider({
 }) {
   return (
     <MotionConfig reducedMotion={reducedMotion ? "always" : "user"}>
-      <Feedback.Provider value={onFeedback || (() => {})}>
-        {children}
-      </Feedback.Provider>
+      <CosmeticMotionProvider reducedMotion={reducedMotion}>
+        <Feedback.Provider value={onFeedback || (() => {})}>
+          {children}
+        </Feedback.Provider>
+      </CosmeticMotionProvider>
     </MotionConfig>
   );
 }
@@ -574,6 +577,7 @@ export function RarityTile({
   return (
     <Tag
       className={`${styles.rarityTile} ${styles[rarity.toLowerCase()] || styles.common} ${className}`}
+      data-rarity={rarity.toLowerCase()}
       {...props}
     >
       {children}

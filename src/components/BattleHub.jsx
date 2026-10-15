@@ -1,5 +1,6 @@
 "use client";
 
+import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import {
@@ -283,7 +284,8 @@ export default function BattleHub({
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         >
           <span className={styles.aura} />
-          <img
+          <AnimatedCosmeticImage
+            cosmeticId={user?.profile?.avatar}
             src={avatar}
             alt={`${user?.name || "Your"} equipped arena guardian`}
           />

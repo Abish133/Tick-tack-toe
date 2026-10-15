@@ -4,6 +4,7 @@ import path from "node:path";
 import { test, expect } from "@playwright/test";
 import {
   COLLECTION_COSMETICS,
+  COLLECTION_BUNDLES,
   COSMETIC_TYPES,
 } from "../src/lib/cosmetic-collection.js";
 
@@ -136,14 +137,14 @@ test("large collection filters all nine categories, previews real marks and stay
   const payments = await read(page, "/api/commerce/products");
   await page.getByRole("button", { name: "Collections", exact: true }).click();
   const bundles = page.getByLabel("Cash cosmetic collections", { exact: true });
-  await expect(bundles.locator("article")).toHaveCount(10);
+  await expect(bundles.locator("article")).toHaveCount(COLLECTION_BUNDLES.length);
   if (!payments.checkoutEnabled) {
     await expect(
       page.getByText("Payments not enabled yet.", { exact: true }),
     ).toBeVisible();
     await expect(
       bundles.getByRole("button", { name: "Checkout opens after setup" }),
-    ).toHaveCount(10);
+    ).toHaveCount(COLLECTION_BUNDLES.length);
     for (const button of await bundles
       .getByRole("button", { name: "Checkout opens after setup" })
       .all())
@@ -151,7 +152,7 @@ test("large collection filters all nine categories, previews real marks and stay
   }
   await bundles
     .locator("article")
-    .first()
+    .filter({has: page.getByRole("heading", {name: "Solar Dynasty Collection", exact: true})})
     .getByRole("button", { name: "Explore nine styles" })
     .click();
   await expect(

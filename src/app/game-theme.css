@@ -6,6 +6,8 @@
   --game-gold:var(--gold-light); --gold:var(--gold-light); --purple:#b596ff; --cyan:#80e6ff;
   --arcane:#a483ff; --frost:#76ddf4; --ember:#ff9360; --void:#070e21; --border:#8094ae50; --frame-border:#a57c3d;
   --rarity-common:#849ab3; --rarity-rare:#54b8ff; --rarity-epic:#b78bff; --rarity-legendary:#f2c86b;
+  --rarity-ascendant:#e9f6ff; --ascendant-gold:#f6dfaa; --ascendant-cyan:#b5f7ff;
+  --ascendant-rim:linear-gradient(120deg,#fff5da,#c7fbff 32%,#e4d3ff 58%,#f6dfaa 82%,#fff5da);
   --element-fire:#ff9061; --element-ice:#8ce8ff; --element-lightning:#e2cbff; --element-nature:#85e3ad; --element-void:#b19aff;
   --font-body:var(--font-inter,Arial,sans-serif); --font-ui:var(--font-rajdhani,Arial,sans-serif); --font-display:var(--font-cinzel,Georgia,serif);
   --hud-height:72px; --dock-height:64px; --screen-gap:16px;

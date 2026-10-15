@@ -1,5 +1,6 @@
 "use client";
 
+import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useCallback, useEffect, useState } from "react";
 import {
   Users,
@@ -101,7 +102,8 @@ export default function SocialPanel({
   function identity(player) {
     return (
       <div className={styles.socialIdentity}>
-        <img
+        <AnimatedCosmeticImage
+          cosmeticId={player.profile?.avatar}
           className={styles.socialAvatar}
           src={portrait(player.profile?.avatar)}
           alt=""

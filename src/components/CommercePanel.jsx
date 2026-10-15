@@ -17,11 +17,13 @@ import {
 import {
   cosmeticTheme,
   cosmeticById,
+  cosmeticMotion,
   COLLECTION_BUNDLES,
   COSMETIC_THEMES,
 } from "../lib/cosmetic-collection";
 import styles from "./CommercePanel.module.css";
 import { GameFrame, GameButton, RarityTile } from "./ui";
+import CosmeticArt from "./CosmeticArt";
 
 let checkoutScript;
 function loadCheckout() {
@@ -255,7 +257,13 @@ export default function CommercePanel({
     }
   }
   const products = data?.products || [],
-    bundles = products.filter((product) => product.kind === "bundle"),
+    bundles = products
+      .filter((product) => product.kind === "bundle")
+      .sort(
+        (a, b) =>
+          Number(b.themeId === "ascendant" || b.id === "bundle-ascendant") -
+          Number(a.themeId === "ascendant" || a.id === "bundle-ascendant"),
+      ),
     extras = products.filter((product) => product.kind !== "bundle");
   const bundleIds = (product) =>
     product.cosmeticIds ||
@@ -309,11 +317,15 @@ export default function CommercePanel({
                     ) || cosmeticTheme(ids[0]),
                   avatar = ids
                     .map(cosmeticById)
-                    .find((item) => item?.type === "avatar");
+                    .find((item) => item?.type === "avatar"),
+                  ascendant = theme?.id === "ascendant",
+                  animated = ids.some((id) => Boolean(cosmeticMotion(id)));
                 return (
                   <article
-                    className={`${styles.bundle} ${!data.checkoutEnabled ? styles.locked : ""}`}
+                    className={`${styles.bundle} ${ascendant ? styles.ascendantBundle : ""} ${!data.checkoutEnabled ? styles.locked : ""}`}
                     key={product.id}
+                    data-rarity={theme?.rarity || undefined}
+                    aria-label={`${product.name}${animated ? ", animated Ascendant collection" : ""}`}
                     style={{ "--bundle-color": theme?.primary || "#c3a1ff" }}
                   >
                     <div className={styles.bundleArt}>
@@ -329,13 +341,23 @@ export default function CommercePanel({
                         loading="lazy"
                       />
                       <div className={styles.bundleShade} />
-                      {avatar && (
+                      {avatar && ascendant ? (
+                        <span className={styles.bundleAvatar} aria-hidden="true">
+                          <CosmeticArt item={avatar} />
+                        </span>
+                      ) : avatar && (
                         <img
                           className={styles.bundleAvatar}
                           src={avatar.asset}
                           alt=""
                           loading="lazy"
                         />
+                      )}
+                      {ascendant && (
+                        <span className={styles.premiumTier}>
+                          <span><Crown size={13} aria-hidden="true" /> ASCENDANT</span>
+                          {animated && <span><Sparkles size={12} aria-hidden="true" /> ANIMATED</span>}
+                        </span>
                       )}
                       <span className={styles.bundleLabel}>
                         <Layers3 size={16} />9 MATCHING STYLES

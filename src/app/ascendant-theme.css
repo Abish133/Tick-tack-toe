@@ -1,0 +1,23 @@
+/* Astral Ascendancy ornaments change visual presentation only. */
+.collection-theme-ascendant{isolation:isolate}
+.collection-theme-ascendant .collection-avatar-aura{background:radial-gradient(ellipse,#f7eac52b,#adf4ff20 40%,transparent 70%)}
+.collection-theme-ascendant .collection-portrait{filter:drop-shadow(0 0 10px #b5efff35)}
+.collection-ascendant-ambient{position:absolute;inset:7%;width:86%;height:86%;object-fit:contain;opacity:.24;z-index:-1;pointer-events:none}
+.collection-theme-ascendant.collection-title-art>strong{color:#fff2cd;text-shadow:0 0 12px #a4f7ff60;letter-spacing:.6px}
+.collection-theme-ascendant.collection-title-art>svg{width:36px;height:36px}
+.collection-theme-ascendant.collection-emote-art>span{border-color:#fff1c266;background:linear-gradient(135deg,#fff1c21a,#a4f7ff14);border-radius:50%;box-shadow:0 0 12px #b2eaff18}
+.collection-theme-ascendant.collection-banner-art{border-block:1px solid #fff1c250}
+.collection-theme-ascendant .collection-banner-crest{border-style:double;border-width:3px;box-shadow:0 0 18px #a4f7ff25}
+.collection-board[data-cosmetic-theme='ascendant']{border:2px solid #fff1c2;border-radius:16px;background:linear-gradient(#0b1026b8,#111326de),var(--cosmetic-motion-art,var(--cosmetic-art)) center/cover;box-shadow:inset 0 0 0 2px #a4f7ff30,0 0 22px #a4f7ff22}
+.collection-board[data-cosmetic-theme='ascendant']>.collection-board-cell,.collection-board[data-cosmetic-theme='ascendant']>.preview-cell{border-color:#fff1c25c;border-radius:9px 3px;background:linear-gradient(135deg,#252841e8,#111326f0)}
+.collection-board[data-cosmetic-theme='ascendant']>.game-cell:not(.frozen):not(.locked):not(.winning){background:linear-gradient(135deg,#252841ed,#111326f5);border-radius:9px 3px}
+.collection-board[data-cosmetic-theme='ascendant'] .collection-marks{filter:drop-shadow(0 0 6px #a4f7ff65)}
+.collection-profile-identity::before{background-image:linear-gradient(0deg,#111320,transparent 85%),var(--cosmetic-motion-art,var(--cosmetic-art))}
+.collection-profile-title[data-cosmetic-theme='ascendant']{color:#fff1c2!important;text-shadow:0 0 12px #a4f7ff55}
+.reduce-motion .collection-board[data-cosmetic-theme='ascendant'],.quality-low .collection-board[data-cosmetic-theme='ascendant']{background-image:linear-gradient(#0b1026b8,#111326de),var(--cosmetic-art)}
+.reduce-motion .collection-profile-identity::before{background-image:linear-gradient(0deg,#111320,transparent 85%),var(--cosmetic-art)}
+@media(prefers-reduced-motion:reduce){
+  .collection-board[data-cosmetic-theme='ascendant']{background-image:linear-gradient(#0b1026b8,#111326de),var(--cosmetic-art)}
+  .collection-profile-identity::before{background-image:linear-gradient(0deg,#111320,transparent 85%),var(--cosmetic-art)}
+}
+@media(prefers-contrast:more){.collection-board[data-cosmetic-theme='ascendant']>.game-cell{background:#080d1d!important;border-color:#fff1c2!important}.collection-ascendant-ambient{opacity:.1}}

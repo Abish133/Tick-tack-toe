@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { GameButton, Modal, ResourcePill, ProgressBar, IconBadge } from "./ui";
 import styles from "./GameShell.module.css";
+import { useCosmeticAnimation } from "./AnimatedCosmeticImage";
 
 const destinations = [
   { path: "/notifications", label: "Notifications", icon: Mail },
@@ -60,10 +61,12 @@ export default function GameShell({
   battleActive = false,
   hasActiveMatch = false,
   background = "/assets/arena.png",
+  backgroundCosmeticId,
   notificationCount = 0,
 }) {
   const [journeyOpen, setJourneyOpen] = useState(false),
     reduced = useReducedMotion();
+  const arenaArt = useCosmeticAnimation(backgroundCosmeticId, background);
   useEffect(() => setJourneyOpen(false), [pathname]);
   useEffect(() => {
     const back = (event) => {
@@ -126,7 +129,7 @@ export default function GameShell({
   return (
     <div
       className={`${styles.world} ${battleActive ? styles.inBattle : ""}`}
-      style={{ "--world-art": `url("${background}")` }}
+      style={{ "--world-art": `url("${arenaArt.src}")` }}
     >
       <div className={styles.environment} aria-hidden="true">
         <div className={styles.worldLight} />

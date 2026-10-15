@@ -2,6 +2,7 @@ import {Cinzel, Inter, Rajdhani} from 'next/font/google';
 import './globals.css';
 import './board-hud.css';
 import './game-theme.css';
+import './ascendant-theme.css';
 import ArenaApp from '@/components/ArenaApp';
 const display=Cinzel({subsets:['latin'],weight:['700','900'],variable:'--font-cinzel',display:'swap'});
 const ui=Rajdhani({subsets:['latin'],weight:['600','700'],variable:'--font-rajdhani',display:'swap'});

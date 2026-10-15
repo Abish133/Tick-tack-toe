@@ -1,5 +1,6 @@
 "use client";
 
+import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
@@ -200,7 +201,8 @@ export default function EndMatchSummary({
             <Trophy size={35} />
           )}
         </span>
-        <img
+        <AnimatedCosmeticImage
+          cosmeticId={skin}
           src={asset}
           alt=""
           onError={(event) => {

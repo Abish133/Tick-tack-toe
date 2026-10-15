@@ -1,5 +1,11 @@
 # Elemental Arena game UI
 
+## Ascendant animated collection
+
+The new [Astral Ascendancy collection](ASCENDANT_COLLECTION.md) adds the Ascendant rarity above Legendary, with nine coordinated cosmetic styles. `AnimatedCosmeticImage` and `CosmeticMotionProvider` preserve the existing image markup while choosing optimized WebP for equipped art, actual GIF for opened artwork previews and static posters for saved or system reduced-motion preferences. System preference changes subscribe through `useSyncExternalStore`; media does not start before hydration. Missing animated media falls back to its still poster.
+
+`cosmeticMotion(id)` keeps GIF/WebP/poster metadata separate from the database catalog fields. New cosmetic ownership and bundle purchases use the existing validation and payment flows. `ascendant-theme.css` contains the new cosmetic ornaments; board marks remain recognizable X/O. Full artwork prompts, animation specifications, pricing and offline encoding instructions are documented with the collection.
+
 ## Compact density update — 15 October 2026
 
 The compact pass changes CSS presentation only. On phones the HUD is 58px (previously 66px), the dock is 56px (previously 64px), the battlefield controls are 48px (previously 70px) and the main Battle button is 56px. Guardian artwork is capped at 200px. Cards, portraits, offer banners, tabs, dialogs and internal panel spacing are smaller throughout Armory, Collection, battle, progression, profiles, social screens and training. Desktop framing is slightly tighter too.

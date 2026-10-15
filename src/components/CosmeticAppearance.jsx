@@ -1,10 +1,14 @@
 'use client';
 import {cosmeticTheme,cosmeticStyle} from '../lib/cosmetic-collection';
 import styles from './CosmeticAppearance.module.css';
+import AnimatedCosmeticImage from './AnimatedCosmeticImage';
 
 // All of these ornaments are presentation only. The board still exposes plain X/O marks.
 export function CosmeticMotif({name='sun',className=''}){
  const art={
+  ascendant:<><path d="m24 3 5 13 14 8-14 5-5 16-5-16L5 24l14-8Z"/><circle cx="24" cy="24" r="7"/><path d="m7 7 7 7m20 20 7 7M41 7l-7 7M14 34l-7 7"/></>,
+  supernova:<><path d="m24 2 4 15 14-9-9 14 13 2-13 5 9 12-14-8-4 13-5-13-12 8 8-14-13-3 14-5-9-12 13 9Z"/><circle cx="24" cy="24" r="5"/></>,
+  infinity:<><path d="M24 24c-6-15-20-13-20 0s14 15 20 0 20-13 20 0-14 15-20 0Z"/><path d="m24 5 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/></>,
   sun:<><circle cx="24" cy="24" r="9"/><path d="M24 2v6m0 32v6M2 24h6m32 0h6M8.5 8.5l4.2 4.2m22.6 22.6 4.2 4.2m0-31-4.2 4.2M12.7 35.3l-4.2 4.2"/></>,
   crown:<><path d="m6 13 8 7 10-13 10 13 8-7-5 24H11Z"/><path d="M12 30h24M20 24h8"/></>,
   waves:<><path d="M4 32c8 0 6-18 16-18 7 0 9 7 5 11-3 3-7 0-5-3m-16 14c6-6 11 6 17 0s11 6 17 0m-8-5c8 0 7-15 14-15"/></>,
@@ -35,6 +39,7 @@ export function CosmeticMark({mark='X',cosmeticId}){
  const theme=cosmeticTheme(cosmeticId),isX=mark==='X';
  if(!theme)return <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="3.3" strokeLinecap="round" aria-hidden="true">{isX?<path d="m10 10 28 28M38 10 10 38"/>:<circle cx="24" cy="24" r="16"/>}</svg>;
  const x={
+  ascendant:<><path d="m9 7 32 32-3 3L6 10ZM38 6 6 38l4 4L42 10Z"/><path d="m24 2 2 5 5 2-5 2-2 5-2-5-5-2 5-2ZM24 33l2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/></>,
   solar:<><path d="m9 6 33 33-3 3L6 9ZM39 6 6 39l3 3L42 9Z"/><path d="m17 5 2 5m12 28 2 5M5 17l5 2m28 12 5 2"/></>,
   abyss:<><path d="M7 7c2 14 32 20 34 34M41 7C39 21 9 27 7 41"/><path d="M8 17c8 0 6-10 12-9M28 40c6 1 4-10 12-9"/></>,
   jade:<><path d="m9 9 30 30M39 9 9 39"/><path d="M17 17c-9 2-8-5-10-9 7 0 11 0 10 9Zm14 0c-2-9 5-8 9-10 0 7 0 11-9 10ZM17 31c2 9-5 8-9 10 0-7 0-11 9-10Zm14 0c9-2 8 5 10 9-7 0-11 0-10-9Z"/></>,
@@ -47,6 +52,7 @@ export function CosmeticMark({mark='X',cosmeticId}){
   nebula:<><path d="m11 11 26 26M37 11 11 37"/><ellipse cx="24" cy="24" rx="23" ry="9" transform="rotate(-35 24 24)"/><circle cx="41" cy="11" r="2"/></>,
  };
  const o={
+  ascendant:<><circle cx="24" cy="24" r="12"/><ellipse cx="24" cy="24" rx="22" ry="8" transform="rotate(-35 24 24)"/><path d="m24 1 2 5 5 2-5 2-2 5-2-5-5-2 5-2ZM24 33l2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/></>,
   solar:<><circle cx="24" cy="24" r="13"/><path d="M24 3v5m0 32v5M3 24h5m32 0h5M9 9l3 3m24 24 3 3m0-30-3 3M12 36l-3 3"/></>,
   abyss:<><circle cx="24" cy="24" r="16"/><path d="M10 18c7-6 8 7 16 0s9 6 12 0M9 30c7-6 8 7 16 0s9 6 13 0"/></>,
   jade:<><circle cx="24" cy="24" r="15"/><path d="M10 15c-8-2-6-7-5-10 6 0 8 3 5 10Zm27 18c7 2 6 7 5 10-6 0-8-3-5-10M14 39l-5 1M35 9l5-1"/></>,
@@ -61,13 +67,14 @@ export function CosmeticMark({mark='X',cosmeticId}){
  return <svg className={`${styles.mark} ${styles[theme.id]||''}`} viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{isX?x[theme.id]:o[theme.id]}</svg>;
 }
 
-export function CosmeticFrame({cosmeticId}){
+export function CosmeticFrame({cosmeticId,format='webp'}){
  const theme=cosmeticTheme(cosmeticId);if(!theme)return null;
+ if(theme.id==='ascendant')return <span className={`${styles.frame} ${styles.ascendant}`} style={cosmeticStyle(cosmeticId)} aria-hidden="true"><AnimatedCosmeticImage cosmeticId={cosmeticId} format={format} alt=""/></span>;
  const outer={solar:'M50 3 61 13 76 10 79 25 93 31 87 46 97 59 84 67 83 83 67 84 59 97 46 87 31 93 25 79 10 76 13 61 3 50 13 39 10 24 25 21 31 7 46 13Z',abyss:'M50 5C68 0 80 18 85 30c19 3 11 27 5 40-5 15-27 20-40 25-17-2-30-13-35-25C-4 64 7 43 15 30 18 14 34 4 50 5Z',jade:'M50 7 64 12 77 23 87 36 93 50 87 64 77 77 64 87 50 93 36 87 23 77 13 64 7 50 13 36 23 23 36 13Z',storm:'M50 3 89 24 97 69 65 96 21 89 3 50 24 11Z',rose:'M50 7c12-12 29 0 27 12 17-3 30 15 16 31 14 15 0 34-16 30 2 17-18 26-27 13-10 13-29 4-27-13C6 84-7 65 7 50-7 34 6 17 23 19 22 3 40-5 50 7Z',clockwork:'M43 4h14l4 10 14 5 10-4 9 12-7 9 4 15 9 6-3 15-12 1-9 12-1 12-15 3-6-9-15-4-9 7-12-9 4-10-5-14L4 57V43l10-4 5-14-4-10 12-9 9 7 15-4Z',lunar:'M50 5C72 0 95 21 95 50S71 99 50 95C22 99 0 71 5 50 0 22 22 0 50 5Z',emberglass:'M50 3 87 15 97 50 87 87 50 97 15 87 3 50 15 15Z',arctic:'M50 2 80 10 91 35 98 50 91 65 80 90 50 98 20 90 9 65 2 50 9 35 20 10Z',nebula:'M50 7C79 7 94 31 94 50S80 94 50 94 6 79 6 50 20 7 50 7Z'};
  return <span className={`${styles.frame} ${styles[theme.id]||''}`} style={cosmeticStyle(cosmeticId)} aria-hidden="true"><svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.8"><path d={outer[theme.id]}/><circle cx="50" cy="50" r="37" strokeWidth=".7" opacity=".6"/><path d="M47 8h6M47 92h6M8 47v6M92 47v6" strokeWidth="2.8"/><circle cx="50" cy="8" r="3" fill="currentColor"/><circle cx="50" cy="92" r="3" fill="currentColor"/></svg><span className={styles.frameCrest}><CosmeticMotif name={theme.motif}/></span></span>;
 }
 
-export function CosmeticArrival({cosmeticId,compact=true}){
+export function CosmeticArrival({cosmeticId,compact=true,format='webp'}){
  const theme=cosmeticTheme(cosmeticId);if(!theme)return null;
- return <span className={`${styles.arrival} ${styles[theme.id]||''} ${compact?styles.compact:''}`} style={cosmeticStyle(cosmeticId)} aria-hidden="true"><span className={styles.arrivalRing}/>{[0,1,2,3,4,5].map(i=><span key={i} className={styles.particle} style={{'--particle-angle':`${i*60}deg`,'--particle-delay':`${i*.13}s`}}><CosmeticMotif name={i%2?theme.emotes[1]:theme.motif}/></span>)}{!compact&&<span className={styles.arrivalCore}><CosmeticMotif name={theme.motif}/></span>}</span>;
+ return <span className={`${styles.arrival} ${styles[theme.id]||''} ${compact?styles.compact:''}`} style={cosmeticStyle(cosmeticId)} aria-hidden="true">{theme.id==='ascendant'&&<AnimatedCosmeticImage cosmeticId={cosmeticId} format={format} className={styles.ascendantPortal} alt=""/>}<span className={styles.arrivalRing}/>{[0,1,2,3,4,5].map(i=><span key={i} className={styles.particle} style={{'--particle-angle':`${i*60}deg`,'--particle-delay':`${i*.13}s`}}><CosmeticMotif name={i%2?theme.emotes[1]:theme.motif}/></span>)}{!compact&&<span className={styles.arrivalCore}><CosmeticMotif name={theme.motif}/></span>}</span>;
 }

@@ -67,8 +67,12 @@ test('Razorpay HMAC checks raw UTF8 bytes rather than a reserialized JSON object
 test('Payment prices use server-side integer paise and capture must match its recorded order',()=>{
   assert.equal(checkoutConfigured(env),true);assert.equal(checkoutConfigured({RAZORPAY_KEY_ID:'public-only'}),false);
   const products=commerceProducts({});assert.equal(products.find(p=>p.id==='coins-spark').amount,4900);assert(products.every(p=>Number.isInteger(p.amount)&&p.currency==='INR'));
-  const bundles=products.filter(product=>product.kind==='bundle');assert.equal(bundles.length,10);assert(bundles.every(bundle=>bundle.amount===14900&&bundle.coins===0&&bundle.cosmeticIds.length===9));
+  const bundles=products.filter(product=>product.kind==='bundle');assert.equal(bundles.length,COLLECTION_BUNDLES.length);assert.equal(bundles.filter(bundle=>bundle.themeId!=='ascendant').length,10);assert(bundles.every(bundle=>bundle.amount===(bundle.themeId==='ascendant'?49900:14900)&&bundle.coins===0&&bundle.cosmeticIds.length===9));
   assert.equal(commerceProducts({RAZORPAY_COLLECTION_PAISE:'19900'}).find(product=>product.kind==='bundle').amount,19900);
+  assert.equal(commerceProducts({RAZORPAY_COLLECTION_PAISE:'19900'}).find(product=>product.id==='bundle-ascendant').amount,49900);
+  assert.equal(commerceProducts({RAZORPAY_ASCENDANT_PAISE:'59900'}).find(product=>product.id==='bundle-ascendant').amount,59900);
+  assert.equal(commerceProducts({RAZORPAY_ASCENDANT_PAISE:'59900'}).find(product=>product.id==='bundle-solar').amount,14900);
+  assert.throws(()=>commerceProducts({RAZORPAY_ASCENDANT_PAISE:'499.5'}),code('PAYMENT_CONFIG'));
   assert.throws(()=>commerceProducts({RAZORPAY_COLLECTION_PAISE:'149.5'}),code('PAYMENT_CONFIG'));
   assert.throws(()=>commerceProducts({RAZORPAY_SPARK_PAISE:'49.5'}),code('PAYMENT_CONFIG'));
   const order={providerOrderId:'order_fixture',amount:4900,currency:'INR'},payment=captured(order,'pay_fixture');
@@ -141,6 +145,40 @@ test('real isolated MySQL provider settlement and cosmetic entitlements',{skip:!
   // Canonical display catalog only, scoped to the guarded disposable test DB.
   for(const item of COLLECTION_COSMETICS)await db.cosmeticItem.upsert({where:{id:item.id},create:item,update:{enabled:true}});
   const bundle=COLLECTION_BUNDLES[0];
+
+  await t.test('Ascendant coin styles use the same ownership checks, debit once and equip all nine profile slots',async()=>{
+    const styles=COLLECTION_COSMETICS.filter(item=>item.rarity==='ascendant'),user=await fixture(25000),other=await fixture();
+    const fields={avatar:'avatar',board:'equippedBoard',marks:'equippedMark',arena:'equippedArena',frame:'equippedFrame',banner:'equippedBanner',effect:'equippedEffect',emote:'equippedEmote',title:'title'};
+    let balance=25000;
+    for(const item of styles){
+      await assert.rejects(equipCosmetic(other.id,item.id),code('NOT_OWNED'));
+      const requestId='ascendant-'+randomUUID(),first=await purchaseCosmetic(user.id,item.id,requestId),again=await purchaseCosmetic(user.id,item.id,requestId);
+      balance-=item.price;assert.equal(first.wallet.coins,balance);assert.equal(again.wallet.coins,balance);assert.equal(again.duplicate,true);
+      await assert.rejects(purchaseCosmetic(user.id,item.id,'owned-'+randomUUID()),code('ALREADY_OWNED'));
+      const equipped=await equipCosmetic(user.id,item.id);assert.equal(equipped.profile[fields[item.type]],item.type==='title'?item.name:item.id);
+    }
+    assert.equal(await db.playerInventory.count({where:{userId:user.id}}),9);
+    assert.equal(await db.shopPurchase.count({where:{userId:user.id}}),9);
+    assert.equal(await db.playerPower.count({where:{userId:user.id}}),0);
+    assert.equal((await db.playerRating.findUnique({where:{userId:user.id}})).cups,0);
+  });
+
+  await t.test('Ascendant cash collection snapshots its premium price and duplicate capture grants cosmetics without coins or powers',async()=>{
+    const user=await fixture(),premium=COLLECTION_BUNDLES.find(item=>item.id==='bundle-ascendant');
+    const listed=(await listCommerceProducts(user.id,env)).products.find(product=>product.id===premium.id);
+    assert.equal(listed.amount,49900);assert.equal(listed.itemCount,9);
+    const {order}=await pending(user,premium.id);assert.equal(order.amount,49900);assert.deepEqual(order.cosmeticIds,premium.cosmeticIds);
+    const payment=captured(order,'pay_'+run+'Ascendant');
+    await assert.rejects(fulfillCapturedPayment(order,{...payment,amount:14900}),code('PAYMENT_MISMATCH'));
+    const results=await Promise.all([fulfillCapturedPayment(order,payment),fulfillCapturedPayment(order,payment)]);
+    assert.equal(results.filter(result=>result.duplicate).length,1);
+    assert.equal(await db.playerInventory.count({where:{userId:user.id}}),9);
+    assert.equal(await db.commerceCosmeticGrant.count({where:{orderId:order.id}}),9);
+    assert.equal((await db.currencyWallet.findUnique({where:{userId:user.id}})).coins,250);
+    assert.equal(await db.playerPower.count({where:{userId:user.id}}),0);
+    await assert.rejects(pending(user,premium.id),code('ALREADY_OWNED'));
+    for(const id of premium.cosmeticIds)await equipCosmetic(user.id,id);
+  });
 
   await t.test('Collections require enabled catalog styles, a registered player and configured checkout',async()=>{
     const user=await fixture(),guest=await fixture(250,true);
@@ -256,7 +294,7 @@ test('real isolated MySQL provider settlement and cosmetic entitlements',{skip:!
     }
   });
 
-  await t.test('All twenty collection emotes require the matching equipped inventory item while six base signals remain free',async()=>{
+  await t.test('All collection emotes require the matching equipped inventory item while six base signals remain free',async()=>{
     const user=await fixture();for(const emote of ['wave','gg','wow','think','fire','shield'])await validateMatchEmote(user.id,emote);
     await assert.rejects(validateMatchEmote(user.id,'unknown'),code('VALIDATION'));
     for(const item of COLLECTION_COSMETICS.filter(item=>item.type==='emote')) {

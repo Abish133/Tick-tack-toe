@@ -533,3 +533,83 @@
     animation: none;
   }
 }
+
+.ascendantBundle {
+  border-color: #e8e4c7;
+  box-shadow: inset 0 0 0 1px #b9ebff66, 0 5px 0 #030711, 0 0 18px #acddf91f;
+}
+.ascendantBundle:before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: var(--ascendant-rim);
+  background-size: 200% 100%;
+  animation: ascendantRim 9s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 3;
+}
+.ascendantBundle:after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border: 1px solid #e0f4ff40;
+  border-radius: 9px;
+  z-index: 2;
+  pointer-events: none;
+}
+.ascendantBundle .bundleInfo {
+  background: linear-gradient(135deg, #2b3549, #111e30 70%);
+  border-top: 1px solid #d6f5ff66;
+}
+.ascendantBundle h3 { color: #f3f8ec; }
+.ascendantBundle .bundlePrice strong { color: #f4e6bd; }
+.ascendantBundle .bundleAvatar :global(.collection-portrait-art) {
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+}
+.ascendantBundle .bundleAvatar img {
+  height: 100%;
+  width: 100%;
+  max-width: none;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px #d3faff33);
+}
+.premiumTier {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  z-index: 2;
+  color: #f1fbff;
+  pointer-events: none;
+}
+.premiumTier > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border: 1px solid #d6eff4;
+  border-radius: 5px;
+  background: linear-gradient(120deg, #203949f5, #35334bf5);
+  box-shadow: inset 0 1px #fff6;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.premiumTier > span + span { border-color: #d9d1ab91; color: #f9e6b9; }
+@media (max-width: 600px) {
+  .premiumTier { top: 6px; left: 6px; gap: 3px; }
+  .premiumTier > span { padding: 3px 5px; }
+}
+@media (prefers-contrast: more) {
+  .premiumTier > span { color: white; background: #081421; border-color: white; }
+}
+@keyframes ascendantRim { to { background-position: 100% 0; } }
+@media (prefers-reduced-motion: reduce) { .ascendantBundle:before { animation: none; } }
+:global(.reduce-motion) .ascendantBundle:before { animation: none; }

@@ -21,6 +21,8 @@ import CommercePanel from "./CommercePanel";
 import { GameFrame, GameButton, Modal, RarityTile } from "./ui";
 import {
   COSMETIC_THEMES,
+  cosmeticById,
+  cosmeticMotion,
   cosmeticTheme,
   cosmeticStyle,
 } from "../lib/cosmetic-collection";
@@ -71,6 +73,7 @@ export function CosmeticPreview({
   user,
 }) {
   const theme = cosmeticTheme(item.id),
+    animated = Boolean(cosmeticMotion(item.id)),
     isBoard = ["board", "marks"].includes(item.type),
     equipped = isEquipped(item, user);
   return (
@@ -84,9 +87,13 @@ export function CosmeticPreview({
         className={styles.previewRarity}
         data-rarity={item.rarity || "rare"}
       >
-        {item.rarity || "rare"} · COSMETIC PREVIEW
+        {item.rarity || "rare"} · {animated && "ANIMATED · "}COSMETIC PREVIEW
       </span>
-      <div className={styles.previewStage} style={cosmeticStyle(item.id)}>
+      <div
+        className={styles.previewStage}
+        data-rarity={item.rarity}
+        style={cosmeticStyle(item.id)}
+      >
         {isBoard ? (
           <div
             className={`preview-board ${item.type === "board" && theme ? "collection-board" : ""} ${styles.previewBoard}`}
@@ -114,7 +121,7 @@ export function CosmeticPreview({
             )}
           </div>
         ) : (
-          <CosmeticArt item={item} />
+          <CosmeticArt item={item} format="gif" />
         )}
       </div>
       {theme && <p className={styles.themeName}>{theme.name} collection</p>}
@@ -208,6 +215,10 @@ export default function CosmeticShop({
       list.sort((a, b) => {
         const first = cosmeticTheme(a.id),
           second = cosmeticTheme(b.id);
+        const premium =
+          Number(second?.id === "ascendant") -
+          Number(first?.id === "ascendant");
+        if (premium) return premium;
         if (!first || !second)
           return Number(Boolean(first)) - Number(Boolean(second));
         const worlds =
@@ -282,6 +293,7 @@ export default function CosmeticShop({
     ownedIds,
     onCollection: viewCollection,
   };
+  const ascendantAvatar = cosmeticById("avatar-collection-ascendant");
   return (
     <section className={styles.store} aria-label="Cosmetic collection">
       <div className={styles.categories} aria-label="Cosmetic categories">
@@ -363,22 +375,22 @@ export default function CosmeticShop({
         {category === "all" && theme === "all" && !query && (
           <GameFrame
             variant="banner"
-            className={styles.hero}
-            aria-label="The elemental style collection"
+            className={`${styles.hero} ${styles.ascendantHero}`}
+            aria-label="Astral Ascendancy, animated Ascendant collection"
           >
             <img
               className={styles.heroBackground}
-              src="/assets/collection/arena-nebula.webp"
+              src="/assets/collection/ascendant/arena-poster.webp"
               alt=""
             />
             <div className={styles.heroShade} />
             <div className={styles.heroCopy}>
               <span className={styles.offerRibbon}>
                 <Sparkles size={16} />
-                TEN WORLDS
+                ASCENDANT · ANIMATED
               </span>
-              <h2>CHOOSE YOUR LEGEND</h2>
-              <p>90 collection styles · Equal powers</p>
+              <h2>ASTRAL ASCENDANCY</h2>
+              <p>Nine animated styles · Beyond Legendary</p>
               <GameButton
                 variant="secondary"
                 className={styles.heroAction}
@@ -388,8 +400,7 @@ export default function CosmeticShop({
               </GameButton>
             </div>
             <div className={styles.heroArt} aria-hidden="true">
-              <img src="/assets/collection/avatar-lunar.webp" alt="" />
-              <img src="/assets/collection/avatar-solar.webp" alt="" />
+              {ascendantAvatar && <CosmeticArt item={ascendantAvatar} />}
             </div>
           </GameFrame>
         )}
@@ -424,6 +435,7 @@ export default function CosmeticShop({
               <div className={`shop-grid ${styles.grid}`}>
                 {filtered.slice(0, limit).map((item) => {
                   const collection = cosmeticTheme(item.id),
+                    animated = Boolean(cosmeticMotion(item.id)),
                     isOwned = owned.has(item.id),
                     equipped = isEquipped(item, user);
                   return (
@@ -434,6 +446,8 @@ export default function CosmeticShop({
                       key={item.id}
                       data-cosmetic-type={item.type}
                       data-cosmetic-id={item.id}
+                      data-animated={animated || undefined}
+                      aria-label={`${item.name}, ${item.rarity || "rare"}${animated ? ", animated cosmetic" : ""}`}
                       style={
                         collection
                           ? { "--collection-color": collection.primary }
@@ -447,11 +461,18 @@ export default function CosmeticShop({
                       >
                         <span className={styles.artHalo} />
                         <CosmeticArt item={item} />
-                        <span
-                          className={styles.rarity}
-                          data-rarity={item.rarity}
-                        >
-                          {item.rarity || "rare"}
+                        <span className={styles.tierBadges}>
+                          <span
+                            className={styles.rarity}
+                            data-rarity={item.rarity}
+                          >
+                            {item.rarity || "rare"}
+                          </span>
+                          {animated && (
+                            <span className={styles.animatedBadge}>
+                              <Sparkles size={12} aria-hidden="true" /> ANIMATED
+                            </span>
+                          )}
                         </span>
                         {isOwned && (
                           <span className={styles.owned}>

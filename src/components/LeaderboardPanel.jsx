@@ -1,5 +1,6 @@
 "use client";
 
+import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
@@ -157,7 +158,7 @@ export default function LeaderboardPanel({
         disabled={!onProfile}
       >
         <span className={styles.avatar}>
-          <img src={portrait(entry.profile)} alt="" loading="lazy" />
+          <AnimatedCosmeticImage cosmeticId={entry.profile?.avatar} src={portrait(entry.profile)} alt="" loading="lazy" />
         </span>
         <span>
           <strong>

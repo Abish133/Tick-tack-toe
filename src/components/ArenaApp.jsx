@@ -1,4 +1,5 @@
 "use client";
+import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import CosmeticShop from "./CosmeticShop";
@@ -188,6 +189,8 @@ const EMOTE_LABELS = {
   aurora: "Brilliant play!",
   planet: "Out of this world!",
   comet: "Star streak!",
+  supernova: "Supernova play!",
+  infinity: "Beyond the stars!",
 };
 function Avatar({
   name,
@@ -206,7 +209,8 @@ function Avatar({
       style={{ ...cosmeticStyle(skin), ...cosmeticStyle(frame) }}
     >
       <span>{initials(name)}</span>
-      <img
+      <AnimatedCosmeticImage
+        cosmeticId={skin}
         src={asset}
         alt=""
         onError={(e) => {
@@ -1120,6 +1124,7 @@ export default function ArenaApp() {
             rankProgress={rankProgress(user?.cups)}
             battleActive={pathname === "/battle"}
             hasActiveMatch={game?.status === "active" && !spectator}
+            backgroundCosmeticId={user?.profile?.equippedArena}
             background={
               cosmeticAsset(user?.profile?.equippedArena) || "/assets/arena.png"
             }

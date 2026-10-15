@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-15",
+  "scope": "Ascendant cosmetic collection and animated artwork",
+  "tier": "ascendant",
+  "collection": "Astral Ascendancy",
+  "styles": 9,
+  "cosmeticOnly": true,
+  "originalArtwork": "Built-in imagegen",
+  "animation": {
+    "frames": 40,
+    "durationMs": 2400,
+    "loop": "infinite",
+    "masters": 3,
+    "gifAndWebp": true,
+    "transparentAvatarAndFrame": true,
+    "manifest": "../public/assets/collection/ascendant/motion-manifest.json"
+  },
+  "productionBuild": "passed",
+  "unitAndBackend": {
+    "passed": 278,
+    "failed": 0,
+    "skipped": 0
+  },
+  "targetedBrowserFlows": {
+    "uniquePassed": 7,
+    "failedAfterFixes": 0,
+    "coverage": [
+      "all-nine new purchases and equipment",
+      "real GIF previews",
+      "live system reduced motion",
+      "saved reduced motion",
+      "actual AI battle and styled X/O",
+      "legacy Solar collection",
+      "season pass",
+      "compact shell and dialogs"
+    ]
+  },
+  "visual": {
+    "report": [
+      {
+        "label": "mobile",
+        "width": 390,
+        "height": 844,
+        "overflow": false
+      },
+      {
+        "label": "desktop",
+        "width": 1440,
+        "height": 900,
+        "overflow": false
+      },
+      {
+        "label": "small",
+        "width": 360,
+        "height": 740,
+        "overflow": false
+      }
+    ],
+    "errors": []
+  },
+  "pricing": {
+    "bundleInr": 499,
+    "env": "RAZORPAY_ASCENDANT_PAISE",
+    "paymentValidation": "Existing secure capture and ownership flows preserved"
+  },
+  "deployment": "CI-gated Railway main autodeploy"
+}
