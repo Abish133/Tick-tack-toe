@@ -92,5 +92,19 @@
     }
   },
   "screenshots": "screenshots/compact-ui/README.md",
-  "pipeline": "Full GitHub release gate required by Railway automatic deployment."
+  "pipeline": "Full GitHub release gate required by Railway automatic deployment.",
+  "release": {
+    "commit": "677d00d7ae463fd5d077777864ebcccc63a4c9cb",
+    "url": "https://elemental-arena-production.up.railway.app",
+    "githubRun": "https://github.com/Abish133/Tick-tack-toe/actions/runs/38682359964",
+    "ci": "success",
+    "unitPassed": 273,
+    "unitSkipped": 0,
+    "browserPassed": 19,
+    "railwayDeployment": "162b66f2-38b0-4446-86dd-668f2e6f6d1b",
+    "railwayStatus": "SUCCESS",
+    "liveScreenChecks": 24,
+    "livePageErrors": [],
+    "coordinator": "active"
+  }
 }

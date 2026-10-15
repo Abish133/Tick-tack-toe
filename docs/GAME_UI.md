@@ -8,6 +8,8 @@ Interactive targets retain a 48px minimum and visible text stays at least 12px. 
 
 The production build passed. All nine targeted browser flows passed, including real cosmetic purchases/equipping and all 22 powers, plus an actual 6×6 battle, emotes, drawers and surrender. A separate check covered eight core screens at six viewport sizes (48 combinations) with no body/horizontal overflow, undersized visible text or browser errors. The normal GitHub release gate reruns the full backend and browser suites before automatic deployment. Current compact captures and measurements are in [screenshots/compact-ui](screenshots/compact-ui/README.md) and [compact-ui-verification.json](compact-ui-verification.json).
 
+The compact release `677d00d` subsequently passed the full CI gate: 273 backend/unit tests with no skips, all 19 browser flows, production builds and Linux coordinator takeover. Railway deployed it successfully. A read-only public-site check verified 24 screen/viewport combinations without overflow or page errors and confirmed the expected release with an active coordinator. The Settings capture waits for both dialog and backdrop opacity to reach 1.
+
 The October 2026 presentation refresh turns the existing application into a screen-based game interface. It does not add or rebalance game mechanics. All 22 powers, three equipped slots, 3×3–6×6 rules, ranked matchmaking, rewards, cosmetic ownership and payment validation continue to use the existing engine and services. Food, health, morale, survival events and other examples in the visual references are not game mechanics.
 
 ## Screen layout and navigation
