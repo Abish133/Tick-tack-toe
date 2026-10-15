@@ -63,6 +63,7 @@ export default function GameShell({
   background = "/assets/arena.png",
   backgroundCosmeticId,
   notificationCount = 0,
+  connectionNotice = null,
 }) {
   const [journeyOpen, setJourneyOpen] = useState(false),
     reduced = useReducedMotion();
@@ -128,7 +129,7 @@ export default function GameShell({
   ];
   return (
     <div
-      className={`${styles.world} ${battleActive ? styles.inBattle : ""}`}
+      className={`${styles.world} ${battleActive ? styles.inBattle : ""} ${connectionNotice ? styles.withNotice : ""}`}
       style={{ "--world-art": `url("${arenaArt.src}")` }}
     >
       <div className={styles.environment} aria-hidden="true">
@@ -243,6 +244,7 @@ export default function GameShell({
           </div>
         </header>
       )}
+      {connectionNotice}
       <main className={styles.stage} aria-label="Game screen">
         {!battleActive && pathname !== "/" && (
           <GameButton

@@ -1,10 +1,14 @@
 import 'dotenv/config';
-import {startServer} from '../server.mjs';
-import {bootstrapDatabase} from './production-bootstrap.mjs';
+import {superviseRuntime} from './runtime-supervisor.mjs';
+import {runtimeErrorDetails,transientRuntimeError,TRANSIENT_RUNTIME_EXIT} from '../src/server/runtime-errors.mjs';
 
-// One Node process receives container signals and holds its dedicated MySQL
-// session across migrations, seeding, serving and draining.
-startServer({bootstrap:bootstrapDatabase,exitOnShutdown:true}).catch(()=>{
-  console.error(JSON.stringify({level:'error',event:'container_start_failed'}));
-  process.exit(1);
-});
+if(process.argv.includes('--worker')) {
+  const {startServer}=await import('../server.mjs');
+  const {bootstrapDatabase}=await import('./production-bootstrap.mjs');
+  startServer({bootstrap:bootstrapDatabase,exitOnShutdown:true}).catch(error=>{
+    console.error(JSON.stringify({level:'error',event:'container_start_failed',...runtimeErrorDetails(error)}));
+    process.exit(transientRuntimeError(error)?TRANSIENT_RUNTIME_EXIT:1);
+  });
+}else{
+  process.exitCode=await superviseRuntime({args:[process.argv[1],'--worker']});
+}

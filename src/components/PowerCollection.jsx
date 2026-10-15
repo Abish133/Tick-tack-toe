@@ -194,7 +194,7 @@ export default function PowerCollection({
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Find your next combination"
+            placeholder="Find power"
             aria-label="Search powers"
           />
         </label>
@@ -220,7 +220,7 @@ export default function PowerCollection({
         {selectionNotice ||
           (swapSlot !== null
             ? `Choose a power for slot ${swapSlot + 1}.`
-            : "Choose an equipped power to remove it, then select its replacement.")}
+            : "Tap a slot, then choose its replacement.")}
       </p>
       <div className={`power-grid ${styles.grid}`}>
         {powers.map((power) => (

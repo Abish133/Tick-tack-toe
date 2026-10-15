@@ -1,5 +1,6 @@
 import {createHash} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
+import {transientRuntimeError} from './runtime-errors.mjs';
 
 export function coordinatorLockNames(databaseUrl, namespace = '') {
   const url = new URL(databaseUrl);
@@ -29,13 +30,15 @@ export async function dedicatedMySQLConnection(databaseUrl) {
 
 export class CoordinatorLock {
   constructor({databaseUrl,namespace='',connect=dedicatedMySQLConnection,onLost=()=>{},onHandoff=()=>{},
-    waitMs=120000,pollMs=250,heartbeatMs=500,queryTimeoutMs=3000}={}) {
+    waitMs=120000,pollMs=250,heartbeatMs=500,queryTimeoutMs=3000,connectRetryMs=2000,onWaiting=()=>{}}={}) {
     this.databaseUrl=databaseUrl;
     this.names=coordinatorLockNames(databaseUrl,namespace);
     this.connect=connect;this.onLost=onLost;this.onHandoff=onHandoff;
     this.waitMs=waitMs;this.pollMs=pollMs;this.heartbeatMs=heartbeatMs;this.queryTimeoutMs=queryTimeoutMs;
     this.connection=null;this.owned=false;this.closed=false;this.requested=false;
     this.connectionId=null;this.timer=null;this.checking=false;this.handoffStarted=false;
+    this.onWaiting=onWaiting;
+    this.connectRetryMs=connectRetryMs;
   }
   async query(sql,values=[]) {
     const [rows]=await this.connection.query({sql,values,timeout:this.queryTimeoutMs});
@@ -43,7 +46,19 @@ export class CoordinatorLock {
   }
   async acquire() {
     if (this.connection || this.closed) throw new Error('Coordinator lock instances are single-use.');
-    const connection=await this.connect(this.databaseUrl);
+    const deadline=Date.now()+this.waitMs;
+    let connection;
+    // Retry opening a new, unowned session only. An owned connection is never
+    // replaced inside this lock; ownership loss still stops the whole worker.
+    for(let attempt=1;!connection;attempt++){
+      try{connection=await this.connect(this.databaseUrl);}
+      catch(error){
+        if(this.closed||!transientRuntimeError(error)||Date.now()>=deadline)throw error;
+        this.onWaiting({phase:'database_connection',attempt,error});
+        await delay(Math.min(this.connectRetryMs,Math.max(1,deadline-Date.now())));
+      }
+      if(this.closed&&!connection)throw new Error('Coordinator acquisition was stopped.');
+    }
     if (this.closed) {
       // A signal can arrive while connect() is still resolving. A late
       // connection must not survive the cancelled acquisition.
@@ -51,12 +66,16 @@ export class CoordinatorLock {
       throw new Error('Coordinator acquisition was stopped.');
     }
     this.connection=connection;
-    this.connection.on?.('error',()=>this.lose('database_connection_lost'));
+    this.connection.on?.('error',error=>this.lose('database_connection_lost',error));
     this.connection.on?.('end',()=>this.lose('database_connection_ended'));
     try {
+      // Heartbeats run every 500ms. Bound the server-side idle life so a lost
+      // TCP session cannot retain ownership for MySQL's default eight hours.
+      // A replacement still has to acquire GET_LOCK; it never steals a lock.
+      await this.query('SET SESSION wait_timeout = 60');
       const {id}=await this.query('SELECT CONNECTION_ID() AS id');
       this.connectionId=Number(id);
-      const deadline=Date.now()+this.waitMs;
+      let lastWaitLog=0;
       while (!this.closed) {
         const {acquired}=await this.query('SELECT GET_LOCK(?, 0) AS acquired',[this.names.owner]);
         if (this.closed) throw new Error('Coordinator acquisition was stopped.');
@@ -71,6 +90,11 @@ export class CoordinatorLock {
           return this;
         }
         if (acquired===null) throw new Error('MySQL refused coordinator ownership.');
+        if(Date.now()-lastWaitLog>=10000){
+          const {owner}=await this.query('SELECT IS_USED_LOCK(?) AS owner',[this.names.owner]);
+          this.onWaiting({phase:'coordinator_ownership',ownerConnectionId:Number(owner)||null,connectionId:this.connectionId});
+          lastWaitLog=Date.now();
+        }
         if (!this.requested) {
           const {acquired:request}=await this.query('SELECT GET_LOCK(?, 0) AS acquired',[this.names.request]);
           if (this.closed) throw new Error('Coordinator acquisition was stopped.');
@@ -79,7 +103,7 @@ export class CoordinatorLock {
           if (Number(request)!==1) throw new Error('Another coordinator takeover is already in progress.');
           this.requested=true;
         }
-        if (Date.now()>=deadline) throw new Error('Coordinator ownership timed out; the existing server was not replaced.');
+        if (Date.now()>=deadline) throw Object.assign(new Error('Coordinator ownership timed out; the existing server was not replaced.'),{code:'COORDINATOR_WAIT_TIMEOUT'});
         await delay(this.pollMs);
       }
       throw new Error('Coordinator acquisition was stopped.');
@@ -99,7 +123,7 @@ export class CoordinatorLock {
         Promise.resolve().then(()=>this.onHandoff()).catch(()=>this.lose('handoff_failed'));
       }
       return true;
-    } catch (error) {this.lose('ownership_check_failed');throw error;}
+    } catch (error) {this.lose('ownership_check_failed',error);throw error;}
   }
   startHeartbeat() {
     this.timer=setInterval(async()=>{
@@ -109,12 +133,12 @@ export class CoordinatorLock {
     },this.heartbeatMs);
     this.timer.unref?.();
   }
-  lose(reason) {
+  lose(reason,error) {
     if (this.closed) return;
     const hadOwnership=this.owned;
     this.closed=true;this.owned=false;clearInterval(this.timer);
     this.connection?.destroy?.();
-    if (hadOwnership) this.onLost(reason);
+    if (hadOwnership) this.onLost(reason,error);
   }
   async release() {
     if (this.closed) return;

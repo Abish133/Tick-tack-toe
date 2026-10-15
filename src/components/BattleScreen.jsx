@@ -1,6 +1,7 @@
 "use client";
 
 import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
+import ArenaConnectionNotice from "./ArenaConnectionNotice";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -189,6 +190,7 @@ function PlayerHUD({
   urgent,
   bank,
   settings,
+  disconnected = false,
 }) {
   const scored = boardSizeOf(game) > 3;
   const participant = match.participants?.find(
@@ -226,9 +228,9 @@ function PlayerHUD({
             </span>
           )}
         </strong>
-        <small>
-          <Trophy size={11} />
-          {subtitle}
+        <small className={disconnected ? styles.disconnectedPlayer : undefined} role={disconnected ? "status" : undefined}>
+          {disconnected ? <WifiOff size={12} /> : <Trophy size={11} />}
+          {disconnected ? "Opponent disconnected · clock continues" : subtitle}
         </small>
         <small
           className={`turn-bank ${styles.bank}`}
@@ -405,6 +407,9 @@ export default function BattleScreen({
   myTurn,
   busy,
   connected,
+  connectionPhase = connected ? "connected" : "connecting",
+  onReconnect,
+  opponentDisconnected = false,
   difficulty,
   settings,
   now,
@@ -442,6 +447,7 @@ export default function BattleScreen({
   const [intro, setIntro] = useState(match?.state?.status === "active");
   const [countdown, setCountdown] = useState("3");
   const game = match?.state;
+  const connectionReady = connected && connectionPhase === "connected";
   const previousRound = useRef(game?.round);
   const progressAtStart = useRef(null);
   const warnedSecond = useRef(null);
@@ -543,6 +549,7 @@ export default function BattleScreen({
   if (!game)
     return (
       <GameFrame className={styles.empty}>
+        {user && <ArenaConnectionNotice phase={connectionPhase} onRetry={onReconnect} inBattle />}
         <Swords size={64} />
         <h2>Your next battle is waiting</h2>
         <p>Choose Ranked, Practice, or challenge a friend to begin.</p>
@@ -551,13 +558,15 @@ export default function BattleScreen({
     );
   if (game.status === "finished")
     return (
+      <div className={`${styles.resultContainer} ${!connectionReady ? styles.resultReconnecting : ""}`}>
+        {!connectionReady && <ArenaConnectionNotice phase={connectionPhase} onRetry={onReconnect} />}
       <EndMatchSummary
         match={match}
         playerId={playerId}
         spectator={spectator}
         rematchRequested={rematchRequested}
         rematchOffer={rematchOffer}
-        busy={busy}
+        busy={busy || !connectionReady}
         onAgain={onAgain}
         onArena={() => navigate("/")}
         onReplay={() => navigate("/replay/" + match.matchId)}
@@ -571,6 +580,7 @@ export default function BattleScreen({
         profile={user?.profile}
         onSound={onSound}
       />
+      </div>
     );
 
   const mode =
@@ -614,14 +624,14 @@ export default function BattleScreen({
         <div className={styles.modePlate}>
           <span
             className={`connection ${styles.connectionSignal}`}
-            title={connected ? "Arena connected" : "Connecting"}
+            title={connectionReady ? "Arena connected" : "Connecting"}
           >
-            {connected ? (
+            {connectionReady ? (
               <Wifi size={14} aria-hidden="true" />
             ) : (
               <WifiOff size={14} aria-hidden="true" />
             )}
-            <span>{connected ? "Arena connected" : "Connecting"}</span>
+            <span>{connectionReady ? "Arena connected" : "Connecting"}</span>
           </span>
           <strong>{mode}</strong>
           <span>
@@ -668,6 +678,7 @@ export default function BattleScreen({
         urgent={urgent}
         bank={bankSeconds(opponent?.id)}
         settings={settings}
+        disconnected={opponentDisconnected}
       />
 
       <div className={`turn-banner ${styles.turnBar}`} aria-live="polite">
@@ -699,6 +710,11 @@ export default function BattleScreen({
       </div>
 
       <div className={styles.boardStage}>
+        {!connectionReady && (
+          <div className={styles.connectionOverlay}>
+            <ArenaConnectionNotice phase={connectionPhase} onRetry={onReconnect} inBattle />
+          </div>
+        )}
         <div className={styles.pedestal}>
           <div
             className={`game-board board-size-${battleSize} ${styles.board} ${cosmeticTheme(user?.profile?.equippedBoard) ? "collection-board" : ""}`}
@@ -869,7 +885,11 @@ export default function BattleScreen({
         >
           <span>
             {emote ||
-              (selectedPower
+              (!connectionReady
+                ? "Restoring your connection. The displayed board may be out of date."
+                : opponentDisconnected
+                  ? "Opponent disconnected. Keep playing; the server turn clock continues."
+                : selectedPower
                 ? targetHint(selectedPower, source)
                 : myTurn
                   ? "Place your mark, or change the board with a power."
@@ -935,6 +955,7 @@ export default function BattleScreen({
                 disabled={
                   !myTurn ||
                   busy ||
+                  !connectionReady ||
                   !availableActions.some(
                     (item) => item.type === "power" && item.powerId === id,
                   )
@@ -1003,7 +1024,7 @@ export default function BattleScreen({
             id={selectedPower}
             actions={selectedActions}
             onAction={castPower}
-            disabled={!myTurn || busy}
+            disabled={!myTurn || busy || !connectionReady}
           />
           <GameButton variant="secondary" onClick={cancelPower}>
             Cancel
@@ -1086,7 +1107,7 @@ export default function BattleScreen({
               )}
               <GameButton
                 variant="danger"
-                disabled={game.status !== "active" || spectator}
+                disabled={game.status !== "active" || spectator || !connectionReady}
                 onClick={() => {
                   setDrawer(null);
                   setSurrender(true);
@@ -1120,7 +1141,7 @@ export default function BattleScreen({
                 <GameButton
                   key={id}
                   variant="secondary"
-                  disabled={!connected || game.status !== "active"}
+                  disabled={!connectionReady || game.status !== "active"}
                   style={{ "--emote-index": index }}
                   onClick={() => {
                     emit("match:emote", {
@@ -1141,7 +1162,7 @@ export default function BattleScreen({
         </Modal>
       )}
       <AnimatePresence>
-        {intro && (
+        {intro && connectionReady && (
           <motion.div
             className={styles.vsIntro}
             initial={{ opacity: 0 }}

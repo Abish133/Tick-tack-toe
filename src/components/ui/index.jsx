@@ -190,7 +190,7 @@ export function ResourcePill({
       display >= 1000
         ? new Intl.NumberFormat("en", {
             notation: "compact",
-            maximumFractionDigits: 0,
+            maximumFractionDigits: 1,
           }).format(display)
         : display.toLocaleString();
   return (

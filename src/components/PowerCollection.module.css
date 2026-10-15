@@ -642,3 +642,48 @@
     height: 26px;
   }
 }
+
+/* Keep the equipped deck small enough to leave room for browsing on a phone. */
+@media (max-width: 600px) {
+  .deck { gap: 4px; }
+  .summary { padding: 6px !important; gap: 4px !important; border-width: 1px; }
+  .summaryTitle { font-size: 12px; gap: 5px; line-height: 16px; }
+  .summaryTitle > svg { width: 15px; height: 15px; }
+  .summaryTitle > span { display: none; }
+  .slots { gap: 5px; align-items: stretch; }
+  .slot { border-width: 1px; border-radius: 7px; box-shadow: inset 0 1px #ffffff20, 0 2px #030811; }
+  .slotChoice { min-height: 76px; height: 100%; padding: 4px 4px 5px; gap: 2px; }
+  .slotChoice strong { font-size: 12px; line-height: 1.15; min-height: 28px; display: grid; place-items: center; }
+  .slotChoice > span:last-child { font-size: 12px; line-height: 13px; gap: 2px; }
+  .slotNumber { font-size: 16px; right: 5px; bottom: 3px; }
+  .art.smallArt, .art.smallArt :global(.sprite) { width: 22px; height: 22px; }
+  .art.smallArt > svg { width: 19px; height: 19px; }
+  .remove { top: 0; right: 0; align-items: start; justify-items: end; padding: 5px; }
+  .remove svg { width: 12px; height: 12px; }
+  .deckHint { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .filters { gap: 4px; }
+  .filters > label { flex-basis: 35%; padding: 0 7px; border-width: 1px; border-radius: 6px; gap: 4px; }
+  .filters > label > svg { width: 15px; height: 15px; flex: none; }
+  .filters input { padding: 0 !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; background: transparent !important; font-size: 12px !important; }
+  .filters > label:focus-within { outline: 2px solid #fff0a6; outline-offset: 1px; }
+  .families { gap: 3px; padding: 0; }
+  .families button { padding: 4px 7px; font-size: 12px; border-radius: 6px; gap: 3px; box-shadow: none; }
+  .families button > svg { width: 15px; height: 15px; }
+  .selectionNotice { min-height: 0; font-size: 12px; line-height: 1.25; }
+  .grid { gap: 6px !important; padding: 2px 1px 8px; }
+  .card { min-height: 152px; padding: 8px 5px 5px !important; border-width: 1px; border-radius: 8px 8px 0 0; }
+  .card::before { inset: 4px; border-radius: 5px; }
+  .card h3 { min-height: 29px; font-size: 13px !important; line-height: 1.15; margin: 4px 0 2px !important; }
+  .art { width: 48px; height: 48px; }
+  .art > svg { width: 34px; height: 34px; }
+  .art :global(.sprite) { width: 46px; height: 46px; }
+  .family { padding: 0 5px; line-height: 16px; border-radius: 4px; }
+  .element { line-height: 15px; }
+  .cost { min-width: 23px; height: 26px; font-size: 15px; top: 4px; left: 4px; border-width: 1px; border-radius: 6px 6px 8px 8px; }
+  .cost svg { width: 10px; height: 13px; }
+  .equippedBadge { right: 5px; top: 7px; }
+  .equippedBadge svg { width: 15px; height: 15px; }
+  .cardAction { margin-top: 3px; font-size: 12px; line-height: 1.1; max-width: 100%; }
+  .inspect { border-width: 1px; border-top: 0; border-radius: 0 0 7px 7px; font-size: 12px; letter-spacing: .4px; gap: 4px; }
+  .inspect > svg { width: 14px; height: 14px; }
+}

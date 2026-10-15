@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-15",
+  "scope": "Compact mobile layout, contained resource counters and connection recovery",
+  "productionBuild": "passed",
+  "unitAndBackend": {"passed":292,"failed":0,"skipped":0},
+  "targetedBrowserFlows": {
+    "passed":7,
+    "coverage":["320–1440px header counter contents","compact Armory and search","core viewports and board cells","nested modal navigation","all 22 Power Lab controls","three-slot replacement","tab close and return","offline action lock and online recovery","server-forced socket reconnection","completed-result recovery after reload"]
+  },
+  "visual": {
+    "viewports":[{"width":390,"height":844},{"width":360,"height":740},{"width":1440,"height":900}],
+    "screens":["Armory","Collection","Battle hub"],
+    "pageErrors":0,
+    "documentOverflow":false,
+    "mobileHudHeight":52,
+    "mobileDeckHeight":112,
+    "minimumControlHeight":48,
+    "screenshots":"screenshots/dense-ui/"
+  },
+  "runtime": {
+    "confirmedIncident":"Orphaned MySQL coordinator connection retained its advisory lock after the worker stopped",
+    "productionRestored":"2026-10-15T08:53:26Z",
+    "playerDataPreserved":true,
+    "ownerSessionIdleTimeoutSeconds":60,
+    "automaticLockStealing":false,
+    "supervisorRecovery":"Fresh worker after transient exit, bounded backoff, signal forwarding",
+    "linuxContainerRecovery":"Required by the release CI gate; unavailable locally"
+  },
+  "gameMechanics":"Unchanged; existing turn clock, timeout, surrender, scoring and reward policies continue",
+  "deployment":"CI-gated Railway main autodeploy"
+}

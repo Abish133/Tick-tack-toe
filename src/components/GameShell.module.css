@@ -5,31 +5,38 @@
 @media(max-width:340px){.hud{gap:2px;padding-inline:3px}.hudTools{gap:1px}.resources{gap:3px}.resources>button{min-width:57px!important}.resources>button>strong{font-size:17px!important}.resources>button>svg:last-of-type{display:none}}
 @media(prefers-reduced-motion:reduce){.environment:before,.atmosphere{animation:none}.active .dockIcon{transform:none}.dockButton{transition:none}}
 :global(.reduce-motion) .environment:before,:global(.reduce-motion) .atmosphere{animation:none}:global(.high-contrast) .hud,:global(.high-contrast) .dock{background:#061020;border-color:#fff0a2}
-.resources{min-width:0}.resources>button{min-width:0}.resources>button>strong{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}@media(max-width:600px){.resources{gap:7px}.resources>button{flex:1;width:0;min-width:56px;padding-left:12px;padding-right:4px}.resources>button>svg:first-child{position:absolute;left:-4px;width:18px;height:18px;filter:drop-shadow(0 2px 3px #000)}.resources>button>strong{font-size:20px;flex:1;text-align:center}.resources>button>svg:last-of-type{width:10px;flex-shrink:0}.hud{gap:4px}}
+.resources{min-width:0}.resources>button{min-width:0}.resources>button>strong{min-width:0;white-space:nowrap}
 .world{grid-template-columns:minmax(0,1fr)}.hud{min-width:0}@media(max-width:340px){.resources>button{min-width:48px!important;padding-inline:9px 3px}.resources>button>strong{font-size:17px!important}.resources>button>svg:last-of-type{display:none}.hudTools{gap:1px}}
 .inBattle .stage{padding:4px}
+.world.withNotice{grid-template-rows:calc(var(--hud-height) + env(safe-area-inset-top)) auto minmax(0,1fr) calc(var(--dock-height) + env(safe-area-inset-bottom))}
 
 .hud{gap:10px}.rank{font-size:16px}.crest small{font-size:19px}
 .dockButton{font-size:16px;gap:6px}.dockIcon{width:36px;height:36px}.dockIcon svg{width:25px;height:25px}
 .journeyTile{min-height:88px;padding:10px 6px;gap:8px;font-size:14px}
 @media(max-width:600px){
-  .hud{gap:4px;border-bottom-width:1px}
+  .hud{gap:3px;border-bottom-width:1px;padding-inline:max(6px,env(safe-area-inset-left)) max(6px,env(safe-area-inset-right))}
   .account{height:48px;width:48px;display:grid;place-items:center}
   .account :global([role=progressbar]){width:42px!important;height:42px!important}
   .account :global(.avatar){width:34px;height:34px}
   .level{font-size:12px;line-height:15px;padding-inline:4px;bottom:0}
-  .resources>button{border-width:1px;border-radius:7px}
-  .resources>button>strong{font-size:18px}
-  .hudTools>button{border-color:#73889e55;border-radius:7px;box-shadow:none}
-  .hudTools>button svg{width:19px;height:19px}
-  .dock{gap:2px;padding-inline:8px;border-top-width:1px}
+  .resources{gap:4px;justify-content:flex-start}
+  .resources>button{flex:1;width:0;min-width:48px!important;border-width:1px;border-radius:6px;padding:0 3px;gap:3px;justify-content:center;border-color:transparent;background:transparent;box-shadow:none;isolation:isolate}
+  .resources>button:before{content:'';position:absolute;inset:6px 0;border:1px solid #9a743c99;border-radius:6px;background:linear-gradient(#24384b,#0b192a);z-index:-1}
+  .resources>button>svg:first-child{position:static;flex:none;width:15px;height:15px;filter:none}
+  .resources>button>strong{font-size:16px!important;line-height:1.1;flex:0 1 auto;letter-spacing:-.3px;text-align:center}
+  .resources>button>svg:last-of-type{display:none}
+  .hudTools{gap:1px}
+  .hudTools>button{border-color:transparent;border-radius:6px;box-shadow:none;background:transparent;isolation:isolate}
+  .hudTools>button:after{content:'';position:absolute;inset:6px 2px;border:1px solid #73889e55;border-radius:6px;background:linear-gradient(#193046,#0e1c30);z-index:-1}
+  .hudTools>button svg{width:17px;height:17px}
+  .dock{gap:2px;padding-inline:6px;border-top-width:1px}
   .dockButton{padding:2px 4px;gap:0;font-size:12px}
-  .dockIcon{width:30px;height:30px;border-radius:8px}
-  .dockIcon svg{width:22px;height:22px}
-  .active .dockIcon{transform:translateY(-3px);box-shadow:0 0 12px #f2c86b25}
+  .dockIcon{width:26px;height:26px;border-radius:6px}
+  .dockIcon svg{width:19px;height:19px}
+  .active .dockIcon{transform:translateY(-1px);box-shadow:0 0 12px #f2c86b25}
   .active:after{height:3px;width:40%}
   .stage{padding-bottom:6px}
-  .withBack :global(.screen-heading){min-height:54px;padding-left:54px}
+  .withBack :global(.screen-heading){min-height:50px;padding-left:50px}
   .journeyGrid{gap:6px}
   .journeyTile{min-height:76px;gap:6px;padding:8px 5px;font-size:13px}
   .journeyTile svg{width:22px;height:22px}

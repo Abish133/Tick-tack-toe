@@ -51,6 +51,8 @@ import TutorialArena from "./TutorialArena";
 import { isArenaRoute } from "../lib/routes";
 import extraStyles from "./ArenaExtras.module.css";
 import { io } from "socket.io-client";
+import { savedBattleTarget, sendArenaRequest, sessionConnectionError } from "../lib/arena-connection.mjs";
+import ArenaConnectionNotice from "./ArenaConnectionNotice";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Link,
@@ -324,6 +326,8 @@ export default function ArenaApp() {
     [sessionReady, setSessionReady] = useState(false),
     [features, setFeatures] = useState({}),
     [connected, setConnected] = useState(false),
+    [connectionPhase, setConnectionPhase] = useState("connecting"),
+    [disconnectedPlayers, setDisconnectedPlayers] = useState([]),
     [error, setError] = useState(""),
     [notice, setNotice] = useState("");
   const [auth, setAuth] = useState(null),
@@ -383,12 +387,18 @@ export default function ArenaApp() {
     muteRef = useRef(false),
     clockOffset = useRef(0),
     pathnameRef = useRef(pathname),
-    settingsOwner = useRef(null);
+    settingsOwner = useRef(null),
+    connectionRef = useRef("connecting"),
+    recoverRef = useRef(null),
+    queueRef = useRef(queue),
+    roomRef = useRef(room);
   settingsRef.current = settings;
   matchRef.current = match;
   userRef.current = user;
   muteRef.current = muteEmotes;
   pathnameRef.current = pathname;
+  queueRef.current = queue;
+  roomRef.current = room;
   const api = useCallback(async (url, method = "GET", body) => {
     const res = await fetch(`/api${url}`, {
       method,
@@ -460,6 +470,16 @@ export default function ArenaApp() {
     } catch {}
   }, [refresh, api]);
   useEffect(() => {
+    // A first page load can fail before we know the signed-in player, so its
+    // recovery cannot depend on the authenticated socket already existing.
+    const online = () => {
+      if (!userRef.current) void refresh();
+      api("/catalog").then(setCatalog).catch(() => {});
+    };
+    window.addEventListener("online", online);
+    return () => window.removeEventListener("online", online);
+  }, [refresh, api]);
+  useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 250);
     return () => clearInterval(id);
   }, []);
@@ -504,36 +524,135 @@ export default function ArenaApp() {
       socketRef.current?.disconnect();
       socketRef.current = null;
       setConnected(false);
+      setDisconnectedPlayers([]);
+      matchRef.current = null;
+      setMatch(null);
       return;
     }
     const socket = io({
       transports: ["websocket", "polling"],
       withCredentials: true,
       reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 10000,
+      timeout: 10000,
     });
+    let disposed = false, retryTimer, retryAttempt = 0, recoverySequence = 0;
+    let queueNeedsCleanup = false, roomNeedsCleanup = null;
+    const phase = (value) => {
+      if (disposed) return;
+      connectionRef.current = value;
+      setConnectionPhase(value);
+    };
+    const clearRetry = () => {
+      clearTimeout(retryTimer);
+      retryTimer = undefined;
+    };
+    const scheduleRetry = () => {
+      if (disposed || retryTimer || !navigator.onLine) return;
+      retryTimer = setTimeout(() => {
+        retryTimer = undefined;
+        if (!disposed) recover();
+      }, Math.min(10000, 1000 * 2 ** retryAttempt++));
+    };
+    const storedTarget = () => {
+      if (matchRef.current?.matchId) return matchRef.current.matchId;
+      if (pathnameRef.current !== "/battle") return null;
+      try {
+        return savedBattleTarget(sessionStorage.getItem("ea:online-match"), user.id) || sessionStorage.getItem("ea:spectating");
+      } catch { return null; }
+    };
+    const recover = async () => {
+      if (disposed) return;
+      clearRetry();
+      if (!navigator.onLine) { phase("offline"); return; }
+      if (!socket.connected) { phase("reconnecting"); socket.connect(); return; }
+      const sequence = ++recoverySequence;
+      const target = storedTarget();
+      phase("syncing");
+      try {
+        // A dropped socket leaves the server queue and room subscription. Never
+        // silently requeue a player or keep a disconnected room modal alive.
+        if (queueNeedsCleanup) {
+          await sendArenaRequest(socket, "queue:leave");
+          queueNeedsCleanup = false;
+        }
+        if (roomNeedsCleanup) {
+          await sendArenaRequest(socket, "room:leave", { code: roomNeedsCleanup });
+          roomNeedsCleanup = null;
+        }
+        if (target) {
+          const snapshot = await sendArenaRequest(socket, "match:reconnect", { matchId: target });
+          if (disposed || sequence !== recoverySequence || !socket.connected) return;
+          if (snapshot.state) stateHandler(snapshot);
+        }
+        if (!disposed && sequence === recoverySequence && socket.connected) {
+          retryAttempt = 0;
+          phase("connected");
+        }
+      } catch (problem) {
+        if (disposed || sequence !== recoverySequence) return;
+        if (sessionConnectionError(problem)) {
+          setError("Your session expired. Sign in again to reconnect to your battle.");
+          await refresh();
+          return;
+        }
+        if (["NOT_FOUND", "FORBIDDEN"].includes(problem.code)) {
+          try { sessionStorage.removeItem("ea:online-match"); sessionStorage.removeItem("ea:spectating"); } catch {}
+          matchRef.current = null;
+          setMatch(null);
+          setDisconnectedPlayers([]);
+          setError(problem.message);
+          phase("connected");
+          return;
+        }
+        phase(navigator.onLine ? "reconnecting" : "offline");
+        scheduleRetry();
+      }
+    };
+    recoverRef.current = recover;
     socketRef.current = socket;
     socket.on("connect", () => {
       setConnected(true);
-      if (matchRef.current?.matchId)
-        socket.emit("match:reconnect", { matchId: matchRef.current.matchId });
-      else if (pathnameRef.current === "/battle") {
-        try {
-          const saved = sessionStorage.getItem("ea:spectating");
-          if (saved) socket.emit("match:join", { matchId: saved });
-        } catch {}
+      void recover();
+    });
+    socket.on("disconnect", (reason) => {
+      recoverySequence += 1;
+      setConnected(false);
+      phase(navigator.onLine ? "reconnecting" : "offline");
+      setSelectedPower(null);
+      setSource(null);
+      if (queueRef.current) queueNeedsCleanup = true;
+      if (roomRef.current) roomNeedsCleanup = roomRef.current.code || roomRef.current.roomCode;
+      setQueue(null);
+      setRoom(null);
+      // Socket.IO does not reconnect after a deliberate server disconnect.
+      // This includes a rolling release and session revocation in another tab.
+      if (reason === "io server disconnect") {
+        void refresh();
+        scheduleRetry();
       }
     });
-    socket.on("disconnect", () => setConnected(false));
-    socket.on("connect_error", (e) => {
+    socket.on("connect_error", (problem) => {
       setConnected(false);
+      phase(navigator.onLine ? "reconnecting" : "offline");
+      if (sessionConnectionError(problem)) {
+        setError("Your session expired. Sign in again to reconnect to your battle.");
+        void refresh();
+      } else if (!socket.active) scheduleRetry();
     });
     socket.on("server:restarting", () => {
+      phase("restarting");
+      if (queueRef.current) queueNeedsCleanup = true;
+      if (roomRef.current) roomNeedsCleanup = roomRef.current.code || roomRef.current.roomCode;
       setQueue(null);
       setRoom(null);
       setNotice("Arena updating. Your match will reconnect automatically.");
     });
     const stateHandler = (payload) => {
+      if (!payload?.state || disposed) return;
       const previous = matchRef.current;
+      if (previous?.matchId === payload.matchId && payload.state.revision < previous.state?.revision) return;
       clockOffset.current =
         Number(payload.serverTime || Date.now()) - Date.now();
       if (previous?.matchId !== payload.matchId) {
@@ -547,9 +666,17 @@ export default function ArenaApp() {
       try {
         if (payload.spectator)
           sessionStorage.setItem("ea:spectating", payload.matchId);
-        else sessionStorage.removeItem("ea:spectating");
+        else {
+          sessionStorage.removeItem("ea:spectating");
+          sessionStorage.setItem("ea:online-match", JSON.stringify({ userId: user.id, matchId: payload.matchId }));
+        }
       } catch {}
+      if (Array.isArray(payload.connectedPlayerIds)) {
+        setDisconnectedPlayers(payload.state.players.filter((player) => player.id !== user.id && !payload.connectedPlayerIds.includes(player.id)).map((player) => player.id));
+      } else if (previous?.matchId !== payload.matchId) setDisconnectedPlayers([]);
+      matchRef.current = payload;
       setMatch(payload);
+      if (socket.connected && navigator.onLine && connectionRef.current !== "connected") phase("connected");
       if (
         payload.state?.status === "finished" &&
         previous?.state?.status !== "finished"
@@ -581,9 +708,10 @@ export default function ArenaApp() {
     );
     socket.on("queue:cancelled", () => setQueue(null));
     socket.on("room:updated", (payload) => setRoom(payload.room || payload));
-    socket.on("match:error", (payload) =>
-      setError(payload.error?.message || payload.message || "Move rejected."),
-    );
+    socket.on("match:error", (payload) => {
+      setError(payload.error?.message || payload.message || "Move rejected.");
+      if (sessionConnectionError(payload.error || payload)) void refresh();
+    });
     socket.on("match:emote", (payload) => {
       if (muteRef.current) return;
       const label = EMOTE_LABELS[payload.emote] || payload.emote;
@@ -592,14 +720,14 @@ export default function ArenaApp() {
       );
       setTimeout(() => setEmote(""), 3500);
     });
-    socket.on("match:playerDisconnected", () =>
-      setNotice(
-        "Opponent disconnected. The turn clock continues; reconnect to resume.",
-      ),
-    );
-    socket.on("match:playerReconnected", () =>
-      setNotice("Opponent reconnected."),
-    );
+    socket.on("match:playerDisconnected", (payload) => {
+      if (payload.matchId !== matchRef.current?.matchId || payload.playerId === user.id) return;
+      setDisconnectedPlayers((ids) => [...new Set([...ids, payload.playerId])]);
+    });
+    socket.on("match:playerReconnected", (payload) => {
+      if (payload.matchId !== matchRef.current?.matchId || payload.playerId === user.id) return;
+      setDisconnectedPlayers((ids) => ids.filter((id) => id !== payload.playerId));
+    });
     socket.on("match:rewardSettled", () => refresh());
     socket.on("match:rematchRequested", (p) => {
       setRematchRequested(p.players?.includes(userRef.current?.id) || false);
@@ -607,33 +735,50 @@ export default function ArenaApp() {
         p.players?.some((id) => id !== userRef.current?.id) || false,
       );
     });
+    const online = () => { void refresh(); void recover(); };
+    const offline = () => {
+      phase("offline");
+      setConnected(false);
+      setSelectedPower(null);
+      setSource(null);
+      if (queueRef.current) queueNeedsCleanup = true;
+      if (roomRef.current) roomNeedsCleanup = roomRef.current.code || roomRef.current.roomCode;
+      setQueue(null);
+      setRoom(null);
+      // Release presence and matchmaking immediately when the OS reports no
+      // network. The online listener explicitly opens a fresh connection.
+      socket.disconnect();
+    };
+    const visible = () => {
+      if (document.visibilityState === "visible") void recover();
+    };
+    window.addEventListener("online", online);
+    window.addEventListener("offline", offline);
+    document.addEventListener("visibilitychange", visible);
+    phase(navigator.onLine ? "connecting" : "offline");
     return () => {
+      disposed = true;
+      recoverySequence += 1;
+      clearRetry();
+      window.removeEventListener("online", online);
+      window.removeEventListener("offline", offline);
+      document.removeEventListener("visibilitychange", visible);
+      socket.removeAllListeners();
       socket.disconnect();
       if (socketRef.current === socket) socketRef.current = null;
+      if (recoverRef.current === recover) recoverRef.current = null;
     };
   }, [user?.id, refresh, router]);
   const emit = useCallback(
-    (event, data = {}) =>
-      new Promise((resolve, reject) => {
-        const socket = socketRef.current;
-        if (!socket?.connected) {
-          reject(new Error("Connecting to the arena. Try again in a moment."));
-          return;
-        }
-        socket
-          .timeout(12000)
-          .emit(event, { requestId: requestId(), ...data }, (err, result) => {
-            if (err)
-              reject(new Error("The server did not respond. Please retry."));
-            else if (result?.ok === false)
-              reject(
-                new Error(
-                  result.error?.message || result.error || "Action rejected.",
-                ),
-              );
-            else resolve(result || {});
-          });
-      }),
+    async (event, data = {}) => {
+      if (connectionRef.current !== "connected") throw new Error("Restoring your connection. Wait for the latest battle state before trying again.");
+      try {
+        return await sendArenaRequest(socketRef.current, event, { requestId: requestId(), ...data });
+      } catch (problem) {
+        if (["ACK_TIMEOUT", "STALE_REVISION", "STALE_ACTION"].includes(problem.code)) void recoverRef.current?.();
+        throw problem;
+      }
+    },
     [],
   );
   async function run(fn) {
@@ -799,7 +944,7 @@ export default function ArenaApp() {
     (item) => item.type === "power" && item.powerId === selectedPower,
   );
   function canTarget(i) {
-    if (!myTurn || busy) return false;
+    if (!myTurn || busy || !connected || connectionPhase !== "connected") return false;
     if (!selectedPower)
       return availableActions.some(
         (item) => item.type === "place" && item.cell === i,
@@ -813,7 +958,7 @@ export default function ArenaApp() {
     );
   }
   async function choosePower(id) {
-    if (!myTurn || busy) return;
+    if (!myTurn || busy || !connected || connectionPhase !== "connected") return;
     setSource(null);
     if (selectedPower === id) {
       setSelectedPower(null);
@@ -832,7 +977,7 @@ export default function ArenaApp() {
     sound("click", settings);
   }
   async function action(event, payload) {
-    if (!match?.matchId) return;
+    if (!match?.matchId || !connected || connectionPhase !== "connected") return;
     await run(async () => {
       const result = await emit(event, {
         matchId: match.matchId,
@@ -1102,6 +1247,9 @@ export default function ArenaApp() {
           <GameShell
             user={user}
             connected={connected}
+            connectionNotice={user && connectionPhase !== "connected" && pathname !== "/battle" && pathname !== "/local-play" ? (
+              <ArenaConnectionNotice phase={connectionPhase} onRetry={() => recoverRef.current?.()} />
+            ) : null}
             notificationCount={unreadCount}
             pathname={pathname}
             navigate={navigate}
@@ -1202,6 +1350,9 @@ export default function ArenaApp() {
                   myTurn={myTurn}
                   busy={busy}
                   connected={connected}
+                  connectionPhase={connectionPhase}
+                  onReconnect={() => recoverRef.current?.()}
+                  opponentDisconnected={disconnectedPlayers.includes(opponent?.id)}
                   difficulty={difficulty}
                   settings={settings}
                   now={now}
@@ -1783,6 +1934,7 @@ export default function ArenaApp() {
                 settingsOwner.current = null;
                 setMatch(null);
                 sessionStorage.removeItem("ea:spectating");
+                sessionStorage.removeItem("ea:online-match");
                 navigate("/");
               })
             }
@@ -2262,6 +2414,7 @@ export default function ArenaApp() {
               </button>
               <button
                 className="button danger"
+                disabled={busy || !connected || connectionPhase !== "connected"}
                 onClick={() =>
                   run(async () => {
                     await emit("match:surrender", { matchId: match.matchId });

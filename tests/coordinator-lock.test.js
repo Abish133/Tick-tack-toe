@@ -111,6 +111,36 @@ test('a failed initial connection query closes its dedicated session',async()=>{
   assert.equal(connection.dead,true);assert.equal(lock.closed,true);assert.equal(lock.owned,false);
 });
 
+test('transient startup connection failures retry without reviving an owned session',async()=>{
+  const f=fixture();let attempts=0;const waiting=[];
+  const lock=f.lock({connectRetryMs:1,onWaiting:entry=>waiting.push(entry),connect:async()=>{
+    if(++attempts<3)throw Object.assign(new Error('private driver message'),{code:'ETIMEDOUT'});
+    return f.connect();
+  }});
+  try{
+    await lock.acquire();assert.equal(attempts,3);assert.equal(lock.owned,true);
+    assert.deepEqual(waiting.map(entry=>entry.phase),['database_connection','database_connection']);
+    lock.connection.emit('error',Object.assign(new Error('lost'),{code:'ECONNRESET'}));
+    assert.equal(lock.owned,false);assert.equal(attempts,3,'Owned connections must never reconnect silently.');
+  }finally{await lock.release();}
+});
+
+test('invalid credentials do not enter the transient startup retry loop',async()=>{
+  const f=fixture();let attempts=0;
+  const lock=f.lock({connect:async()=>{attempts++;throw Object.assign(new Error('private credentials'),{code:'ER_ACCESS_DENIED_ERROR'});}});
+  await assert.rejects(lock.acquire(),error=>error.code==='ER_ACCESS_DENIED_ERROR');assert.equal(attempts,1);
+  await lock.release();
+});
+
+test('dedicated ownership sessions set a bounded idle timeout before acquiring',async()=>{
+  const f=fixture(),queries=[];
+  const lock=f.lock({connect:async()=>{const connection=await f.connect(),query=connection.query;connection.query=options=>{queries.push(options.sql);return query(options);};return connection;}});
+  try{
+    await lock.acquire();assert.equal(queries[0],'SET SESSION wait_timeout = 60');
+    assert.ok(queries.findIndex(sql=>sql.includes('GET_LOCK'))>0);
+  }finally{await lock.release();}
+});
+
 test('a late GET_LOCK result cannot revive ownership after release',async()=>{
   const f=fixture();let finish,entered;
   const gate=new Promise(resolve=>{finish=resolve;});
@@ -186,6 +216,7 @@ test('real MySQL sessions enforce exclusion, handoff and normal-disconnect relea
   try{
     await first.acquire();await second.acquire();assert.equal(requested,1);assert.equal(first.owned,false);
     assert.equal(second.owned,true);assert.notEqual(first.connectionId,second.connectionId);await second.checkOwnership();
+    assert.equal(Number((await second.query('SELECT @@SESSION.wait_timeout AS seconds')).seconds),60);
     await second.release();let losses=0;
     const third=new CoordinatorLock({databaseUrl:integrationUrl,namespace,onLost:()=>losses++});
     try{
@@ -195,5 +226,21 @@ test('real MySQL sessions enforce exclusion, handoff and normal-disconnect relea
       const fourth=new CoordinatorLock({databaseUrl:integrationUrl,namespace});
       try{await fourth.acquire();assert.equal(fourth.owned,true);}finally{await fourth.release();}
     }finally{await third.release();}
+  }finally{await first.release();await second.release();}
+});
+
+test('an orphaned idle MySQL owner expires without killing or stealing another session',{skip:!integrationUrl,timeout:10000},async()=>{
+  assert.match(new URL(integrationUrl).pathname,/^\/ea_(ci|test)_/);
+  const namespace='idle-expiry-'+randomUUID();
+  const first=new CoordinatorLock({databaseUrl:integrationUrl,namespace,heartbeatMs:100000});
+  const second=new CoordinatorLock({databaseUrl:integrationUrl,namespace,pollMs:20,waitMs:4000});
+  try{
+    await first.acquire();
+    // Simulate an abandoned coordinator session in this isolated namespace.
+    // Production uses 60 seconds; one second keeps this real-server test fast.
+    await first.query('SET SESSION wait_timeout = 1');
+    await second.acquire();assert.equal(second.owned,true);assert.notEqual(first.connectionId,second.connectionId);
+    assert.equal(first.owned,false);assert.equal(first.closed,true);
+    await second.checkOwnership();
   }finally{await first.release();await second.release();}
 });

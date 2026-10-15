@@ -91,7 +91,22 @@ try{
   const active=await fetch(secondOrigin+'/api/matches/active',{headers:{cookie}});assert.equal(active.status,200);assert.equal((await active.json()).match.matchId,matchId,'Replacement must hydrate the active game before serving.');
   const [migrations]=await sql.query('SELECT migration_name,finished_at FROM _prisma_migrations WHERE rolled_back_at IS NULL');
   assert.ok(migrations.length>=3);assert.ok(migrations.every(row=>row.finished_at),'Every historical/new migration must finish on fresh Linux.');
-  console.log('Production Linux bootstrap, ownership gate, session continuity and rolling takeover passed.');
+  // Kill only this disposable CI coordinator's dedicated connection. The
+  // supervisor must replace the worker without a container restart, keep
+  // admission closed meanwhile, and hydrate the same durable match/session.
+  const beforeRecovery=JSON.parse(await docker(['inspect','--format','{{json .State}}',second]));
+  const [[{owner:lostOwner}]]=await sql.query('SELECT IS_USED_LOCK(?) AS owner',[hold.names.owner]);
+  assert.ok(Number.isSafeInteger(Number(lostOwner))&&Number(lostOwner)>0);
+  await sql.query('KILL CONNECTION '+Number(lostOwner));
+  await poll(secondOrigin,'/api/health',503,5000,{allowClosedListener:true});
+  const recovered=await (await poll(secondOrigin,'/api/health',200,60000)).json();assert.equal(recovered.release,'ci-second');
+  const afterRecovery=JSON.parse(await docker(['inspect','--format','{{json .State}}',second]));
+  assert.equal(afterRecovery.Running,true);assert.equal(afterRecovery.Pid,beforeRecovery.Pid,'Recovery must retain the supervisor container process.');
+  const [[{owner:recoveredOwner}]]=await sql.query('SELECT IS_USED_LOCK(?) AS owner',[hold.names.owner]);
+  assert.ok(Number(recoveredOwner)>0);assert.notEqual(Number(recoveredOwner),Number(lostOwner),'Recovery must use a new dedicated owner session.');
+  const recoveredSession=await fetch(secondOrigin+'/api/auth/session',{headers:{cookie}});assert.equal(recoveredSession.status,200);assert.equal((await recoveredSession.json()).user.id,userId);
+  const recoveredMatch=await fetch(secondOrigin+'/api/matches/active',{headers:{cookie}});assert.equal(recoveredMatch.status,200);assert.equal((await recoveredMatch.json()).match.matchId,matchId);
+  console.log('Production Linux bootstrap, ownership gate, session continuity, rolling takeover and database interruption recovery passed.');
 }catch(error){
   for(const name of[first,second]){try{console.error((await docker(['logs','--tail','60',name])).slice(-5000));}catch{}}
   throw error;

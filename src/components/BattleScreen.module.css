@@ -155,3 +155,9 @@
   .screen .powerCard { height: 58px; }
   .resultPortrait { height: 98px; width: 110px; flex-basis: 98px; }
 }
+.connectionOverlay { position:absolute; top:2px; left:0; right:0; z-index:40; }
+.connectionOverlay>div { margin:0; box-shadow:0 4px 16px #0009; }
+.screen .playerHUD .namePlate .disconnectedPlayer { color:#f6d58a; }
+.disconnectedPlayer>svg { flex:0 0 12px; }
+.resultContainer { height:100%; min-height:0; width:100%; display:grid; grid-template-rows:minmax(0,1fr); overflow:hidden; }
+.resultReconnecting { grid-template-rows:auto minmax(0,1fr); }
