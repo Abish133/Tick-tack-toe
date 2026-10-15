@@ -10,6 +10,7 @@ import {allowedOrigins,secret} from './src/server/security.mjs';
 import {requestClientIp} from './src/server/client-ip.mjs';
 import {CoordinatorLock} from './src/server/coordinator-lock.mjs';
 import {manageArenaLifecycle} from './src/server/coordinator-lifecycle.mjs';
+import {runtimeErrorDetails,transientRuntimeError,TRANSIENT_RUNTIME_EXIT} from './src/server/runtime-errors.mjs';
 
 const log=(event,extra={})=>console.log(JSON.stringify({level:'info',event,...extra,at:new Date().toISOString()}));
 const json=(res,status,body)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store',...(status===503?{'Retry-After':'2'}:{})});res.end(JSON.stringify(body));};
@@ -26,12 +27,13 @@ export async function startServer({bootstrap,exitOnShutdown=false}={}) {
   const handle=app.getRequestHandler();
   const lock=new CoordinatorLock({databaseUrl:process.env.DATABASE_URL,
     waitMs:120000,onHandoff:()=>shutdown('coordinator_handoff'),
-    onLost:reason=>{
+    onWaiting:({error,...details})=>log('coordinator_waiting',{...details,...(error?runtimeErrorDetails(error):{})}),
+    onLost:(reason,error)=>{
       // Never continue on the pooled Prisma connection after losing ownership.
       ready=false;stopping=true;lifecycle?.stop();delete globalThis.__elementalArena;
       io.disconnectSockets(true);server.close();server.closeAllConnections();
-      log('coordinator_lost',{reason});
-      if (exitOnShutdown) process.exit(1);
+      log('coordinator_lost',{reason,...runtimeErrorDetails(error)});
+      if (exitOnShutdown) process.exit(TRANSIENT_RUNTIME_EXIT);
       else void db.$disconnect();
     },
   });
@@ -57,7 +59,7 @@ export async function startServer({bootstrap,exitOnShutdown=false}={}) {
   io.use((socket,next)=>ready&&!stopping&&lock.owned?next():next(new Error('The arena is restarting. Please reconnect.')));
   io.on('connection',socket=>socket.use((packet,next)=>ready&&!stopping&&lock.owned?next():next(new Error('The coordinator is draining.'))));
 
-  async function shutdown(reason='signal') {
+  async function shutdown(reason='signal',exitCode=reason==='startup_failed'?1:0) {
     if (shutdownWork) return shutdownWork;
     stopping=true;ready=false;lifecycle?.stop();
     shutdownWork=(async()=>{
@@ -86,7 +88,7 @@ export async function startServer({bootstrap,exitOnShutdown=false}={}) {
         delete globalThis.__elementalArena;
         await app.close();await db.$disconnect();await lock.release();
         log('arena_stopped',{reason});
-        if (exitOnShutdown) process.exit(reason==='startup_failed'?1:0);
+        if (exitOnShutdown) process.exit(exitCode);
       }finally {clearTimeout(force);process.off('SIGTERM',onSignal);process.off('SIGINT',onSignal);}
     })();
     return shutdownWork;
@@ -111,7 +113,10 @@ export async function startServer({bootstrap,exitOnShutdown=false}={}) {
     services.attach(io);globalThis.__elementalArena=services;ready=true;
     log('arena_ready',{host,port,database:'mysql',rankedOpponents:'humans first, disclosed competitive bot fallback'});
     return {server,io,services,lock,shutdown,get ready(){return ready&&!stopping&&lock.owned;}};
-  } catch(error) {await shutdown('startup_failed');throw error;}
+  } catch(error) {
+    log('arena_start_failed',runtimeErrorDetails(error));
+    await shutdown('startup_failed',transientRuntimeError(error)?TRANSIENT_RUNTIME_EXIT:1);throw error;
+  }
 }
 
 if (process.argv[1] && path.resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
