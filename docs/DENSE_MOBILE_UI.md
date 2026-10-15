@@ -14,3 +14,8 @@ Screenshots use one disposable local test account and real authentication, a thr
 - [Armory, small phone](screenshots/dense-ui/armory-small.png)
 - [Collection, phone](screenshots/dense-ui/collection-mobile.png)
 - [Battle hub, phone](screenshots/dense-ui/hub-mobile.png)
+
+Season Pass displays exactly the selected Free or Premium reward track. Switching resets its inner scroller; the selected row sits directly under the controls. The shared season XP line, Premium unlock options, ownership and independent claim records are unchanged. The updated real commerce flow passed, covering locked previews, coin unlock, claiming each track, switching after claims, equipping the reward and the compact mobile layout.
+
+- [Free Season Pass track](screenshots/dense-ui/season-free-mobile.png)
+- [Premium Season Pass track](screenshots/dense-ui/season-premium-mobile.png)

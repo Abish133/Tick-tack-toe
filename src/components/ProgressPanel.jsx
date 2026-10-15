@@ -193,13 +193,10 @@ function SeasonJourney({
 }) {
   const [track, setTrack] = useState("free");
   const [info, setInfo] = useState(false);
-  const trackRows = useRef({});
+  const trackScroll = useRef(null);
   function selectTrack(value) {
     setTrack(value);
-    trackRows.current[value]?.scrollIntoView({
-      block: "nearest",
-      inline: "nearest",
-    });
+    trackScroll.current?.scrollTo({ left: 0, top: 0 });
   }
   const price = Number(data.passCoinPrice || 900),
     xp = Number(data.xp || 0),
@@ -404,20 +401,19 @@ function SeasonJourney({
           Premium journey<span>5 exclusive cosmetics</span>
         </GameButton>
       </div>
-      <div className={styles.trackScroll} aria-label="Season reward path">
+      <div ref={trackScroll} className={styles.trackScroll} aria-label="Season reward path">
         <div className={styles.path}>
           <div
-            ref={(element) => {
-              trackRows.current.free = element;
-            }}
-            className={`${styles.rewardRow} ${track === "free" ? styles.focused : ""}`}
-            aria-label="Free season rewards"
+            key={track}
+            className={`${styles.rewardRow} ${styles.focused}`}
+            role="group"
+            aria-label={track === "free" ? "Free season rewards" : "Premium season rewards"}
           >
             <span className={styles.rowLabel}>
-              <Gift size={22} />
-              FREE
+              {track === "free" ? <Gift size={22} /> : <Crown size={22} />}
+              {track === "free" ? "FREE" : "PREMIUM"}
             </span>
-            {free.map((tier) => renderReward(tier, "free"))}
+            {(track === "free" ? free : premium).map((tier) => renderReward(tier, track))}
           </div>
           <div
             className={styles.trackLine}
@@ -427,19 +423,6 @@ function SeasonJourney({
             <i style={{ left: `${Math.min(100, (xp / maxXp) * 100)}%` }}>
               <Trophy size={18} />
             </i>
-          </div>
-          <div
-            ref={(element) => {
-              trackRows.current.premium = element;
-            }}
-            className={`${styles.rewardRow} ${track === "premium" ? styles.focused : ""}`}
-            aria-label="Premium season rewards"
-          >
-            <span className={styles.rowLabel}>
-              <Crown size={22} />
-              PREMIUM
-            </span>
-            {premium.map((tier) => renderReward(tier, "premium"))}
           </div>
         </div>
       </div>
