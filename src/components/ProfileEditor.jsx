@@ -29,6 +29,7 @@ import { CosmeticFrame, CosmeticArrival } from "./CosmeticAppearance";
 import CosmeticArt from "./CosmeticArt";
 import { GameFrame, GameButton, CustomSelect, Tabs } from "./ui";
 import styles from "./ProfileEditor.module.css";
+import { displayName } from "../lib/display-name";
 
 const divisions = [
   [3300, "Mythic"],
@@ -209,7 +210,7 @@ function PlayerCard({ player, children, publicView = false }) {
       />
       <div className={styles.nameplate}>
         <ProfileTitle profile={player.profile} />
-        <h2>{player.name}</h2>
+        <h2>{displayName(player.name)}</h2>
         <span className={styles.rank}>
           <Trophy size={20} />
           {rank(player)}

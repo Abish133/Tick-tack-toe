@@ -166,3 +166,10 @@
     gap: 9px;
   }
 }
+
+/* Polish: all tabs visible on wider screens; autosave note replaces the save button. */
+.autosave { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 4px 0 0; font-size: 12px; color: #9ff0b8; }
+@media (min-width: 768px) {
+  .settings :global(.scroll-row) { flex-wrap: wrap !important; overflow: visible !important; mask-image: none; animation: none; }
+  .settings :global(.scroll-row) > button { padding-inline: 12px; }
+}

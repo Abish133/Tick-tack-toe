@@ -1431,7 +1431,7 @@ export default function ArenaApp() {
                   {screenHeading(
                     "EARN YOUR PLACE",
                     title,
-                    "Real players. Recorded results. Ranked opponents may include clearly labelled competitive bots.",
+                    "Real players. Recorded results. Ranked opponents may include clearly labelled competitive bots. Ranked cups come from ranked human matches; weekly victories count human wins since Monday 00:00 UTC; win streaks count consecutive human wins; tournament victories come from verified tournaments.",
                     <button
                       className="button secondary"
                       onClick={() => queueUp("ranked")}

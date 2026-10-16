@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Volume2,
   Monitor,
@@ -77,6 +77,19 @@ export default function SettingsScreen({
   onUpgrade,
 }) {
   const [tab, setTab] = useState("audio");
+  // Settings save themselves shortly after the last change.
+  const saved = useRef(JSON.stringify(settings)),
+    saveRef = useRef(onSave);
+  saveRef.current = onSave;
+  useEffect(() => {
+    const current = JSON.stringify(settings);
+    if (current === saved.current) return;
+    const timer = setTimeout(() => {
+      saved.current = current;
+      saveRef.current?.();
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [settings]);
   const update = (key, value) =>
     setSettings((previous) => ({ ...previous, [key]: value }));
   const toggle = (key) => (
@@ -247,11 +260,9 @@ export default function SettingsScreen({
             </div>
           )}
         </div>
-        <div className={styles.actions}>
-          <GameButton onClick={onSave}>
-            Save settings <Check size={18} />
-          </GameButton>
-        </div>
+        <p className={styles.autosave}>
+          <Check size={14} /> Changes save automatically
+        </p>
       </div>
     </Modal>
   );

@@ -16,6 +16,7 @@ import {
 import { cosmeticAsset } from "../lib/cosmetic-collection";
 import { GameFrame, GameButton, CustomSelect, Modal, Tabs } from "./ui";
 import styles from "./LeaderboardPanel.module.css";
+import { displayName } from "../lib/display-name";
 
 const categories = [
   ["cups", "Ranked cups"],
@@ -64,7 +65,6 @@ export default function LeaderboardPanel({
   const [loading, setLoading] = useState(true);
   const [failure, setFailure] = useState("");
   const [retry, setRetry] = useState(0);
-  const [info, setInfo] = useState(false);
   const regionEdited = useRef(false);
 
   useEffect(() => {
@@ -154,7 +154,7 @@ export default function LeaderboardPanel({
         type="button"
         className={compact ? styles.compactPlayer : styles.player}
         onClick={() => onProfile?.(entry.id)}
-        aria-label={`View ${entry.name}'s profile`}
+        aria-label={`View ${displayName(entry.name)}'s profile`}
         disabled={!onProfile}
       >
         <span className={styles.avatar}>
@@ -162,7 +162,7 @@ export default function LeaderboardPanel({
         </span>
         <span>
           <strong>
-            {entry.name}
+            <span data-ellipsis>{displayName(entry.name)}</span>
             {entry.id === user?.id && <span className={styles.you}>YOU</span>}
           </strong>
           <small>
@@ -215,24 +215,18 @@ export default function LeaderboardPanel({
           items={scopes.map(([id, label, icon]) => ({ id, label, icon }))}
         />
         <div className={styles.ranking}>
-          <Tabs
-            label="Leaderboard category"
+          <CustomSelect
+            id="leaderboard-ranking"
+            label="Ranking"
             value={category}
             onChange={selectCategory}
-            className={styles.categories}
-            items={categories.map(([id, label]) => ({
-              id,
+            className={styles.rankingChip}
+            options={categories.map(([id, label]) => ({
+              value: id,
               label,
               disabled: scope === "season" && id !== "cups",
             }))}
           />
-          <GameButton
-            variant="icon"
-            aria-label="Ranking information"
-            onClick={() => setInfo(true)}
-          >
-            <Info size={22} />
-          </GameButton>
         </div>
       </div>
       {scope === "regional" && (
@@ -403,24 +397,6 @@ export default function LeaderboardPanel({
           </>
         )}
       </div>
-      {info && (
-        <Modal title="Ranking information" onClose={() => setInfo(false)}>
-          <p className={styles.caption}>
-            {category === "cups"
-              ? "Ranked human matches determine cup standings."
-              : category === "weekly"
-                ? "Human match victories since Monday at 00:00 UTC."
-                : category === "streak"
-                  ? "Consecutive completed human match victories."
-                  : category === "tournaments"
-                    ? "Championships from completed verified tournaments."
-                    : "Wins from completed human matches."}{" "}
-            {scope === "friends"
-              ? "Your accepted friends and your own results."
-              : null}
-          </p>
-        </Modal>
-      )}
     </div>
   );
 }

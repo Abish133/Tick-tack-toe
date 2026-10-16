@@ -200,7 +200,7 @@ export default function SocialPanel({
           aria-label="Player name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Exact player name, or search for a rival"
+          placeholder="Find player…"
           minLength={2}
           maxLength={20}
           required

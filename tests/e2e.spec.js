@@ -270,7 +270,8 @@ test("two human accounts complete ranked play with synchronized powers, cups and
       path: path.join(screenshots, "leaderboard-desktop.png"),
       fullPage: true,
     });
-    await b.getByRole("tab", { name: "Weekly victories", exact: true }).click();
+    await b.getByRole("combobox", { name: "Ranking", exact: true }).click();
+    await b.getByRole("option", { name: "Weekly victories", exact: true }).click();
     await expect(ownProfile).toBeVisible();
     await b.getByRole("tab", { name: "Season", exact: true }).click();
     await expect(
@@ -559,9 +560,6 @@ test("guest practice, three-power loadout, persisted settings and cosmetic purch
     await contrastSwitch.click();
   await expect(contrastSwitch).toHaveAttribute("aria-checked", "true");
   await expect(motionSwitch).toHaveAttribute("aria-checked", "true");
-  await page
-    .getByRole("button", { name: "Save settings", exact: true })
-    .click();
   await expect(page.getByRole("status")).toContainText("Settings saved");
   await expect
     .poll(async () => (await session(page)).settings.reducedMotion)

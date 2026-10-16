@@ -53,7 +53,6 @@ async function setReducedMotion(page,enabled){
   const toggle=settings.getByRole('switch',{name:'Reduced motion',exact:true});
   if((await toggle.getAttribute('aria-checked'))!==String(enabled))await toggle.click();
   await expect(toggle).toHaveAttribute('aria-checked',String(enabled));
-  await settings.getByRole('button',{name:'Save settings',exact:true}).click();
   await expect.poll(async()=>(await read(page,'/api/auth/session')).user.settings.reducedMotion).toBe(enabled);
   await settings.getByRole('button',{name:'Close Settings',exact:true}).click();
 }
