@@ -45,7 +45,7 @@ async function read(page, route) {
 async function guest(page, label) {
   const origin = new URL(test.info().project.use.baseURL || "http://localhost:3000").origin;
   const response = await page.request.post("/api/auth/guest", {
-    data: { name: `Polish ${label} ${Date.now().toString(36)}`.slice(0, 20) },
+    data: { name: `E2E ${label} ${Date.now().toString(36)}`.slice(0, 20) },
     headers: { origin },
   });
   expect(response.status()).toBe(201);
