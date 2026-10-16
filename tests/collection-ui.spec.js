@@ -230,8 +230,8 @@ test("earned coins buy every solar style once and equipped art appears in the ac
       .getByRole("button", { name: new RegExp(`${item.price} coins`) })
       .click();
     await expect(
-      card.getByRole("button", { name: "Owned", exact: true }),
-    ).toBeDisabled();
+      card.getByRole("button", { name: "Equip cosmetic", exact: true }),
+    ).toBeEnabled();
   }
   expect((await read(page, "/api/auth/session")).user.coins).toBe(
     5000 - items.reduce((sum, item) => sum + item.price, 0),

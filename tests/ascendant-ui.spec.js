@@ -126,7 +126,7 @@ test('Ascendant animated cosmetics preview safely, buy once, equip every slot an
       const card=collection.locator(`.shop-card[data-cosmetic-id="${item.id}"]`);
       const price=item.price.toLocaleString('en-US');
       await card.getByRole('button',{name:`${price} coins`,exact:true}).click();
-      await expect(card.getByRole('button',{name:'Owned',exact:true})).toBeDisabled();
+      await expect(card.getByRole('button',{name:'Equip cosmetic',exact:true})).toBeEnabled();
       const reveal=page.getByRole('button',{name:'Skip cosmetic reveal',exact:true});
       if(await reveal.isVisible())await reveal.click();
     }
