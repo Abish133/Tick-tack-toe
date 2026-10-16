@@ -362,3 +362,12 @@ p.battlefield-info {
     padding-block: 2px;
   }
 }
+
+/* One default X/O palette on every board (cosmetic marks keep their own rules). */
+.mark.x {
+  color: #e8b77d;
+  filter: drop-shadow(0 0 8px #e8a65a80);
+}
+.mark.o {
+  color: #92dcea;
+}

@@ -61,7 +61,7 @@ const options = {
   ],
   notifications: [
     "Arena announcements",
-    "Receive administrator updates in your inbox.",
+    "Receive arena news in your inbox.",
   ],
 };
 

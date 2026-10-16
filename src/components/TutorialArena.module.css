@@ -368,3 +368,12 @@
 @media (max-width: 760px) {
   .board { width: min(100cqw, calc(100cqh - 8px), 300px); }
 }
+
+/* Polish: one-line lesson copy, shared mark palette, chapter chips on one line. */
+.lessonCopy { margin: 4px 0 6px; font-size: 13px; line-height: 1.4; color: #c3cfe0; }
+.board :global(.mark.x) { color: #e8b77d !important; }
+.board :global(.mark.o) { color: #92dcea !important; }
+@media (max-width: 600px) {
+  .steps button { font-size: 11px !important; line-height: 1.15; white-space: normal; }
+  .lessonCopy { font-size: 12px; }
+}

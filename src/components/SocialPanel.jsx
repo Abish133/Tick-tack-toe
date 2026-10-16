@@ -484,7 +484,7 @@ export default function SocialPanel({
                   });
                   setReport(null);
                 },
-                "Report sent to the arena administrator.",
+                "Report sent to the arena moderators.",
               );
             }}
           >

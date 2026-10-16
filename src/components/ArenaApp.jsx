@@ -1683,7 +1683,7 @@ export default function ArenaApp() {
                   {screenHeading(
                     "LEARN THE NEXT MOVE",
                     "Welcome to your arena",
-                    "Three short interactive lessons using the real game rules.",
+                    "Three short interactive lessons using the real game rules. Training scenarios award no cups, coins or XP. You always equip exactly three powers, take one action per turn, and every Ranked player has equal access.",
                   )}
                   <TutorialArena
                     navigate={navigate}
@@ -1706,7 +1706,7 @@ export default function ArenaApp() {
                   {screenHeading(
                     "A NEW ANGLE, EVERY DAY",
                     "One move. One opportunity.",
-                    "A shared daily practice puzzle. No ranked cups or paid advantages.",
+                    "You are X. Place one mark to complete a winning line. Everyone gets the same puzzle; a new one arrives at 00:00 UTC. Practice only — no ranked cups or paid advantages.",
                   )}
                   <DailyPuzzle />
                 </>
@@ -1761,9 +1761,19 @@ export default function ArenaApp() {
                         </article>
                       ))
                     ) : (
-                      <Empty icon={Trophy} title="No tournaments scheduled">
-                        Scheduled competitions will appear here once an
-                        administrator opens registration.
+                      <Empty
+                        icon={Trophy}
+                        title="No tournaments right now"
+                        action={
+                          <button
+                            className="button primary"
+                            onClick={() => navigate("/")}
+                          >
+                            <Swords size={16} /> Battle
+                          </button>
+                        }
+                      >
+                        Check back soon — new brackets open regularly.
                       </Empty>
                     )}
                   </section>

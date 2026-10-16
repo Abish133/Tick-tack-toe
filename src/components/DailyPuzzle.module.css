@@ -224,3 +224,11 @@
 @media (max-width: 760px) {
   .board { width: min(100cqw, calc(100cqh - 8px), 300px); }
 }
+
+/* Polish: a miss flashes the cell; marks share the battle palette. */
+.missCell { animation: missFlash 0.6s ease-out; border-color: #ff8b82 !important; }
+@keyframes missFlash { 30% { box-shadow: inset 0 0 18px #ff5f5f88; transform: translateX(-3px); } 60% { transform: translateX(3px); } }
+.missed { color: #ffb1a1 !important; }
+.board :global(.mark.x) { color: #e8b77d !important; }
+.board :global(.mark.o) { color: #92dcea !important; }
+@media (prefers-reduced-motion: reduce) { .missCell { animation: none; } }

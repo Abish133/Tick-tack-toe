@@ -10,11 +10,10 @@ import {
   RefreshCw,
   Check,
   BookOpen,
-  Info,
 } from "lucide-react";
 import { createGame, applyAction } from "../lib/game-engine/index";
 import PowerEffects from "./PowerEffects";
-import { GameFrame, GameButton, Modal } from "./ui";
+import { GameFrame, GameButton } from "./ui";
 import styles from "./TutorialArena.module.css";
 
 const chapters = [
@@ -79,7 +78,6 @@ export default function TutorialArena({ navigate, reducedMotion = false }) {
     [done, setDone] = useState(false),
     [source, setSource] = useState(false),
     [error, setError] = useState("");
-  const [info, setInfo] = useState(false);
   const lesson = chapters[chapter];
   function select(index) {
     setChapter(index);
@@ -164,6 +162,7 @@ export default function TutorialArena({ navigate, reducedMotion = false }) {
             GUIDED PRACTICE
           </span>
           <h2>{lesson.title}</h2>
+          <p className={`${styles.lessonCopy} clamp-2`}>{lesson.description}</p>
           {lesson.power && (
             <GameFrame variant="card" className={styles.power}>
               {lesson.power === "shield" ? (
@@ -184,16 +183,13 @@ export default function TutorialArena({ navigate, reducedMotion = false }) {
             </GameFrame>
           )}
           <div className={styles.lessonActions}>
-            <GameButton variant="secondary" onClick={() => select(chapter)}>
-              <RefreshCw size={17} />
-              <span className={styles.restartText}>Restart this lesson</span>
-            </GameButton>
             <GameButton
               variant="icon"
-              aria-label="Lesson information"
-              onClick={() => setInfo(true)}
+              aria-label="Restart this lesson"
+              title="Restart this lesson"
+              onClick={() => select(chapter)}
             >
-              <Info size={22} />
+              <RefreshCw size={19} />
             </GameButton>
           </div>
         </div>
@@ -274,24 +270,6 @@ export default function TutorialArena({ navigate, reducedMotion = false }) {
           </GameButton>
         </div>
       </div>
-      <Modal
-        open={info}
-        title="Lesson information"
-        onClose={() => setInfo(false)}
-      >
-        <div className={styles.info}>
-          <h3>{lesson.name}</h3>
-          <p>{lesson.description}</p>
-          <p>
-            This is a training scenario. It uses the real game rules and awards
-            no cups, coins, or XP.
-          </p>
-          <p>
-            Exactly three equipped powers. One action per turn. Every Ranked
-            player has equal access.
-          </p>
-        </div>
-      </Modal>
     </GameFrame>
   );
 }

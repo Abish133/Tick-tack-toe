@@ -7,11 +7,10 @@ import {
   RefreshCw,
   CheckCircle2,
   Target,
-  Info,
-  CalendarDays,
 } from "lucide-react";
 import { detectOutcome } from "@/lib/game-engine/index";
-import { GameFrame, GameButton, Modal } from "./ui";
+import { GameFrame, GameButton } from "./ui";
+import { countdownTo, nextUtcMidnight } from "../lib/time-format";
 import styles from "./DailyPuzzle.module.css";
 
 const PUZZLES = [
@@ -29,7 +28,7 @@ export default function DailyPuzzle() {
   const [board, setBoard] = useState(Array(9).fill(null));
   const [solved, setSolved] = useState(false);
   const [feedback, setFeedback] = useState("");
-  const [info, setInfo] = useState(false);
+  const [missed, setMissed] = useState(null);
   useEffect(() => {
     const dayNumber = Math.floor(Date.now() / 86400000);
     setDay(dayNumber);
@@ -43,10 +42,12 @@ export default function DailyPuzzle() {
       setBoard(next);
       setSolved(true);
       setFeedback("A winning move. Well spotted.");
-    } else
+    } else {
+      setMissed(index);
       setFeedback(
         "That move does not finish the line. Look for the immediate win.",
       );
+    }
   }
   return (
     <GameFrame className={`puzzle-panel ${styles.root}`}>
@@ -55,13 +56,6 @@ export default function DailyPuzzle() {
           <Target size={24} />
           WIN IN ONE MOVE
         </span>
-        <GameButton
-          variant="icon"
-          aria-label="Daily puzzle information"
-          onClick={() => setInfo(true)}
-        >
-          <Info size={22} />
-        </GameButton>
       </div>
       <p className={styles.help}>
         You are X. Place one mark to complete a winning line.
@@ -74,7 +68,7 @@ export default function DailyPuzzle() {
         >
           {board.map((mark, index) => (
             <button
-              className="game-cell"
+              className={`game-cell ${missed === index ? styles.missCell : ""}`}
               key={index}
               disabled={!!mark || solved}
               onClick={() => choose(index)}
@@ -90,35 +84,29 @@ export default function DailyPuzzle() {
         </div>
       </div>
       <div
-        className={`puzzle-feedback ${styles.feedback} ${solved ? `solved ${styles.solved}` : ""}`}
+        className={`puzzle-feedback ${styles.feedback} ${solved ? `solved ${styles.solved}` : ""} ${missed ? styles.missed : ""}`}
         aria-live="polite"
       >
         {solved && <CheckCircle2 size={21} />}
         {feedback || "One careful observation can change the whole board."}
       </div>
-      <GameButton
-        variant="secondary"
-        onClick={() => {
-          if (day !== null) setBoard([...PUZZLES[day % PUZZLES.length]]);
-          setSolved(false);
-          setFeedback("");
-        }}
-      >
-        <RefreshCw size={18} />
-        Try again
-      </GameButton>
-      <Modal
-        open={info}
-        title="Daily puzzle information"
-        onClose={() => setInfo(false)}
-      >
-        <div className={styles.info}>
-          <CalendarDays size={36} />
-          <h3>Find the finishing move.</h3>
-          <p>Shared daily rotation · Resets at midnight UTC · Practice only</p>
-          <p>You are X. Place one mark to complete a winning line.</p>
-        </div>
-      </Modal>
+      {solved ? (
+        <GameButton variant="secondary" disabled className="claimed-button">
+          <CheckCircle2 size={18} />
+          Solved · New puzzle in {countdownTo(nextUtcMidnight())}
+        </GameButton>
+      ) : missed ? (
+        <GameButton
+          variant="secondary"
+          onClick={() => {
+            setMissed(null);
+            setFeedback("");
+          }}
+        >
+          <RefreshCw size={18} />
+          Try again
+        </GameButton>
+      ) : null}
     </GameFrame>
   );
 }
