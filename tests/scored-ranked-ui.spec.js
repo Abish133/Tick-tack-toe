@@ -216,6 +216,14 @@ test("Ranked clearly discloses and starts a Hard competitive bot on a 6 by 6 boa
       .getByRole("button")
       .nth(35);
     await expect(target).toBeEnabled();
+    await expect(
+      page.getByRole("navigation", { name: "Game destinations", exact: true }),
+    ).toHaveCount(0);
+    await page.getByRole("button", { name: "Battle menu", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Arena hub, match continues", exact: true })
+      .click();
+    await expect(page).toHaveURL(//$/);
     await page
       .getByRole("button", { name: "Powers & loadout", exact: true })
       .click();

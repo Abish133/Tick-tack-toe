@@ -15,6 +15,7 @@ import {
   Flag,
   Gem,
   Hourglass,
+  Home,
   Info,
   LockKeyhole,
   MessageCircle,
@@ -53,6 +54,7 @@ import PowerTargetControls, {
 } from "./PowerTargetControls";
 import EndMatchSummary from "./EndMatchSummary";
 import styles from "./BattleScreen.module.css";
+import { displayName } from "../lib/display-name";
 
 const RANKS = [
   [3300, "Mythic"],
@@ -154,6 +156,9 @@ function BattleAvatar({
   );
 }
 
+const titleCase = (text = "") =>
+  String(text).replace(/^./, (letter) => letter.toUpperCase());
+
 function EnergyOrbs({ amount = 0, opponent = false }) {
   return (
     <div
@@ -201,9 +206,9 @@ function PlayerHUD({
       ? "Practice · No ranked cups"
       : `${rank(participant?.initialCups)} · ${pretty(participant?.initialCups)} cups`
     : match.rankedBot
-      ? `${match.difficulty} · Competitive bot`
+      ? `${titleCase(match.difficulty)} · Competitive bot`
       : match.mode === "ai"
-        ? `${match.difficulty || difficulty} AI · Practice`
+        ? `${titleCase(match.difficulty || difficulty)} AI · Practice`
         : `${rank(participant?.initialCups)} · ${player?.mark}`;
   return (
     <GameFrame
@@ -221,7 +226,9 @@ function PlayerHUD({
       />
       <div className={styles.namePlate}>
         <strong>
-          {player?.name || "Opponent"}
+          <span className={styles.playerName} data-ellipsis>
+            {displayName(player?.name) || "Opponent"}
+          </span>
           {self && (
             <span className={styles.you}>
               {spectator ? "SPECTATING" : "YOU"} · {player?.mark}
@@ -251,6 +258,7 @@ function PlayerHUD({
         <div
           className={styles.roundGems}
           role="group"
+          title={scored ? "Three-in-a-row points" : `Round wins: first to ${Math.ceil(game.maxRounds / 2)} wins the match`}
           aria-label={`${player?.name || "Opponent"}: ${scored ? game.roundScores?.[player?.id] || 0 : game.roundWins?.[player?.id] || 0} ${scored ? "points" : "round wins"}`}
         >
           {scored ? (
@@ -259,7 +267,9 @@ function PlayerHUD({
               <b>{game.roundScores?.[player?.id] || 0}</b>
             </>
           ) : (
-            Array.from(
+            <>
+            <span>WINS</span>
+            {Array.from(
               { length: Math.ceil(game.maxRounds / 2) },
               (_, index) => (
                 <Gem
@@ -273,7 +283,8 @@ function PlayerHUD({
                   aria-hidden="true"
                 />
               ),
-            )
+            )}
+            </>
           )}
         </div>
       </div>
@@ -694,7 +705,9 @@ export default function BattleScreen({
           {spectator
             ? game.players.find((player) => player.id === game.currentPlayerId)
                 ?.name + "’s turn"
-            : myTurn
+            : myTurn && selectedPower
+              ? targetHint(selectedPower, source)
+              : myTurn
               ? "Your move, challenger"
               : match.mode === "ai"
                 ? "Opponent is thinking…"
@@ -909,16 +922,6 @@ export default function BattleScreen({
                 <Info size={18} />
               </button>
             )}
-          {selectedPower && (
-            <GameButton
-              variant="secondary"
-              onClick={cancelPower}
-              className={styles.cancelTarget}
-            >
-              <X size={17} />
-              Cancel
-            </GameButton>
-          )}
         </div>
       </div>
 
@@ -988,14 +991,25 @@ export default function BattleScreen({
               </button>
             );
           })}
-          <GameButton
-            variant="icon"
-            className={styles.emoteTrigger}
-            aria-label="Match emotes"
-            onClick={() => openDrawer("emotes")}
-          >
-            <MessageCircle size={24} />
-          </GameButton>
+          {selectedPower ? (
+            <GameButton
+              variant="secondary"
+              onClick={cancelPower}
+              className={styles.cancelTarget}
+            >
+              <X size={17} />
+              Cancel
+            </GameButton>
+          ) : (
+            <GameButton
+              variant="icon"
+              className={styles.emoteTrigger}
+              aria-label="Match emotes"
+              onClick={() => openDrawer("emotes")}
+            >
+              <MessageCircle size={24} />
+            </GameButton>
+          )}
         </div>
       ) : (
         <div className={styles.classicFooter}>
@@ -1071,6 +1085,19 @@ export default function BattleScreen({
                 <Info size={20} />
                 Battle intel
               </GameButton>
+              {!spectator && game.status === "active" && (
+                <GameButton
+                  variant="secondary"
+                  aria-label="Arena hub, match continues"
+                  onClick={() => {
+                    setDrawer(null);
+                    navigate("/");
+                  }}
+                >
+                  <Home size={20} />
+                  Arena hub · match continues
+                </GameButton>
+              )}
               <GameButton
                 variant="secondary"
                 onClick={() => {

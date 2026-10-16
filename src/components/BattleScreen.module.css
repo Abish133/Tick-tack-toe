@@ -161,3 +161,79 @@
 .disconnectedPlayer>svg { flex:0 0 12px; }
 .resultContainer { height:100%; min-height:0; width:100%; display:grid; grid-template-rows:minmax(0,1fr); overflow:hidden; }
 .resultReconnecting { grid-template-rows:auto minmax(0,1fr); }
+
+/* ---------- Polish: the board fills the space it is given; nothing overlaps it. ---------- */
+.screen{grid-template-rows:auto auto auto minmax(0,1fr) auto auto;max-width:980px}
+.screen .playerHUD{height:auto;min-height:52px}
+.boardStage{container-type:size;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:4px 0 0;min-width:0}
+.pedestal{flex:none;min-width:0!important;width:min(calc(100cqw - 12px),calc(100cqh - 40px),640px)!important;transform:none}
+.screen .battleStatus{position:static;flex:none;min-height:24px;width:100%;padding-inline:8px}
+.screen .liveScore{bottom:auto;top:-2px}
+.screen .cell{min-width:0;min-height:0}
+.screen .turnBar .clock{font-size:28px;min-width:64px;justify-content:flex-end}
+.screen .clock:global(.urgent){animation:clockPulse .8s ease-in-out infinite}
+@keyframes clockPulse{50%{transform:scale(1.14);text-shadow:0 0 14px #ff6b5f}}
+.energy>span b{display:inline!important}
+.roundGems>span{font-family:var(--font-ui);font-size:11px;letter-spacing:.8px;color:#b8c7db;margin-right:2px}
+.screen .hotbar{grid-template-columns:repeat(3,minmax(0,1fr)) minmax(48px,auto)}
+.screen .hotbar .cancelTarget{position:static;align-self:stretch;height:auto;min-height:48px;padding:6px 10px;white-space:nowrap}
+@media(hover:none),(pointer:coarse){
+  .screen .cell:not(:disabled):hover{border-color:#697587;background:linear-gradient(145deg,#344656e6,#12263a);box-shadow:inset 0 1px 0 #bdcad426,inset 0 -3px 2px #0005}
+  .screen .powerCard:hover:not(:disabled){transform:none}
+}
+@media(max-width:620px){
+  .screen .board{padding:5px;gap:3px}
+  .pedestal{width:min(calc(100cqw - 4px),calc(100cqh - 34px),560px)!important}
+  .screen .turnBar .clock{font-size:24px}
+  .screen .battleStatus{min-height:20px}
+}
+/* Short screens: the instruction already sits in the turn banner. */
+@media(max-height:700px){.screen .battleStatus{display:none}.screen .battleStatus:has(.curseInfo){display:flex}.pedestal{width:min(calc(100cqw - 4px),calc(100cqh - 8px),560px)!important}}
+/* Wide desktop: players flank the board. */
+@media(min-width:1180px) and (min-height:700px){
+  .screen{max-width:1240px;grid-template-columns:minmax(220px,1fr) minmax(0,auto) minmax(220px,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-areas:"top top top" "turn turn turn" "opp board self" "hot hot hot";column-gap:18px}
+  .screen>:global(.battle-player.opponent){grid-area:opp;align-self:center}
+  .screen>:global(.battle-player.self){grid-area:self;align-self:center}
+  .battleTop{grid-area:top}
+  .screen .turnBar{grid-area:turn}
+  .boardStage{grid-area:board;width:min(calc(100dvh - 250px),640px)}
+  .screen .hotbar,.classicFooter{grid-area:hot}
+  .screen .playerHUD{flex-direction:column;align-items:flex-start;padding:12px;gap:10px}
+  .screen .playerHUD .hudRight{width:100%;justify-content:space-between}
+}
+/* Landscape phones: HUDs left, board centre, powers right. */
+@media(orientation:landscape) and (max-height:500px){
+  .screen,.screen:global(.battle-arena){max-width:none;padding:2px 6px;gap:4px 8px;grid-template-columns:minmax(170px,1fr) min(calc(100dvh - 12px),52vw) minmax(120px,.8fr);grid-template-rows:auto auto auto minmax(0,1fr);grid-template-areas:"top board hot" "opp board hot" "turn board hot" "self board hot"}
+  .battleTop{grid-area:top}
+  .screen>:global(.battle-player.opponent){grid-area:opp}
+  .screen>:global(.battle-player.self){grid-area:self;align-self:start}
+  .screen .turnBar{grid-area:turn;max-width:none}
+  .boardStage{grid-area:board;padding:0}
+  .screen .hotbar,.classicFooter{grid-area:hot;align-self:center}
+  .screen .hotbar{grid-template-columns:1fr;grid-auto-rows:minmax(48px,auto);max-width:none;gap:5px}
+  .screen .powerCard{height:auto;min-height:48px;display:grid;grid-template-columns:28px minmax(0,1fr);text-align:left}
+  .screen .powerName small{display:none}
+  .battleTop>button,.topTools>button{width:40px;height:40px;min-width:40px;min-height:40px}
+  .modePlate span{max-width:100%}
+  .screen .playerHUD{min-height:44px;height:auto;padding:2px 6px}
+  .avatarRing{width:38px;height:38px;flex-basis:38px;padding:2px}
+  .avatarRing .avatar{width:32px;height:32px}
+  .screen .turnBar .clock{font-size:20px}
+  .screen .battleStatus{display:none}
+  .pedestal{width:min(calc(100cqw - 4px),calc(100cqh - 4px))!important}
+}
+/* Portrait: keep the HUDs hugging the board instead of floating at the edges. */
+@media(orientation:portrait){.screen{align-content:center;grid-template-rows:auto auto auto minmax(0,calc(min(100vw,980px) + 34px)) auto auto}}
+@media(orientation:landscape) and (max-height:500px){
+  .topTools>button:not(:last-child){display:none}
+  .modePlate{padding-right:16px}
+  .modePlate strong{font-size:12px}
+  .modePlate span{font-size:11px}
+  .screen .playerHUD{flex-wrap:wrap;row-gap:2px}
+  .screen .playerHUD .hudRight{width:100%;justify-content:space-between}
+  .screen .playerHUD .namePlate small:not(.bank){display:none}
+  .screen .turnBar{font-size:11px}
+  .turnBar>span:first-child{letter-spacing:0}
+}
+.playerName{min-width:0;flex:0 1 auto}
+.you{flex:none}
