@@ -150,34 +150,39 @@ export default function InventoryPanel({
                   <span className={styles.rarity} data-rarity={item.rarity}>
                     {item.rarity}
                   </span>
-                  <span className={styles.owned}>
-                    <Check size={14} />
-                    {active ? "Equipped" : "Owned"}
+                  <span
+                    className={`${styles.ownedCheck} ${active ? styles.equippedCheck : ""}`}
+                    title={active ? "Equipped" : "Owned"}
+                  >
+                    <Check size={14} aria-hidden="true" />
                   </span>
-                  <span className={styles.previewLabel}>
-                    <Eye size={16} /> Preview
+                  <span className={styles.previewLabel} aria-hidden="true">
+                    <Eye size={16} />
                   </span>
                 </button>
                 <div className={`shop-info ${styles.info}`}>
                   <span className={styles.itemType}>{item.type}</span>
                   <h3>{item.name}</h3>
-                  <GameButton
-                    variant={active ? "primary" : "secondary"}
-                    disabled={busy === item.id || active}
-                    onClick={() => equip(item)}
-                  >
-                    {active ? (
-                      <>
-                        <Check size={18} />
-                        Equipped
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles size={18} />
-                        Equip cosmetic
-                      </>
-                    )}
-                  </GameButton>
+                  {active ? (
+                    <GameButton
+                      variant="secondary"
+                      disabled
+                      className="claimed-button"
+                    >
+                      <Check size={18} />
+                      Equipped
+                    </GameButton>
+                  ) : (
+                    <GameButton
+                      variant="primary"
+                      aria-label="Equip cosmetic"
+                      disabled={busy === item.id}
+                      onClick={() => equip(item)}
+                    >
+                      <Sparkles size={18} />
+                      Equip
+                    </GameButton>
+                  )}
                 </div>
               </RarityTile>
             );

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Layers3,
   Zap,
@@ -44,7 +44,20 @@ export default function PowerCollection({
     [selectionNotice, setSelectionNotice] = useState(""),
     [inspect, setInspect] = useState(null),
     [swapSlot, setSwapSlot] = useState(null),
-    [dropSlot, setDropSlot] = useState(null);
+    [dropSlot, setDropSlot] = useState(null),
+    [hintSeen, setHintSeen] = useState(false);
+  // The slot hint teaches once; after the first slot or card tap it stays hidden.
+  useEffect(() => {
+    try {
+      setHintSeen(localStorage.getItem("ea:armory-hint") === "seen");
+    } catch {}
+  }, []);
+  useEffect(() => {
+    if (swapSlot === null && !selectionNotice) return;
+    try {
+      localStorage.setItem("ea:armory-hint", "seen");
+    } catch {}
+  }, [swapSlot, selectionNotice]);
   const categories = ["all", ...new Set(POWER_INFO.map((power) => power.role))];
   const powers = POWER_INFO.filter(
     (power) =>
@@ -216,12 +229,14 @@ export default function PowerCollection({
           })}
         </div>
       </div>
-      <p className={styles.selectionNotice} aria-live="polite">
-        {selectionNotice ||
-          (swapSlot !== null
-            ? `Choose a power for slot ${swapSlot + 1}.`
-            : "Tap a slot, then choose its replacement.")}
-      </p>
+      {(selectionNotice || swapSlot !== null || !hintSeen) && (
+        <p className={styles.selectionNotice} aria-live="polite">
+          {selectionNotice ||
+            (swapSlot !== null
+              ? `Choose a power for slot ${swapSlot + 1}.`
+              : "Tap a slot, then choose its replacement.")}
+        </p>
+      )}
       <div className={`power-grid ${styles.grid}`}>
         {powers.map((power) => (
           <div

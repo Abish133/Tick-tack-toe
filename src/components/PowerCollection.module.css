@@ -687,3 +687,36 @@
   .inspect { border-width: 1px; border-top: 0; border-radius: 0 0 7px 7px; font-size: 12px; letter-spacing: .4px; gap: 4px; }
   .inspect > svg { width: 14px; height: 14px; }
 }
+
+/* ---------- Polish: slim deck strip and compact cards on small screens ---------- */
+.slotNumber { top: 4px; left: 5px; right: auto; bottom: auto; width: 16px; height: 16px; display: grid; place-items: center; border-radius: 50%; background: #050c1dcc; border: 1px solid color-mix(in srgb, var(--power-color) 60%, #3b4357); color: #e8dcbf; font-size: 10px !important; line-height: 1; }
+@media (max-width: 600px) {
+  .slotChoice { min-height: 56px !important; flex-direction: row !important; justify-content: flex-start !important; gap: 6px !important; padding: 4px 22px 4px 8px !important; }
+  .slotChoice strong { font-size: 12px; text-align: left !important; min-height: 0 !important; display: block !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+  .slotChoice > span:last-child { display: none !important; }
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 6px !important; }
+  .card { min-height: 0 !important; padding: 18px 4px 6px !important; }
+  .card h3 { font-size: 12px !important; min-height: 30px !important; margin: 3px 0 0 !important; }
+  .family, .element, .cardAction { display: none !important; }
+  .card :global(.power-art), .card > span[class*="art"] { transform: scale(0.82); }
+  .inspect { min-height: 40px !important; font-size: 11px !important; gap: 4px !important; }
+}
+@media (max-width: 400px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (orientation: landscape) and (max-height: 500px) {
+  .summaryTitle, .deckHint, .selectionNotice { display: none !important; }
+  .summary { padding: 4px !important; }
+  .slotChoice { min-height: 44px !important; flex-direction: row !important; padding: 2px 22px 2px 6px !important; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important; }
+  .card { min-height: 0 !important; aspect-ratio: auto; padding: 16px 4px 6px !important; }
+  .family, .element, .cardAction { display: none !important; }
+}
+@media (max-width: 400px) {
+  .slotChoice > :not(.slotNumber):not(strong) { display: none !important; }
+  .slotChoice { padding: 4px 20px 4px 22px !important; }
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  .deck { overflow-y: auto; }
+  .grid { overflow: visible !important; min-height: auto !important; flex: none; }
+  .filters { min-height: 40px; }
+  .filters input { min-height: 40px; }
+}

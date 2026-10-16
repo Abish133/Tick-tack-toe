@@ -18,7 +18,8 @@ import {
 import CosmeticArt from "./CosmeticArt";
 import { CosmeticMark } from "./CosmeticAppearance";
 import CommercePanel from "./CommercePanel";
-import { GameFrame, GameButton, Modal, RarityTile } from "./ui";
+import { GameFrame, GameButton, Modal, RarityTile, StateBadge } from "./ui";
+import { markSeen, newIds } from "../lib/seen-cosmetics";
 import {
   COSMETIC_THEMES,
   cosmeticById,
@@ -186,6 +187,15 @@ export default function CosmeticShop({
   const catalogRef = useRef(null),
     pendingPurchase = useRef(null),
     owned = useMemo(() => new Set(ownedIds), [ownedIds]);
+  const [fresh, setFresh] = useState(() => new Set());
+  // Show NEW ribbons for this visit, then remember them as seen.
+  useEffect(() => {
+    if (!items.length) return;
+    const ids = items.map((item) => item.id);
+    setFresh(newIds(ids));
+    markSeen(ids);
+  }, [items]);
+  const balance = Number(user?.coins || 0);
   const counts = useMemo(
     () =>
       Object.fromEntries(
@@ -247,7 +257,7 @@ export default function CosmeticShop({
   }, [ownedIds]);
   useEffect(() => {
     if (!reveal) return;
-    const timer = setTimeout(() => setReveal(null), 2200);
+    const timer = setTimeout(() => setReveal(null), 4000);
     return () => clearTimeout(timer);
   }, [reveal]);
   function viewCollection(id) {
@@ -468,20 +478,25 @@ export default function CosmeticShop({
                           >
                             {item.rarity || "rare"}
                           </span>
-                          {animated && (
+                          {animated ? (
                             <span className={styles.animatedBadge}>
                               <Sparkles size={12} aria-hidden="true" /> ANIMATED
                             </span>
+                          ) : (
+                            fresh.has(item.id) &&
+                            !isOwned && <StateBadge state="new" />
                           )}
                         </span>
                         {isOwned && (
-                          <span className={styles.owned}>
-                            <Check size={14} />
-                            {equipped ? "Equipped" : "Owned"}
+                          <span
+                            className={`${styles.ownedCheck} ${equipped ? styles.equippedCheck : ""}`}
+                            title={equipped ? "Equipped" : "Owned"}
+                          >
+                            <Check size={14} aria-hidden="true" />
                           </span>
                         )}
-                        <span className={styles.previewLabel}>
-                          <Eye size={16} /> Preview
+                        <span className={styles.previewLabel} aria-hidden="true">
+                          <Eye size={16} />
                         </span>
                       </button>
                       <div className={`shop-info ${styles.info}`}>
@@ -490,23 +505,57 @@ export default function CosmeticShop({
                             item.type}
                         </span>
                         <h3>{item.name}</h3>
-                        <GameButton
-                          variant={isOwned ? "secondary" : "primary"}
-                          disabled={busy || isOwned}
-                          onClick={() => buy(item)}
-                        >
-                          {isOwned ? (
-                            <>
-                              <Check size={18} />
-                              Owned
-                            </>
-                          ) : (
-                            <>
+                        {equipped ? (
+                          <GameButton
+                            variant="secondary"
+                            disabled
+                            className="claimed-button"
+                          >
+                            <Check size={18} />
+                            Equipped
+                          </GameButton>
+                        ) : isOwned ? (
+                          <GameButton
+                            variant="secondary"
+                            aria-label="Equip cosmetic"
+                            disabled={busy || equipBusy}
+                            onClick={() => equip(item)}
+                          >
+                            <Check size={18} />
+                            Equip
+                          </GameButton>
+                        ) : balance < Number(item.price ?? item.cost ?? 0) ? (
+                          <>
+                            <GameButton
+                              variant="secondary"
+                              className="cant-afford"
+                              disabled={busy}
+                              onClick={() => setCategory("coins")}
+                              aria-label={`${pretty(item.price ?? item.cost)} coins`}
+                            >
                               <Coins size={18} />
-                              {pretty(item.price ?? item.cost)} coins
-                            </>
-                          )}
-                        </GameButton>
+                              <span className="price">
+                                {pretty(item.price ?? item.cost)}
+                              </span>
+                            </GameButton>
+                            <small className={styles.needMore}>
+                              Need{" "}
+                              {pretty(
+                                Number(item.price ?? item.cost ?? 0) - balance,
+                              )}{" "}
+                              more
+                            </small>
+                          </>
+                        ) : (
+                          <GameButton
+                            variant="primary"
+                            disabled={busy}
+                            onClick={() => buy(item)}
+                          >
+                            <Coins size={18} />
+                            {pretty(item.price ?? item.cost)} coins
+                          </GameButton>
+                        )}
                       </div>
                     </RarityTile>
                   );
@@ -608,6 +657,18 @@ export default function CosmeticShop({
           <strong>STYLE UNLOCKED</strong>
           <CosmeticArt item={reveal} />
           <span>{reveal.name}</span>
+          {!isEquipped(reveal, user) && (
+            <GameButton
+              className={styles.revealEquip}
+              disabled={equipBusy}
+              onClick={async () => {
+                await equip(reveal);
+                setReveal(null);
+              }}
+            >
+              <Check size={17} /> Equip now
+            </GameButton>
+          )}
           <button
             aria-label="Skip cosmetic reveal"
             onClick={() => setReveal(null)}

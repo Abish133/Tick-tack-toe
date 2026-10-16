@@ -350,3 +350,15 @@ p.battlefield-info {
 .cant-afford .price {
   color: #ff9d8f;
 }
+
+/* Short landscape screens: tabs and armory sections stay compact. */
+@media (max-height: 500px) {
+  .armory-tabs,
+  .content.route--powers [role="tablist"] {
+    margin-bottom: 2px;
+  }
+  .content.route--powers [role="tablist"] > button {
+    min-height: 40px;
+    padding-block: 2px;
+  }
+}
