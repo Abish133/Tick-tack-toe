@@ -134,3 +134,9 @@
 @keyframes auraPulse{50%{transform:scale(1.12);opacity:.75}}
 @media(prefers-reduced-motion:reduce){.battle,.battle::before,.aura{animation:none}}
 :global(.reduce-motion) .battle,:global(.reduce-motion) .battle::before,:global(.reduce-motion) .aura{animation:none}
+
+/* glass */
+.rankPlate,.events>button,.loadoutFan>button:not(.editLoadout),.editLoadout,.hubTop>button{border:1px solid #ffffff2e!important;border-top-color:#ffffff4d!important;background:linear-gradient(165deg,#ffffff1f,#ffffff06 45%,#0a1528cc)!important;box-shadow:inset 0 1px 0 #ffffff40,0 10px 24px #0007!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:18px!important}
+.editLoadout{border-radius:50%!important}
+.loadoutFan>button:not(.editLoadout){border-color:color-mix(in srgb,var(--power-color) 70%,#fff)!important;background:linear-gradient(165deg,color-mix(in srgb,var(--power-color) 30%,#ffffff10),#0a1528cc)!important}
+.eventTile[data-state=ready]{border-color:#ffe08f!important}

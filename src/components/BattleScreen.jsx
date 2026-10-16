@@ -47,6 +47,7 @@ import {
 import { boardSizeOf } from "../lib/game-engine/geometry";
 import { POWER_INFO } from "./PowerPresentation";
 import { ATTACKS, CastSequence, TurnSweep } from "./BattleJuice";
+import VersusIntro, { versusDetail } from "./VersusIntro";
 import PowerEffects from "./PowerEffects";
 import PowerTargetControls, {
   CellStatuses,
@@ -518,11 +519,11 @@ export default function BattleScreen({
     const count = setInterval(() => {
       step += 1;
       setCountdown(["3", "2", "1", "FIGHT"][Math.min(step, 3)]);
-    }, 550);
+    }, 650);
     const finish = setTimeout(() => {
       clearInterval(count);
       setIntro(false);
-    }, 2300);
+    }, 2900);
     return () => {
       clearInterval(count);
       clearTimeout(finish);
@@ -1236,107 +1237,22 @@ export default function BattleScreen({
       )}
       <AnimatePresence>
         {intro && connectionReady && (
-          <motion.div
-            className={styles.vsIntro}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            aria-label="Battle introduction"
-          >
-            <GameButton
-              variant="ghost"
-              className={styles.skipIntro}
-              onClick={() => setIntro(false)}
-              aria-label="Skip battle introduction"
-            >
-              Skip
-            </GameButton>
-            <motion.div
-              className={styles.vsPlayer}
-              initial={
-                settings.reducedMotion ? { opacity: 0 } : { x: -80, opacity: 0 }
-              }
-              animate={{ x: 0, opacity: 1 }}
-            >
-              <BattleAvatar
-                player={me}
-                profile={user?.profile}
-                active={false}
-                reducedMotion={settings.reducedMotion}
-              />
-              <strong>{me?.name}</strong>
-              <span>
-                <Trophy size={17} />
-                {rank(
-                  match.participants?.find((player) => player.id === me?.id)
-                    ?.initialCups,
-                )}{" "}
-                ·{" "}
-                {pretty(
-                  match.participants?.find((player) => player.id === me?.id)
-                    ?.initialCups,
-                )}
-              </span>
-            </motion.div>
-            <motion.b
-              className={styles.vsLightning}
-              initial={
-                settings.reducedMotion
-                  ? { opacity: 0 }
-                  : { scale: 1.8, opacity: 0 }
-              }
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.25 }}
-            >
-              <Zap size={74} />
-              VS
-            </motion.b>
-            <motion.div
-              className={`${styles.vsPlayer} ${styles.vsOpponent}`}
-              initial={
-                settings.reducedMotion ? { opacity: 0 } : { x: 80, opacity: 0 }
-              }
-              animate={{ x: 0, opacity: 1 }}
-            >
-              <BattleAvatar
-                player={opponent}
-                active={false}
-                reducedMotion={settings.reducedMotion}
-              />
-              <strong>{opponent?.name || "Opponent"}</strong>
-              <span>
-                {match.rankedBot ? (
-                  `${match.difficulty} · Competitive bot`
-                ) : match.mode === "ai" ? (
-                  `${match.difficulty || difficulty} AI · Practice`
-                ) : (
-                  <>
-                    <Trophy size={17} />
-                    {rank(
-                      match.participants?.find(
-                        (player) => player.id === opponent?.id,
-                      )?.initialCups,
-                    )}{" "}
-                    ·{" "}
-                    {pretty(
-                      match.participants?.find(
-                        (player) => player.id === opponent?.id,
-                      )?.initialCups,
-                    )}
-                  </>
-                )}
-              </span>
-            </motion.div>
-            <motion.strong
-              key={countdown}
-              className={styles.fightCountdown}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              {countdown}
-            </motion.strong>
-          </motion.div>
+          <VersusIntro
+            key="versus"
+            reduced={reduced}
+            countdown={countdown}
+            onSkip={() => setIntro(false)}
+            me={{
+              name: displayName(me?.name),
+              skin: me?.profile?.avatar || user?.profile?.avatar,
+              detail: versusDetail(match, me, difficulty, rank, pretty, true),
+            }}
+            opponent={{
+              name: displayName(opponent?.name) || "Opponent",
+              skin: opponent?.profile?.avatar,
+              detail: versusDetail(match, opponent, difficulty, rank, pretty, false),
+            }}
+          />
         )}
       </AnimatePresence>
     </section>

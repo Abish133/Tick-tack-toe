@@ -1,0 +1,167 @@
+/* Premium glass & gloss for legacy surfaces, the board and dialogs. Loaded last. */
+.button,
+.button.primary {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px !important;
+  border: 1px solid #ffe8a8 !important;
+  background: linear-gradient(180deg, #fff1c2 0%, #f5ce73 34%, #d39a3c 66%, #b07a2a 100%) !important;
+  color: #2a1a06 !important;
+  box-shadow: inset 0 1px 0 #fffbe9, inset 0 -3px 6px #8a5a1a66, 0 6px 18px #f2c86b40, 0 3px 0 #6b4718 !important;
+  transition: transform 0.18s cubic-bezier(0.3, 1.5, 0.5, 1), box-shadow 0.2s, filter 0.2s;
+}
+.button.secondary,
+.button.ghost {
+  border: 1px solid #ffffff38 !important;
+  background: linear-gradient(180deg, #ffffff2b 0%, #ffffff0f 48%, #0b162a99 100%) !important;
+  color: #f3f7ff !important;
+  box-shadow: inset 0 1px 0 #ffffff59, 0 6px 16px #0007 !important;
+  backdrop-filter: blur(12px);
+}
+.button.danger {
+  border: 1px solid #ffb3bd !important;
+  background: linear-gradient(180deg, #ff9aa8, #e0465e 45%, #9e2238) !important;
+  color: #fff !important;
+}
+.button::after {
+  content: "";
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 2px;
+  height: 44%;
+  border-radius: 12px 12px 40% 40%;
+  background: linear-gradient(180deg, #ffffff99, #ffffff00);
+  pointer-events: none;
+}
+.button.secondary::after,
+.button.ghost::after {
+  background: linear-gradient(180deg, #ffffff33, #ffffff00);
+}
+.button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+}
+.button:active:not(:disabled) {
+  transform: translateY(2px) scale(0.98);
+}
+.panel,
+.modal {
+  border-radius: 20px !important;
+  border: 1px solid #ffffff2e !important;
+  border-top-color: #ffffff59 !important;
+  background: linear-gradient(160deg, #ffffff1c 0%, #ffffff08 38%, #0a162acc 100%), #0b1628c4 !important;
+  box-shadow: inset 0 1px 0 #ffffff40, 0 18px 40px #0008 !important;
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+}
+
+/* Board: glossy glass tiles with a specular sheen. */
+.game-board {
+  border-radius: 22px !important;
+  border: 1px solid #ffffff3d !important;
+  background: linear-gradient(160deg, #ffffff1f, #ffffff05 40%, #0a1528d9) !important;
+  box-shadow: inset 0 1px 0 #ffffff4d, 0 24px 50px #000a, 0 0 40px #6fb7ff22 !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.game-cell {
+  position: relative;
+  border-radius: 14px !important;
+  border: 1px solid #ffffff26 !important;
+  background: linear-gradient(165deg, #ffffff1a 0%, #ffffff06 42%, #0b1a30cc 100%) !important;
+  box-shadow: inset 0 1px 0 #ffffff33, inset 0 -6px 12px #0006 !important;
+  transition: transform 0.18s cubic-bezier(0.3, 1.5, 0.5, 1), box-shadow 0.2s, filter 0.25s, background 0.2s;
+}
+.game-cell::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 3%;
+  height: 26%;
+  border-radius: 10px 10px 50% 50%;
+  background: linear-gradient(180deg, #ffffff12, transparent);
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .game-cell:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: inset 0 1px 0 #ffffff55, 0 8px 18px #0007, 0 0 18px #f2c86b44 !important;
+  }
+}
+.game-cell .mark svg {
+  filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 2px 2px #0008);
+}
+.game-board.targeting .game-cell.valid-target::after {
+  border-radius: 50%;
+}
+
+/* Pills and chips everywhere get the same glass. */
+.board-size-options button {
+  border-radius: 14px !important;
+  border: 1px solid #ffffff2e !important;
+  background: linear-gradient(180deg, #ffffff1f, #ffffff05 50%, #0b162a99) !important;
+  box-shadow: inset 0 1px 0 #ffffff3d;
+  transition: transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+.board-size-options button.selected {
+  background: linear-gradient(180deg, #fff1c2, #e8b65a 60%, #b9862f) !important;
+  color: #2a1a06 !important;
+  border-color: #ffe8a8 !important;
+  box-shadow: inset 0 1px 0 #fff, 0 6px 16px #f2c86b55 !important;
+}
+.board-size-chip {
+  border-radius: 14px !important;
+  background: linear-gradient(180deg, #ffffff1f, #ffffff05 50%, #0b162a99) !important;
+  border: 1px solid #ffffff2e !important;
+}
+
+/* Staggered entrance for grids and lists so screens feel alive. */
+@media (prefers-reduced-motion: no-preference) {
+  .shop-grid > *,
+  .power-grid > *,
+  [aria-label="Achievement badge wall"] > *,
+  .season-tier {
+    animation: cardRise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .shop-grid > :nth-child(2), .power-grid > :nth-child(2), [aria-label="Achievement badge wall"] > :nth-child(2), .season-tier:nth-child(2) { animation-delay: 0.04s; }
+  .shop-grid > :nth-child(3), .power-grid > :nth-child(3), [aria-label="Achievement badge wall"] > :nth-child(3), .season-tier:nth-child(3) { animation-delay: 0.08s; }
+  .shop-grid > :nth-child(4), .power-grid > :nth-child(4), [aria-label="Achievement badge wall"] > :nth-child(4), .season-tier:nth-child(4) { animation-delay: 0.12s; }
+  .shop-grid > :nth-child(5), .power-grid > :nth-child(5), [aria-label="Achievement badge wall"] > :nth-child(5), .season-tier:nth-child(5) { animation-delay: 0.16s; }
+  .shop-grid > :nth-child(n + 6), .power-grid > :nth-child(n + 6), [aria-label="Achievement badge wall"] > :nth-child(n + 6) { animation-delay: 0.2s; }
+}
+.reduce-motion .shop-grid > *,
+.reduce-motion .power-grid > *,
+.reduce-motion .season-tier {
+  animation: none !important;
+}
+@keyframes cardRise {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+}
+
+/* Cell states keep their meaning on the glass tiles. */
+.game-board.targeting .game-cell.valid-target {
+  border-color: var(--target-color) !important;
+  background: radial-gradient(circle, color-mix(in srgb, var(--target-color) 30%, #1c2c40), #0b1a30 75%) !important;
+  box-shadow: inset 0 0 22px color-mix(in srgb, var(--target-color) 55%, transparent), 0 0 16px color-mix(in srgb, var(--target-color) 50%, transparent) !important;
+}
+.game-cell.winning {
+  border-color: #ffe08f !important;
+  background: linear-gradient(165deg, #f2c86b40, #0b1a30cc) !important;
+  box-shadow: inset 0 0 26px #f2c86b66, 0 0 18px #f2c86b66 !important;
+}
+.game-cell.frozen { background: linear-gradient(165deg, #9fe8ff55, #234961cc) !important; }
+.game-cell.locked { background: linear-gradient(165deg, #b48cff44, #201c35cc) !important; }
+.game-cell.shielded { box-shadow: inset 0 0 0 2px #9fe8ff, inset 0 0 18px #6fd6ff66 !important; }
+.game-cell.selected-source { border-color: #fff !important; box-shadow: 0 0 0 2px var(--target-color, #fff), 0 0 24px var(--target-color, #fff) !important; }
+
+.toast {
+  border-radius: 16px !important;
+  border: 1px solid #ffffff40 !important;
+  background: linear-gradient(180deg, #ffffff2a, #ffffff0a 50%, #0b1628e0) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: inset 0 1px 0 #ffffff59, 0 14px 34px #0009 !important;
+}
+.button > * { position: relative; z-index: 1; }

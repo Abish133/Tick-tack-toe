@@ -853,3 +853,13 @@
 .unread p{font-weight:700;color:#fff6dc}
 .missions>.title small{display:flex;align-items:center;gap:5px}
 @media(max-width:600px){.day{min-height:80px}.day small{font-size:11px;letter-spacing:0}}
+
+/* glass */
+.mission{border:1px solid #ffffff2e!important;border-top-color:#ffffff4d!important;background:linear-gradient(165deg,#ffffff1f,#ffffff06 45%,#0a1528cc)!important;box-shadow:inset 0 1px 0 #ffffff40,0 10px 24px #0007!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:18px!important}
+.mission:before,.mission:after{display:none}
+.day{border:1px solid #ffffff2e!important;border-top-color:#ffffff4d!important;background:linear-gradient(165deg,#ffffff1f,#ffffff06 45%,#0a1528cc)!important;box-shadow:inset 0 1px 0 #ffffff40,0 10px 24px #0007!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:16px!important}
+.today{border-color:#ffe08f!important}
+.calendar{border-radius:22px!important}
+.socialTabs button,.filters button{border:1px solid #ffffff2e!important;border-top-color:#ffffff4d!important;background:linear-gradient(165deg,#ffffff1f,#ffffff06 45%,#0a1528cc)!important;box-shadow:inset 0 1px 0 #ffffff40,0 10px 24px #0007!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:999px!important}
+.notificationRow,.achievement{border:1px solid #ffffff2e!important;border-top-color:#ffffff4d!important;background:linear-gradient(165deg,#ffffff1f,#ffffff06 45%,#0a1528cc)!important;box-shadow:inset 0 1px 0 #ffffff40,0 10px 24px #0007!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:18px!important}
+.filters button,.socialTabs button{min-width:48px;padding-inline:14px!important}

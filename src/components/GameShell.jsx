@@ -309,16 +309,18 @@ export default function GameShell({
           <motion.div
             key={pathname}
             className={`${styles.screen} ${pathname !== "/" && !battleActive ? styles.withBack : ""}`}
-            initial={{
-              opacity: 0,
-              x: reduced || settings?.reducedMotion ? 0 : 22,
-            }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{
-              opacity: 0,
-              x: reduced || settings?.reducedMotion ? 0 : -22,
-            }}
-            transition={{ duration: 0.25 }}
+            initial={
+              reduced || settings?.reducedMotion
+                ? { opacity: 0 }
+                : { opacity: 0, scale: 0.97, y: 14, filter: "blur(10px)" }
+            }
+            animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+            exit={
+              reduced || settings?.reducedMotion
+                ? { opacity: 0 }
+                : { opacity: 0, scale: 1.02, filter: "blur(8px)" }
+            }
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
           >
             {children}
           </motion.div>

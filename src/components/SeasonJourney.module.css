@@ -470,3 +470,7 @@
 .purchase button { white-space: nowrap; }
 .purchase button > span { flex-wrap: nowrap; }
 .seasonNote button { min-height: 40px; padding-inline: 6px; }
+
+/* glass */
+.tier{border-radius:20px!important}
+.tabs button{border-radius:999px!important}

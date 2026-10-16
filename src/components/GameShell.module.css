@@ -71,3 +71,20 @@
 .dockDot{top:2px;right:calc(50% - 26px)}
 .journeyTile{position:relative}
 .resources>button>svg:last-of-type:first-of-type{display:block}
+
+/* ===== Premium glass shell ===== */
+.hud{background:linear-gradient(180deg,#0b1730d9,#0b173099)!important;border-bottom:1px solid #ffffff26!important;box-shadow:inset 0 -1px 0 #f2c86b22,0 10px 30px #0006!important;backdrop-filter:blur(20px) saturate(1.6);-webkit-backdrop-filter:blur(20px) saturate(1.6)}
+.dock{margin:0 max(8px,env(safe-area-inset-left)) max(8px,env(safe-area-inset-bottom));border-radius:22px;border:1px solid #ffffff2e!important;border-top-color:#ffffff4d!important;background:linear-gradient(180deg,#ffffff1f,#ffffff06 45%,#0a1428cc)!important;box-shadow:inset 0 1px 0 #ffffff40,0 16px 40px #000a!important;backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-filter:blur(22px) saturate(1.6)}
+.world{grid-template-rows:calc(var(--hud-height) + env(safe-area-inset-top)) minmax(0,1fr) calc(var(--dock-height) + 8px + env(safe-area-inset-bottom))}
+.inBattle{grid-template-rows:minmax(0,1fr) calc(var(--dock-height) + 8px + env(safe-area-inset-bottom))}
+.inBattle.noDock{grid-template-rows:minmax(0,1fr)}
+.world.withNotice{grid-template-rows:calc(var(--hud-height) + env(safe-area-inset-top)) auto minmax(0,1fr) calc(var(--dock-height) + 8px + env(safe-area-inset-bottom))}
+.dock:before,.dock:after{display:none}
+.dockButton{border-radius:16px;transition:color .25s,transform .25s cubic-bezier(.3,1.5,.5,1)}
+.active{background:linear-gradient(180deg,#ffffff24,#ffffff08)!important;box-shadow:inset 0 1px 0 #ffffff3d}
+.active .dockIcon{background:linear-gradient(180deg,#fff1c2,#e8b65a 60%,#b9862f)!important;color:#2a1a06!important;border:1px solid #ffe8a8!important;box-shadow:inset 0 1px 0 #fff,0 6px 16px #f2c86b66!important}
+.active:after{bottom:4px!important;height:3px!important;width:22%!important}
+.journeyTile{border-radius:18px!important;border:1px solid #ffffff2e!important;background:linear-gradient(165deg,#ffffff1f,#ffffff05 45%,#0a1528cc)!important;box-shadow:inset 0 1px 0 #ffffff40,0 10px 24px #0007;transition:transform .2s cubic-bezier(.3,1.5,.5,1)}
+.journeyTile:hover{transform:translateY(-3px)}
+.environment:before{opacity:.9!important;filter:saturate(1.15)}
+.atmosphere{opacity:.65!important}
