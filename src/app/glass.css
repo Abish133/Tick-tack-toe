@@ -57,7 +57,7 @@
 }
 
 /* Board: glossy glass tiles with a specular sheen. */
-.game-board {
+.game-board:not(.collection-board) {
   border-radius: 22px !important;
   border: 1px solid #ffffff3d !important;
   background: linear-gradient(160deg, #ffffff1f, #ffffff05 40%, #0a1528d9) !important;
@@ -65,7 +65,7 @@
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
-.game-cell {
+.game-board:not(.collection-board) .game-cell {
   position: relative;
   border-radius: 14px !important;
   border: 1px solid #ffffff26 !important;
@@ -73,7 +73,7 @@
   box-shadow: inset 0 1px 0 #ffffff33, inset 0 -6px 12px #0006 !important;
   transition: transform 0.18s cubic-bezier(0.3, 1.5, 0.5, 1), box-shadow 0.2s, filter 0.25s, background 0.2s;
 }
-.game-cell::after {
+.game-board:not(.collection-board) .game-cell::after {
   content: "";
   position: absolute;
   left: 8%;
@@ -165,3 +165,32 @@
   box-shadow: inset 0 1px 0 #ffffff59, 0 14px 34px #0009 !important;
 }
 .button > * { position: relative; z-index: 1; }
+
+/* Equipped cosmetic boards keep their own art in real battles (the battle
+   screen's default board style used to hide it). */
+.battle-arena .game-board.collection-board {
+  border: 2px solid color-mix(in srgb, var(--cosmetic-primary) 70%, #fff) !important;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--cosmetic-ink) 80%, transparent), color-mix(in srgb, var(--cosmetic-ink) 62%, transparent)),
+    var(--cosmetic-art, none) center/cover !important;
+  box-shadow: inset 0 0 26px color-mix(in srgb, var(--cosmetic-primary) 18%, transparent), 0 0 34px color-mix(in srgb, var(--cosmetic-primary) 28%, transparent), 0 20px 40px #0009 !important;
+}
+.battle-arena .game-board.collection-board[data-cosmetic-theme="ascendant"] {
+  border-color: #fff1c2 !important;
+  background:
+    linear-gradient(#0b102690, #111326b8),
+    var(--cosmetic-motion-art, var(--cosmetic-art)) center/cover !important;
+}
+.reduce-motion .battle-arena .game-board.collection-board[data-cosmetic-theme="ascendant"],
+.quality-low .battle-arena .game-board.collection-board[data-cosmetic-theme="ascendant"] {
+  background: linear-gradient(#0b102690, #111326b8), var(--cosmetic-art) center/cover !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .battle-arena .game-board.collection-board[data-cosmetic-theme="ascendant"] {
+    background: linear-gradient(#0b102690, #111326b8), var(--cosmetic-art) center/cover !important;
+  }
+}
+/* Let the board art show between translucent cosmetic tiles. */
+.battle-arena .collection-board > .game-cell:not(.frozen):not(.locked):not(.winning):not(.valid-target) {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--cosmetic-primary) 14%, #0b1026a8), #111326b0) !important;
+}

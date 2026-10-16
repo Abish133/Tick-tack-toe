@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import { Trophy, Zap } from "lucide-react";
 import { cosmeticAsset } from "../lib/cosmetic-collection";
+import { useCosmeticAnimation } from "./AnimatedCosmeticImage";
 import styles from "./VersusIntro.module.css";
 
 const art = (skin = "avatar-void") =>
@@ -11,6 +12,7 @@ const art = (skin = "avatar-void") =>
 
 function Side({ side, name, detail, skin, reduced }) {
   const from = side === "left" ? -1 : 1;
+  const media = useCosmeticAnimation(skin, art(skin));
   return (
     <motion.div
       className={`${styles.side} ${styles[side]}`}
@@ -21,7 +23,7 @@ function Side({ side, name, detail, skin, reduced }) {
       <span className={styles.glow} />
       <motion.img
         className={styles.art}
-        src={art(skin)}
+        src={media.src}
         alt=""
         initial={reduced ? false : { scale: 1.25, filter: "brightness(2.2) blur(6px)" }}
         animate={{ scale: 1, filter: "brightness(1) blur(0px)" }}
