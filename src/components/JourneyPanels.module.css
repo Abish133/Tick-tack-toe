@@ -819,3 +819,37 @@
   outline: 3px solid #83e0ff;
   outline-offset: 3px;
 }
+
+/* ---------- Polish: daily calendar and mission states ---------- */
+.days{gap:6px}
+.day{flex:1 0 64px;min-width:64px;min-height:84px;gap:3px;padding:6px 2px}
+.day small{min-height:14px;font-size:11px;letter-spacing:.5px}
+.day[data-state=claimed] small{color:#9ff0b8}
+.day[data-state=locked] small{color:#8e9db2}
+.dayCheck{color:#9ff0b8!important;filter:drop-shadow(0 0 6px #4bd38a)}
+.bigDay{flex-grow:1.4;min-width:80px}
+.bigDay strong{font-size:26px}
+.claimDaily{animation:claimGlow 1.6s ease-in-out infinite}
+@keyframes claimGlow{50%{box-shadow:inset 0 2px #fff2bd66,0 4px 0 #62441e,0 0 22px #f2c86bcc}}
+.note{display:flex;align-items:center;gap:6px;margin:-4px 2px 10px;font-size:12px;color:#c9b88f}
+.mission[data-state=claimed]{order:2}
+.mission[data-state=claimed]:before,.mission[data-state=claimed]:after{background:linear-gradient(90deg,#2f6b48,#7fcf9c,#2f6b48)}
+@media(max-width:600px){
+  .calendar{grid-template-columns:1fr;gap:8px;padding:10px}
+  .calendar>button{grid-column:1;grid-row:auto;width:100%}
+  .day{flex:0 0 56px;min-width:56px;min-height:72px}
+  .day strong{font-size:18px}
+  .bigDay{flex-basis:68px;min-width:68px}
+  .missionGrid{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){.claimDaily{animation:none}}
+:global(.reduce-motion) .claimDaily{animation:none}
+.achievementSummary{display:flex;align-items:center;gap:10px;padding:8px 14px;flex-shrink:0;color:#f2c86b}
+.achievementSummary strong{font-family:var(--font-ui);font-size:16px;white-space:nowrap;color:#fff0c7}
+.achievementSummary [role=progressbar]{flex:1;height:8px}
+.achievementIcon{position:relative}
+.achievementCheck{position:absolute;right:-6px;bottom:-4px;padding:2px;border-radius:50%;background:#2c8c55;color:#fff;border:1px solid #d8ffe5}
+.achievement[data-state=locked] .achievementIcon{filter:grayscale(1) brightness(.6)}
+.unread p{font-weight:700;color:#fff6dc}
+.missions>.title small{display:flex;align-items:center;gap:5px}
+@media(max-width:600px){.day{min-height:80px}.day small{font-size:10.5px;letter-spacing:.2px}}

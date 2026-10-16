@@ -1546,7 +1546,11 @@ export default function ArenaApp() {
                       : pathname === "/notifications"
                         ? "From around the arena"
                         : "A season of possibilities",
-                    "Real progress. Cosmetic rewards. Equal competitive footing.",
+                    pathname === "/season-pass"
+                      ? "Earn season XP to claim coin rewards and five exclusive cosmetics. Free rewards stay free, and nothing here changes power, energy or clocks — all 22 powers are equal. Season XP and both tracks restart each season; claimed cosmetics and coins stay with you."
+                      : pathname === "/achievements"
+                        ? "Achievements unlock as you play. Ready ones rise to the top; completed ones move to the end."
+                        : "Match results, friend requests and achievement updates.",
                   )}
                   <ProgressPanel
                     kind={pathname.slice(1)}
@@ -1555,6 +1559,7 @@ export default function ArenaApp() {
                     refresh={refresh}
                     onError={setError}
                     onNotice={setNotice}
+                    navigate={navigate}
                   />
                 </>
               )}
@@ -1594,6 +1599,7 @@ export default function ArenaApp() {
                       refresh={refresh}
                       onError={setError}
                       onNotice={setNotice}
+                      navigate={navigate}
                     />
                   )}
                 </>

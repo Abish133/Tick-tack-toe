@@ -431,3 +431,41 @@
 .tabs button > span {
   white-space: nowrap;
 }
+
+/* ---------- Polish: one compact header, XP on every node, clear states ---------- */
+.header { display: flex; align-items: center; gap: 14px; padding: 10px 14px; flex-shrink: 0; background: radial-gradient(ellipse at 15% 0, #c3864433, transparent), linear-gradient(110deg, #23354d, #181a30); }
+.headerInfo { flex: 1; min-width: 0; display: grid; gap: 5px; }
+.headerInfo .kicker { font-family: var(--font-display); font-size: 15px; letter-spacing: 0.5px; color: #fff0c7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.headerInfo p { font-size: 12px; color: #d8c79c; margin: 0; font-variant-numeric: tabular-nums; }
+.headerInfo [role="progressbar"] { height: 10px; }
+.purchase .price { display: inline-flex; align-items: center; gap: 3px; }
+.path { min-width: 0; }
+.rewardRow { grid-template-columns: repeat(5, minmax(150px, 1fr)); }
+.rewardRow:before { left: 40px; right: 40px; }
+.rowLabel { display: none; }
+.trackLine { display: none; }
+.tier { align-content: start; }
+.tier p.requirement { display: block !important; font-family: var(--font-ui); font-size: 13px; font-weight: 700; color: #e8d5a5; letter-spacing: 0.4px; }
+.nextTier { border-color: #f2c86b !important; box-shadow: 0 0 0 1px #f2c86b66, 0 0 18px #f2c86b44 !important; }
+.nextMarker { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 4; padding: 1px 10px; border-radius: 10px; background: var(--gold-gradient); color: #1c1405; font: 700 11px/18px var(--font-ui); letter-spacing: 1px; box-shadow: 0 2px 6px #0009; }
+.lockOverlay { position: absolute; inset: 0; display: grid; place-items: center; background: #050b17a6; color: #e3d2ff; border-radius: 8px; }
+.lockedButton { color: #d7c8f2 !important; }
+.lockedButton:disabled { filter: none !important; opacity: 0.85 !important; }
+.needXp { display: flex; align-items: center; justify-content: center; min-height: 40px; width: 100%; font: 700 12px var(--font-ui); letter-spacing: 0.6px; color: #b8c5da; text-transform: uppercase; }
+.claimNow { animation: seasonClaim 1.6s ease-in-out infinite; }
+@keyframes seasonClaim { 50% { box-shadow: inset 0 2px #fff2bd66, 0 4px 0 #62441e, 0 0 20px #f2c86bcc; } }
+.seasonNote { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; font-size: 12px; color: #c0cadc; margin: 0; flex-shrink: 0; }
+.seasonNote button { min-height: 32px; border: 0; background: none; color: #ffe08f; font: 700 12px var(--font-ui); text-decoration: underline; letter-spacing: 0.5px; }
+.trackScroll { padding-top: 14px; }
+@media (max-width: 700px) {
+  .header { padding: 8px 10px; gap: 8px; flex-wrap: wrap; }
+  .headerInfo { flex-basis: 100%; }
+  .purchase { width: 100%; grid-template-columns: 1fr auto; align-items: center; justify-items: stretch; }
+  .purchase small { justify-self: end; }
+  .rewardRow { grid-template-columns: repeat(5, 120px); }
+  .path { min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .claimNow { animation: none; } }
+:global(.reduce-motion) .claimNow { animation: none; }
+.purchase button { white-space: nowrap; }
+.purchase button > span { flex-wrap: nowrap; }

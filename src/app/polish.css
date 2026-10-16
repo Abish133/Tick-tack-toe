@@ -331,3 +331,22 @@ p.battlefield-info {
     padding: 8px 10px 10px;
   }
 }
+
+/* A claimed reward button reads as done, not broken. */
+.claimed-button:disabled,
+.claimed-button[data-game-ui]:disabled {
+  filter: none !important;
+  opacity: 1 !important;
+  border-color: #6fc58e !important;
+  background: linear-gradient(#1d4a33, #0f2a1d) !important;
+  color: #c9f7d8 !important;
+  box-shadow: 0 3px 0 #08170f !important;
+}
+.cant-afford:disabled,
+.cant-afford[data-game-ui]:disabled {
+  filter: none !important;
+  opacity: 1 !important;
+}
+.cant-afford .price {
+  color: #ff9d8f;
+}
