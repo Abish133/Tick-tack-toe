@@ -294,6 +294,7 @@ function SeasonJourney({
       });
       await refresh();
       await load();
+      window.dispatchEvent(new Event("ea:rewards-changed"));
       onNotice?.(
         rewardTrack === "premium"
           ? `${tier.cosmetic?.name || "Season cosmetic"} and ${tier.coins} cosmetic coins claimed!`

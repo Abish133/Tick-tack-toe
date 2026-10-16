@@ -39,11 +39,17 @@ export default function usePendingCounts(api, user, pathname) {
   useEffect(() => {
     const focus = () => reload();
     window.addEventListener("focus", focus);
-    return () => window.removeEventListener("focus", focus);
+    // Reward panels announce claims so the dots update without polling.
+    window.addEventListener("ea:rewards-changed", reload);
+    return () => {
+      window.removeEventListener("focus", focus);
+      window.removeEventListener("ea:rewards-changed", reload);
+    };
   }, [reload]);
-  // Only reward screens (and real balance changes) refresh the counts.
+  // Reward screens, XP changes and explicit claims refresh the counts.
+  // Coin changes alone do not: purchases would otherwise multiply requests.
   const routeKey = REWARD_ROUTES.includes(pathname) ? pathname : "other";
-  const balanceKey = `${user?.coins}:${user?.xp}:${tick}`;
+  const balanceKey = `${routeKey}:${user?.xp}:${tick}`;
   useEffect(() => {
     const requestedFor = user?.id;
     if (!user?.id || !api) {
@@ -51,17 +57,23 @@ export default function usePendingCounts(api, user, pathname) {
       last.current = { at: 0, balance: "" };
       return;
     }
+    // Other screens keep the last known counts; explicit claims (tick) still refresh.
+    if (routeKey === "other" && !tick) return;
     const now = Date.now();
     if (
       last.current.balance === balanceKey &&
       now - last.current.at < 15000
     )
       return;
-    last.current = { at: now, balance: balanceKey };
+    last.current = { ...last.current, at: now, balance: balanceKey };
+    // Social requests change rarely: refresh them at most once a minute.
+    const withFriends =
+      pathname === "/friends" || now - (last.current.friendsAt || 0) > 60000;
+    if (withFriends) last.current.friendsAt = now;
     Promise.allSettled([
       api("/missions"),
       api("/season-pass"),
-      api("/friends"),
+      withFriends ? api("/friends") : Promise.resolve(null),
     ]).then(([missions, season, friends]) => {
       if (currentUser.current !== requestedFor) return;
       const m = missions.status === "fulfilled" ? missions.value : null,
@@ -69,25 +81,29 @@ export default function usePendingCounts(api, user, pathname) {
         f = friends.status === "fulfilled" ? friends.value : null;
       const daily = m?.daily && !m.daily.claimedToday ? 1 : 0,
         missionCount = readyMissionCount(m),
-        seasonCount = readySeasonTiers(s),
-        requests = (f?.requests || []).filter(
-          (r) => r.receiverId === user.id,
-        ).length,
-        invites = (f?.challenges || []).filter(
-          (c) =>
-            c.metadata?.status === "pending" &&
-            new Date(c.metadata.expiresAt) > new Date() &&
-            c.senderId !== user.id,
-        ).length;
-      setCounts({
-        daily,
-        missions: missionCount,
-        season: seasonCount,
-        requests,
-        invites,
-        journey: daily + missionCount + seasonCount,
-        social: requests + invites,
-        data: { missions: m, season: s },
+        seasonCount = readySeasonTiers(s);
+      setCounts((current) => {
+        const requests = f
+            ? (f.requests || []).filter((r) => r.receiverId === user.id)
+                .length
+            : current.requests,
+          invites = f
+            ? (f.challenges || []).filter(
+                (c) =>
+                  c.metadata?.status === "pending" &&
+                  new Date(c.metadata.expiresAt) > new Date(),
+              ).length
+            : current.invites;
+        return {
+          daily,
+          missions: missionCount,
+          season: seasonCount,
+          requests,
+          invites,
+          journey: daily + missionCount + seasonCount,
+          social: requests + invites,
+          data: { missions: m, season: s },
+        };
       });
     });
   }, [api, user?.id, routeKey, balanceKey]);

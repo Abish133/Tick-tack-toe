@@ -54,6 +54,7 @@ export default function MissionsPanel({
       const result = await api(endpoint, "POST", body);
       if (key === "daily") setBurst((value) => value + 1);
       await Promise.all([refresh(), load()]);
+      window.dispatchEvent(new Event("ea:rewards-changed"));
       onNotice(`+${result.coins} coins added to your wallet!`);
     } catch (e) {
       onError(e.message);

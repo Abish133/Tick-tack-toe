@@ -257,7 +257,7 @@ export default function CosmeticShop({
   }, [ownedIds]);
   useEffect(() => {
     if (!reveal) return;
-    const timer = setTimeout(() => setReveal(null), 4000);
+    const timer = setTimeout(() => setReveal(null), 2200);
     return () => clearTimeout(timer);
   }, [reveal]);
   function viewCollection(id) {
@@ -657,18 +657,6 @@ export default function CosmeticShop({
           <strong>STYLE UNLOCKED</strong>
           <CosmeticArt item={reveal} />
           <span>{reveal.name}</span>
-          {!isEquipped(reveal, user) && (
-            <GameButton
-              className={styles.revealEquip}
-              disabled={equipBusy}
-              onClick={async () => {
-                await equip(reveal);
-                setReveal(null);
-              }}
-            >
-              <Check size={17} /> Equip now
-            </GameButton>
-          )}
           <button
             aria-label="Skip cosmetic reveal"
             onClick={() => setReveal(null)}
