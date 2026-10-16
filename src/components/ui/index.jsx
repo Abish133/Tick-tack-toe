@@ -14,7 +14,17 @@ import {
   useReducedMotion,
   MotionConfig,
 } from "motion/react";
-import { Check, ChevronDown, Info, Lock, Plus, X, Zap } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Gift,
+  Info,
+  Lock,
+  Plus,
+  Sparkles,
+  X,
+  Zap,
+} from "lucide-react";
 import styles from "./GameUI.module.css";
 import { CosmeticMotionProvider } from "../AnimatedCosmeticImage";
 
@@ -156,6 +166,7 @@ export function ResourcePill({
   label,
   onClick,
   className = "",
+  showPlus = true,
 }) {
   const previous = useRef(Number(value) || 0),
     frame = useRef(),
@@ -203,7 +214,7 @@ export function ResourcePill({
     >
       <Icon aria-hidden="true" />
       <strong>{shown}</strong>
-      <Plus size={13} aria-hidden="true" />
+      {showPlus && <Plus size={13} aria-hidden="true" />}
       {delta !== 0 && (
         <motion.i
           className={`${styles.delta} ${delta < 0 ? styles.loss : ""}`}
@@ -642,4 +653,95 @@ export function Toast({ children, error = false, onClose }) {
       )}
     </motion.div>
   );
+}
+
+/* ---------- Reward / ownership states ----------
+   locked · progress · ready · claimed · new · equipped · owned */
+export function NotificationDot({ count = 0, className = "", label }) {
+  if (!count) return null;
+  return (
+    <b
+      className={`${styles.notificationDot} ${className}`}
+      aria-label={label || `${count} ready`}
+      data-notification-dot
+    >
+      {count > 9 ? "9+" : count}
+    </b>
+  );
+}
+
+const STATE_COPY = {
+  locked: ["Locked", Lock],
+  ready: ["Ready", Gift],
+  claimed: ["Claimed", Check],
+  completed: ["Completed", Check],
+  new: ["New", Sparkles],
+  equipped: ["Equipped", Check],
+  owned: ["Owned", Check],
+};
+export function StateBadge({ state, children, className = "" }) {
+  const [label, Icon] = STATE_COPY[state] || [state, null];
+  return (
+    <span
+      className={`${styles.stateBadge} ${styles["state_" + state] || ""} ${className}`}
+      data-state-badge={state}
+    >
+      {Icon && <Icon size={12} aria-hidden="true" />}
+      {children || label}
+    </span>
+  );
+}
+
+// One button vocabulary for every reward: CLAIM when ready, a quiet label otherwise.
+export function ClaimButton({
+  state,
+  onClaim,
+  onGo,
+  busy = false,
+  claimLabel = "Claim",
+  claimedLabel = "Claimed",
+  lockedLabel = "Locked",
+  goLabel = "Go",
+  className = "",
+  ...props
+}) {
+  if (state === "ready")
+    return (
+      <GameButton
+        className={`${styles.claimReady} ${className}`}
+        disabled={busy}
+        onClick={onClaim}
+        {...props}
+      >
+        <Gift size={17} />
+        {claimLabel}
+      </GameButton>
+    );
+  if (state === "progress" && onGo)
+    return (
+      <GameButton
+        variant="secondary"
+        size="sm"
+        className={className}
+        onClick={onGo}
+        {...props}
+      >
+        {goLabel}
+      </GameButton>
+    );
+  if (state === "claimed" || state === "completed")
+    return (
+      <span className={`${styles.stateLabel} ${styles.claimedLabel} ${className}`}>
+        <Check size={16} aria-hidden="true" />
+        {claimedLabel}
+      </span>
+    );
+  if (state === "locked")
+    return (
+      <span className={`${styles.stateLabel} ${className}`}>
+        <Lock size={15} aria-hidden="true" />
+        {lockedLabel}
+      </span>
+    );
+  return null;
 }

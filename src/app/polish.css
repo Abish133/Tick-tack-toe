@@ -191,3 +191,143 @@
     opacity: 0.5;
   }
 }
+
+/* ---------- Reward cards share one state language ---------- */
+.reward-card {
+  position: relative;
+  transition: filter 0.2s, box-shadow 0.2s;
+}
+.reward-card[data-state="locked"] {
+  filter: brightness(0.62) saturate(0.35);
+}
+.reward-card[data-state="ready"] {
+  border-color: var(--state-ready) !important;
+  box-shadow: 0 0 0 1px #ffe39a55, 0 0 22px #f2c86b66 !important;
+  animation: reward-ready 1.8s ease-in-out infinite;
+}
+.reward-card[data-state="claimed"],
+.reward-card[data-state="completed"] {
+  border-color: #6fc58e !important;
+}
+.reward-card[data-state="claimed"] > :not(.reward-stamp) {
+  opacity: 0.62;
+}
+.reward-stamp {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1px solid #b5f5c9;
+  background: #0f3424f0;
+  color: #b5f5c9;
+  font: 700 11px/16px var(--font-ui);
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  transform: rotate(4deg);
+  box-shadow: 0 2px 6px #0008;
+}
+.reward-card[data-state="ready"] .reward-icon {
+  animation: reward-bounce 1.2s ease-in-out infinite;
+}
+@keyframes reward-ready {
+  50% {
+    box-shadow: 0 0 0 1px #ffe39a99, 0 0 32px #f2c86baa;
+  }
+}
+@keyframes reward-bounce {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-5px) rotate(-6deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reward-card[data-state="ready"],
+  .reward-card[data-state="ready"] .reward-icon {
+    animation: none;
+  }
+}
+.reduce-motion .reward-card[data-state="ready"],
+.reduce-motion .reward-card[data-state="ready"] .reward-icon {
+  animation: none;
+}
+/* Disabled buttons keep their frame and colour, never a flat grey slab. */
+.button:disabled,
+[data-game-ui]:disabled {
+  filter: saturate(0.55) brightness(0.8) !important;
+  opacity: 0.6 !important;
+}
+
+/* Initials only show when the avatar art is missing (cut-out art let them peek through). */
+.avatar:has(> img:not([style*="none"])) > span,
+.avatar:has(> video) > span {
+  visibility: hidden;
+}
+
+/* ---------- Board size chip and practice dialog ---------- */
+.board-size-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 1px solid #a3865499;
+  border-radius: 9px;
+  background: linear-gradient(#1d354f, #0b1b2f);
+  color: #e8d5a5;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  letter-spacing: 0.8px;
+}
+.board-size-chip > strong {
+  margin-left: auto;
+  color: #ffe7a0;
+  font-size: 16px;
+}
+.board-size-picker.compact .board-size-options {
+  margin-top: 6px;
+}
+p.battlefield-info {
+  min-height: 0;
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #b9cce0;
+}
+.practice-dialog .segmented button.active,
+.practice-dialog .difficulty-grid button.active {
+  border-color: #f2c86b !important;
+  background: linear-gradient(#6b542e, #302b23) !important;
+  color: #ffe7a0 !important;
+}
+.practice-dialog .difficulty-bars i.lit {
+  background: #f2c86b !important;
+}
+.dialog-footer {
+  position: sticky;
+  bottom: -16px;
+  margin: 10px -16px -16px;
+  padding: 10px 16px 14px;
+  background: linear-gradient(transparent, #0b1a2df2 30%);
+  z-index: 2;
+}
+.dialog-footer .button {
+  width: 100%;
+}
+@media (max-width: 600px) {
+  .practice-dialog .difficulty-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+  .practice-dialog .difficulty-grid button {
+    min-height: 44px;
+  }
+  .dialog-footer {
+    bottom: -10px;
+    margin: 8px -10px -10px;
+    padding: 8px 10px 10px;
+  }
+}

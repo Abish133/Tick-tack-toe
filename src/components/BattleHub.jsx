@@ -1,8 +1,8 @@
 "use client";
 
 import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
-import { useState, useEffect } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   Swords,
   Trophy,
@@ -20,8 +20,19 @@ import {
   Info,
   Play,
   Clock3,
+  Check,
+  Coins,
 } from "lucide-react";
-import { GameFrame, GameButton, Modal, ProgressBar } from "./ui";
+import {
+  GameFrame,
+  GameButton,
+  Modal,
+  ProgressBar,
+  NotificationDot,
+} from "./ui";
+import { readyMissionCount, readySeasonTiers } from "./usePendingCounts";
+import { countdownTo, nextUtcMidnight } from "../lib/time-format";
+import { displayName } from "../lib/display-name";
 import BoardSizePicker from "./BoardSizePicker";
 import { cosmeticAsset } from "../lib/cosmetic-collection";
 import { POWER_INFO } from "./PowerPresentation";
@@ -120,6 +131,7 @@ export function ModeSelect({
   onBoardSize,
   busy = false,
 }) {
+  const [page, setPage] = useState(0);
   return (
     <Modal
       open={open}
@@ -134,8 +146,20 @@ export function ModeSelect({
           value={boardSize}
           onChange={onBoardSize}
           disabled={busy}
+          compact
         />
-        <div className={styles.modeCarousel} aria-label="Battle modes">
+        <div
+          className={styles.modeCarousel}
+          aria-label="Battle modes"
+          onScroll={(event) => {
+            const row = event.currentTarget,
+              card = row.firstElementChild;
+            if (card)
+              setPage(
+                Math.round(row.scrollLeft / (card.getBoundingClientRect().width + 10)),
+              );
+          }}
+        >
           {modes.map(({ id, label, icon: Icon, art, help }) => (
             <GameFrame
               variant="card"
@@ -149,20 +173,27 @@ export function ModeSelect({
                 <p>{help}</p>
                 <span>{id === "ranked" ? "RANKED" : "PLAY"}</span>
               </button>
+              {id === "ranked" && (
+                <small className={styles.cardDisclosure}>
+                  <Shield size={12} aria-hidden="true" />
+                  {disclosure}
+                </small>
+              )}
             </GameFrame>
           ))}
         </div>
-        <p className={styles.disclosure}>
-          <Shield size={16} />
-          {disclosure}
-        </p>
+        <div className={styles.modeDots} aria-hidden="true">
+          {modes.map(({ id }, index) => (
+            <i key={id} data-active={index === page} />
+          ))}
+        </div>
+
       </div>
     </Modal>
   );
 }
 
 export default function BattleHub({
-  api,
   now = Date.now(),
   user,
   boardSize,
@@ -179,52 +210,29 @@ export default function BattleHub({
   onSpectate,
   activeMatch = false,
   reducedMotion = false,
+  pending = {},
+  onClaimDaily,
 }) {
   const [mode, setMode] = useState("ranked"),
     [selector, setSelector] = useState(false),
     [policy, setPolicy] = useState(false),
+    [claiming, setClaiming] = useState(false),
+    [burst, setBurst] = useState(0),
     reduce = useReducedMotion() || reducedMotion;
-  const [events, setEvents] = useState({});
-  useEffect(() => {
-    let active = true;
-    if (!user?.id || !api) {
-      setEvents({});
-      return;
-    }
-    Promise.allSettled([api("/missions"), api("/season-pass")]).then(
-      ([missions, season]) => {
-        if (active)
-          setEvents({
-            missions: missions.status === "fulfilled" ? missions.value : null,
-            season: season.status === "fulfilled" ? season.value : null,
-          });
-      },
+  const events = pending.data || {};
+  const daily = events.missions?.daily,
+    dailyReady = !!daily && !daily.claimedToday,
+    dailyClaimed = !!daily?.claimedToday,
+    nextDaily = countdownTo(
+      events.missions?.dailyResetAt || nextUtcMidnight(now),
+      now,
     );
-    return () => {
-      active = false;
-    };
-  }, [api, user?.id, user?.coins, user?.xp]);
   const seasonXp = Number(events.season?.xp || 0),
     nextTier =
       events.season?.tiers?.find((tier) => tier.requiredXp > seasonXp) ||
       events.season?.tiers?.at(-1);
-  const readyMissions = [
-    ...(events.missions?.missions || []),
-    ...(events.missions?.weeklyMissions || []),
-  ].filter(
-    (mission) => !mission.claimed && mission.progress >= mission.target,
-  ).length;
-  const dailySeconds = Math.max(
-      0,
-      Math.ceil(
-        (new Date(
-          events.missions?.dailyResetAt || Math.ceil(now / 86400000) * 86400000,
-        ).getTime() -
-          now) /
-          1000,
-      ),
-    ),
-    dailyCountdown = `${Math.floor(dailySeconds / 3600)}:${String(Math.floor(dailySeconds / 60) % 60).padStart(2, "0")}:${String(dailySeconds % 60).padStart(2, "0")}`;
+  const seasonReady = readySeasonTiers(events.season),
+    readyMissions = readyMissionCount(events.missions);
   const selected = modes.find((item) => item.id === mode) || modes[0];
   const launch = (id) => {
     if (["ranked", "classic", "quick"].includes(id)) queueUp(id);
@@ -246,15 +254,22 @@ export default function BattleHub({
     setSelector(false);
     if (!["ranked", "classic", "quick"].includes(id)) launch(id);
   };
+  const claimDaily = async () => {
+    if (claiming || !onClaimDaily) return;
+    setClaiming(true);
+    const result = await onClaimDaily();
+    setClaiming(false);
+    if (result) setBurst((value) => value + 1);
+  };
   const avatar =
     cosmeticAsset(user?.profile?.avatar) ||
     `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[user?.profile?.avatar] || user?.profile?.avatar || "avatar-void"}.png`;
   return (
     <section className={styles.hub} aria-label="Battle hub">
       <div className={styles.hubTop}>
-        <div className={styles.season}>
+        <div className={styles.season} title={events.season?.season?.name}>
           <Crown size={18} />
-          <span>ELEMENTAL AWAKENING</span>
+          <span data-ellipsis>ELEMENTAL AWAKENING</span>
         </div>
         <GameButton
           variant="secondary"
@@ -262,7 +277,7 @@ export default function BattleHub({
           aria-label="Select battle mode"
         >
           <Swords size={18} />
-          {selected.label}
+          <span data-ellipsis>{selected.label}</span>
           <ChevronDown size={16} />
         </GameButton>
       </div>
@@ -273,10 +288,9 @@ export default function BattleHub({
           onClick={() => navigate("/leaderboard")}
         >
           <Trophy size={44} />
-          <strong>{rankLabel}</strong>
           <b>{Number(user?.cups || 0).toLocaleString()}</b>
           <ProgressBar value={rankProgress} label="Division progress" />
-          <small>TROPHY ROAD</small>
+          <small>{rankProgress > 0 ? "TROPHY ROAD" : "0 / 100"}</small>
         </button>
         <motion.div
           className={styles.guardian}
@@ -290,47 +304,112 @@ export default function BattleHub({
             alt={`${user?.name || "Your"} equipped arena guardian`}
           />
           <span className={styles.pedestal} />
-          <div className={styles.nameplate}>
-            {user?.profile?.title || user?.name || "CHALLENGER"}
+          <div className={styles.nameplate} data-ellipsis>
+            {user?.profile?.title || displayName(user?.name) || "CHALLENGER"}
           </div>
         </motion.div>
         <div className={styles.events}>
           <button
-            aria-label="View rewards"
-            onClick={() => navigate("/missions")}
+            className={`reward-card ${styles.eventTile}`}
+            data-state={
+              dailyReady ? "ready" : dailyClaimed ? "claimed" : "progress"
+            }
+            aria-label={
+              dailyReady
+                ? "Claim daily reward"
+                : dailyClaimed
+                  ? `Daily reward claimed. Next in ${nextDaily}`
+                  : "View rewards"
+            }
+            disabled={claiming}
+            onClick={() => (dailyReady ? claimDaily() : navigate("/missions"))}
           >
-            <Gift size={28} />
+            <Gift size={24} className="reward-icon" />
             <span>
-              DAILY REWARD
-              {events.missions?.daily?.claimedToday ? (
-                <small>{dailyCountdown}</small>
-              ) : events.missions?.daily ? (
+              <strong>DAILY</strong>
+              {dailyReady ? (
                 <small className={styles.claimReady}>CLAIM</small>
+              ) : dailyClaimed ? (
+                <small>Next in {nextDaily}</small>
               ) : null}
             </span>
+            {dailyReady && (
+              <NotificationDot count={1} label="Daily reward ready" />
+            )}
+            {dailyClaimed && (
+              <span className={styles.tileCheck} aria-hidden="true">
+                <Check size={12} />
+              </span>
+            )}
+            <AnimatePresence>
+              {burst > 0 && !reduce && (
+                <motion.span
+                  key={burst}
+                  className={styles.coinBurst}
+                  aria-hidden="true"
+                  initial={{ opacity: 1 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  {Array.from({ length: 7 }, (_, i) => (
+                    <motion.i
+                      key={i}
+                      initial={{ opacity: 1, x: 0, y: 0, scale: 0.6 }}
+                      animate={{
+                        opacity: 0,
+                        x: Math.cos((i / 7) * Math.PI * 2) * 46,
+                        y: Math.sin((i / 7) * Math.PI * 2) * 46 - 30,
+                        scale: 1.1,
+                      }}
+                      transition={{ duration: 0.9, ease: "easeOut" }}
+                    >
+                      <Coins size={16} />
+                    </motion.i>
+                  ))}
+                </motion.span>
+              )}
+            </AnimatePresence>
           </button>
           <button
+            className={`reward-card ${styles.eventTile}`}
+            data-state={seasonReady ? "ready" : "progress"}
             aria-label="Season pass"
             onClick={() => navigate("/season-pass")}
           >
-            <Crown size={28} />
+            <Crown size={24} className="reward-icon" />
             <span>
-              SEASON PASS
-              {nextTier && (
-                <ProgressBar
-                  value={Math.min(seasonXp, nextTier.requiredXp)}
-                  max={nextTier.requiredXp}
-                  label="Current season tier progress"
-                />
+              <strong>SEASON</strong>
+              {seasonReady ? (
+                <small className={styles.claimReady}>CLAIM</small>
+              ) : nextTier ? (
+                <small>
+                  {Math.min(seasonXp, nextTier.requiredXp)}/
+                  {nextTier.requiredXp} XP
+                </small>
+              ) : null}
+            </span>
+            <NotificationDot
+              count={seasonReady}
+              label={`${seasonReady} season rewards ready`}
+            />
+          </button>
+          <button
+            className={`reward-card ${styles.eventTile}`}
+            data-state={readyMissions ? "ready" : "progress"}
+            aria-label="Missions"
+            onClick={() => navigate("/missions")}
+          >
+            <Target size={24} className="reward-icon" />
+            <span>
+              <strong>MISSIONS</strong>
+              {readyMissions > 0 && (
+                <small className={styles.claimReady}>CLAIM</small>
               )}
             </span>
-          </button>
-          <button aria-label="Missions" onClick={() => navigate("/missions")}>
-            <Target size={28} />
-            <span>MISSIONS</span>
-            {readyMissions > 0 && (
-              <b className={styles.missionBadge}>{readyMissions}</b>
-            )}
+            <NotificationDot
+              count={readyMissions}
+              label={`${readyMissions} missions ready`}
+            />
           </button>
         </div>
         {activeMatch && (
@@ -346,22 +425,19 @@ export default function BattleHub({
       </div>
       <div className={styles.launchZone}>
         <div className={styles.loadoutFan} aria-label="Three equipped powers">
-          {loadout.map((id, index) => {
+          {loadout.map((id) => {
             const power = POWER_INFO.find((item) => item.id === id);
             if (!power) return null;
             const Icon = power.icon;
             return (
               <button
                 key={id}
-                style={{
-                  "--power-color": power.color,
-                  "--card-rotate": `${(index - 1) * 7}deg`,
-                }}
+                style={{ "--power-color": power.color }}
                 onClick={() => navigate("/powers")}
                 aria-label={`Edit loadout: ${power.name}`}
               >
-                <Icon size={25} />
-                <strong>{power.name}</strong>
+                <Icon size={22} />
+                <strong data-ellipsis>{power.name}</strong>
                 <span>
                   {power.cost}
                   <small> ENERGY</small>
@@ -398,22 +474,17 @@ export default function BattleHub({
           </span>
           <Swords size={26} />
         </GameButton>
-        <div className={styles.policy}>
-          <Shield size={14} />
-          <span>
-            {mode === "ranked"
-              ? "Hard or above · ranked bot fallback"
-              : "Choose your strategy"}
-          </span>
-          <GameButton
-            variant="icon"
+        {mode === "ranked" && (
+          <button
+            type="button"
+            className={styles.disclosureCopy}
             onClick={() => setPolicy(true)}
             aria-label="Ranked bot policy"
           >
-            <Info size={17} />
-          </GameButton>
-        </div>
-        <span className={styles.disclosureCopy}>{disclosure}</span>
+            <Shield size={13} aria-hidden="true" />
+            <span>{disclosure}</span>
+          </button>
+        )}
       </div>
       <ModeSelect
         open={selector}

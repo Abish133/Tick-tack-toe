@@ -67,3 +67,6 @@
   .dock:before,.dock:after{display:none}
 }
 @media(max-height:500px) and (max-width:900px){.dockLabel{display:none}.active .dockLabel{display:block}}
+.dockDot{top:2px;right:calc(50% - 26px)}
+.journeyTile{position:relative}
+.resources>button>svg:last-of-type:first-of-type{display:block}

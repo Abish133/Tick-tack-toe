@@ -26,7 +26,15 @@ import {
   Wifi,
   WifiOff,
 } from "lucide-react";
-import { GameButton, Modal, ResourcePill, ProgressBar, IconBadge } from "./ui";
+import {
+  GameButton,
+  Modal,
+  ResourcePill,
+  ProgressBar,
+  IconBadge,
+  NotificationDot,
+} from "./ui";
+import { displayName } from "../lib/display-name";
 import styles from "./GameShell.module.css";
 import { useCosmeticAnimation } from "./AnimatedCosmeticImage";
 
@@ -63,8 +71,14 @@ export default function GameShell({
   background = "/assets/arena.png",
   backgroundCosmeticId,
   notificationCount = 0,
+  pending = {},
   connectionNotice = null,
 }) {
+  const tileCount = {
+    "/missions": (pending.daily || 0) + (pending.missions || 0),
+    "/season-pass": pending.season || 0,
+    "/notifications": notificationCount,
+  };
   const [journeyOpen, setJourneyOpen] = useState(false),
     reduced = useReducedMotion();
   const arenaArt = useCosmeticAnimation(backgroundCosmeticId, background);
@@ -148,7 +162,8 @@ export default function GameShell({
       icon: Compass,
       active:
         destinations.some((route) => route.path === pathname) &&
-        !["/inventory", "/friends"].includes(pathname),
+        !["/inventory", "/friends", "/notifications"].includes(pathname),
+      count: pending.journey || 0,
     },
     {
       path: "/friends",
@@ -156,6 +171,7 @@ export default function GameShell({
       title: "Social",
       icon: Users,
       active: pathname === "/friends",
+      count: pending.social || 0,
     },
   ];
   return (
@@ -174,8 +190,8 @@ export default function GameShell({
             className={styles.account}
             onClick={onAccount}
             aria-label="Player account"
-            aria-description={`${user?.name || "Challenger"}, level ${user?.level || 1}`}
-            title={user?.name || "Player account"}
+            aria-description={`${displayName(user?.name) || "Challenger"}, level ${user?.level || 1}`}
+            title={displayName(user?.name) || "Player account"}
           >
             <ProgressBar
               radial
@@ -217,6 +233,7 @@ export default function GameShell({
               value={user?.cups}
               icon={Trophy}
               label="Trophies"
+              showPlus={false}
               onClick={() => go("/leaderboard")}
             />
             <ResourcePill
@@ -308,7 +325,7 @@ export default function GameShell({
       </main>
       {!battleActive && (
       <nav className={styles.dock} aria-label="Game destinations">
-        {dock.map(({ path, label, title, icon: Icon, active }) => (
+        {dock.map(({ path, label, title, icon: Icon, active, count }) => (
           <button
             key={label}
             className={`${styles.dockButton} ${active ? styles.active : ""}`}
@@ -321,9 +338,11 @@ export default function GameShell({
               <Icon size={27} />
             </span>
             <span className={styles.dockLabel}>{title}</span>
-            {label === "Journey" && notificationCount > 0 && (
-              <b className={styles.redDot} />
-            )}
+            <NotificationDot
+              count={count}
+              className={styles.dockDot}
+              label={`${count} ${label === "Journey" ? "rewards ready" : "requests waiting"}`}
+            />
           </button>
         ))}
       </nav>
@@ -344,6 +363,7 @@ export default function GameShell({
             >
               <Icon size={30} />
               <strong>{label}</strong>
+              <NotificationDot count={tileCount[path] || 0} />
             </button>
           ))}
           {user?.role === "ADMIN" && (

@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import CosmeticShop from "./CosmeticShop";
 import GameShell from "./GameShell";
 import ScreenHeading from "./ScreenHeading";
+import usePendingCounts from "./usePendingCounts";
+import { friendlyError } from "../lib/friendly-errors";
 import { GameUIProvider, Modal as GameModal, Tabs } from "./ui";
 import GameEntrance from "./GameEntrance";
 import BattleHub, { ModeSelect } from "./BattleHub";
@@ -262,6 +264,7 @@ function sound(type, settings) {
     const tones = {
       ...POWER_TONES,
       win: [660, 990, "sine"],
+      reward: [880, 1320, "triangle"],
       click: [430, 300, "sine"],
     };
     const tone = tones[type] || tones.click;
@@ -411,14 +414,20 @@ export default function ArenaApp() {
     } catch {
       throw new Error("The arena server is unavailable. Please try again.");
     }
-    if (!res.ok || data.ok === false)
-      throw new Error(
-        data.error?.message ||
-          data.message ||
-          "Request could not be completed.",
+    if (!res.ok || data.ok === false) {
+      const error = new Error(
+        friendlyError(
+          url,
+          data.error?.code,
+          data.error?.message || data.message,
+        ) || "Request could not be completed.",
       );
+      error.code = data.error?.code;
+      throw error;
+    }
     return data;
   }, []);
+  const pending = usePendingCounts(api, user, pathname);
   const [unreadCount, setUnreadCount] = useState(0);
   useEffect(() => {
     let live = true;
@@ -459,6 +468,21 @@ export default function ArenaApp() {
       setSessionReady(true);
     }
   }, [api]);
+  const claimDaily = useCallback(async () => {
+    try {
+      const result = await api("/rewards/daily", "POST", {});
+      pending.clear("daily");
+      sound("reward", settingsRef.current);
+      await refresh();
+      pending.reload();
+      setNotice(`Daily reward claimed: +${result.coins} coins!`);
+      return result;
+    } catch (e) {
+      pending.reload();
+      setError(e.message);
+      return null;
+    }
+  }, [api, refresh, pending.clear, pending.reload]);
   useEffect(() => {
     refresh();
     api("/catalog")
@@ -1251,6 +1275,7 @@ export default function ArenaApp() {
               <ArenaConnectionNotice phase={connectionPhase} onRetry={() => recoverRef.current?.()} />
             ) : null}
             notificationCount={unreadCount}
+            pending={pending}
             pathname={pathname}
             navigate={navigate}
             settings={settings}
@@ -1299,6 +1324,8 @@ export default function ArenaApp() {
                   onSpectate={() => setWatchModal(true)}
                   activeMatch={game?.status === "active" && !spectator}
                   reducedMotion={settings.reducedMotion}
+                  pending={pending}
+                  onClaimDaily={claimDaily}
                 />
               )}
 
@@ -2100,11 +2127,13 @@ export default function ArenaApp() {
             title="Sharpen your next move"
             subtitle="AI practice. No ranked cups at risk."
             close={() => setPracticeModal(false)}
+            className="practice-dialog"
           >
             <BoardSizePicker
               value={boardSize}
               onChange={setBoardSize}
               disabled={busy}
+              compact
             />
             <div className="field-label">RULESET</div>
             <div className="segmented">
@@ -2145,13 +2174,15 @@ export default function ArenaApp() {
                   ? "Score as many lines of three as possible before the board fills."
                   : "Elemental opponents search legal placements and powers together."}
             </p>
-            <button
-              className="button primary wide"
-              disabled={busy}
-              onClick={startPractice}
-            >
-              <Play size={17} /> Enter Practice Arena <ArrowRight size={16} />
-            </button>
+            <div className="dialog-footer">
+              <button
+                className="button primary wide"
+                disabled={busy}
+                onClick={startPractice}
+              >
+                <Play size={17} /> Enter Practice Arena <ArrowRight size={16} />
+              </button>
+            </div>
           </Modal>
         )}
         {roomModal && (
@@ -2428,7 +2459,14 @@ export default function ArenaApp() {
   );
 }
 
-function Modal({ title, subtitle, children, close, fullScreen = false }) {
+function Modal({
+  title,
+  subtitle,
+  children,
+  close,
+  fullScreen = false,
+  className = "",
+}) {
   return (
     <GameModal
       title={title}
@@ -2436,7 +2474,7 @@ function Modal({ title, subtitle, children, close, fullScreen = false }) {
       onClose={close}
       fullScreen={fullScreen}
       closeLabel="Close dialog"
-      className="modal legacy-modal"
+      className={`modal legacy-modal ${className}`}
     >
       {children}
     </GameModal>
