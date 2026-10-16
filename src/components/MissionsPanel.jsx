@@ -52,8 +52,13 @@ export default function MissionsPanel({
         Loading your rewards…
       </div>
     );
-  const day = data.daily?.day || 1,
-    claimed = data.daily?.claimedToday;
+  const claimed = data.daily?.claimedToday,
+    // `day` is the next claimable day; once today is claimed, today is the previous one.
+    day =
+      data.daily?.todayDay ||
+      (claimed
+        ? ((Math.max(1, data.daily?.totalClaims || 1) - 1) % 7) + 1
+        : data.daily?.day || 1);
   const groups = [
     ["Daily missions", data.missions || [], data.dailyResetAt],
     ["Weekly missions", data.weeklyMissions || [], data.weeklyResetAt],
