@@ -5,6 +5,7 @@ import './game-theme.css';
 import './ascendant-theme.css';
 import './polish.css';
 import './glass.css';
+import './ascendant-motion.css';
 import ArenaApp from '@/components/ArenaApp';
 const display=Cinzel({subsets:['latin'],weight:['700','900'],variable:'--font-cinzel',display:'swap'});
 const ui=Rajdhani({subsets:['latin'],weight:['600','700'],variable:'--font-rajdhani',display:'swap'});
