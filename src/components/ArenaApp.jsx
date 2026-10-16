@@ -1236,7 +1236,7 @@ export default function ArenaApp() {
       reducedMotion={settings.reducedMotion}
     >
       <div
-        className={`app-shell ${pathname === "/battle" ? "battle-active" : ""} ${settings.reducedMotion ? "reduce-motion" : ""} ${settings.highContrast ? "high-contrast" : ""} ${user?.profile?.equippedBoard || ""} ${user?.profile?.equippedMark || ""} ${user?.profile?.avatar || ""} ${user?.profile?.equippedEffect || ""} ${user?.profile?.equippedFrame || ""} ${user?.profile?.equippedBanner || ""} ${user?.profile?.equippedArena || ""} quality-${settings.quality.toLowerCase()}`}
+        className={`app-shell ${pathname === "/battle" && game?.status === "active" ? "battle-active" : ""} ${settings.reducedMotion ? "reduce-motion" : ""} ${settings.highContrast ? "high-contrast" : ""} ${user?.profile?.equippedBoard || ""} ${user?.profile?.equippedMark || ""} ${user?.profile?.avatar || ""} ${user?.profile?.equippedEffect || ""} ${user?.profile?.equippedFrame || ""} ${user?.profile?.equippedBanner || ""} ${user?.profile?.equippedArena || ""} quality-${settings.quality.toLowerCase()}`}
         onClickCapture={(event) => {
           const button = event.target.closest?.("button");
           if (button && !button.disabled && !button.dataset.gameUi)
@@ -1299,6 +1299,7 @@ export default function ArenaApp() {
             rankLabel={rank(user?.cups)}
             rankProgress={rankProgress(user?.cups)}
             battleActive={pathname === "/battle"}
+            dockHidden={pathname === "/battle" && game?.status === "active"}
             hasActiveMatch={game?.status === "active" && !spectator}
             backgroundCosmeticId={user?.profile?.equippedArena}
             background={

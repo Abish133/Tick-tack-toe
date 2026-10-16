@@ -67,6 +67,7 @@ export default function GameShell({
   rankLabel = "Rookie",
   rankProgress = 0,
   battleActive = false,
+  dockHidden = false,
   hasActiveMatch = false,
   background = "/assets/arena.png",
   backgroundCosmeticId,
@@ -176,7 +177,7 @@ export default function GameShell({
   ];
   return (
     <div
-      className={`${styles.world} ${battleActive ? styles.inBattle : ""} ${connectionNotice ? styles.withNotice : ""}`}
+      className={`${styles.world} ${battleActive ? styles.inBattle : ""} ${dockHidden ? styles.noDock : ""} ${connectionNotice ? styles.withNotice : ""}`}
       style={{ "--world-art": `url("${arenaArt.src}")` }}
     >
       <div className={styles.environment} aria-hidden="true">
@@ -323,7 +324,7 @@ export default function GameShell({
           </motion.div>
         </AnimatePresence>
       </main>
-      {!battleActive && (
+      {!dockHidden && (
       <nav className={styles.dock} aria-label="Game destinations">
         {dock.map(({ path, label, title, icon: Icon, active, count }) => (
           <button

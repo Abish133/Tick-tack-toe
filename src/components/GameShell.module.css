@@ -42,8 +42,9 @@
   .journeyTile svg{width:22px;height:22px}
 }
 
-/* Polish: the dock leaves the screen during a battle; the back button sits beside the title. */
-.inBattle{grid-template-rows:minmax(0,1fr)}
+/* Polish: the dock leaves the screen while a match is live; the back button sits beside the title. */
+.inBattle{grid-template-rows:minmax(0,1fr) calc(var(--dock-height) + env(safe-area-inset-bottom))}
+.inBattle.noDock{grid-template-rows:minmax(0,1fr)}
 .inBattle .stage{padding:max(4px,env(safe-area-inset-top)) max(4px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-left))}
 .back{width:var(--back-size)!important;height:var(--back-size)!important;min-height:var(--back-size)!important;top:calc(var(--screen-gap) + (var(--screen-header-h) - var(--back-size)) / 2)}
 .back svg{width:20px;height:20px}

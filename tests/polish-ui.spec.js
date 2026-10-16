@@ -269,6 +269,11 @@ test("an active match hides the dock and keeps every board cell uncovered", asyn
   await expect(page).toHaveURL(/\/battle$/);
   const board = page.getByRole("group", { name: "Three by three elemental game board" });
   await expect(board).toBeVisible();
+  const intro = page.getByRole("button", { name: "Skip battle introduction" });
+  if (await intro.isVisible().catch(() => false)) await intro.click();
+  await expect(page.getByLabel("Battle introduction")).toHaveCount(0, {
+    timeout: 15000,
+  });
   for (const [width, height] of [[360, 640], [390, 844], [740, 360], [1280, 720]]) {
     await page.setViewportSize({ width, height });
     await page.waitForTimeout(300);

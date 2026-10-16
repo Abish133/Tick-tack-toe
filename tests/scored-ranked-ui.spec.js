@@ -223,7 +223,7 @@ test("Ranked clearly discloses and starts a Hard competitive bot on a 6 by 6 boa
     await page
       .getByRole("button", { name: "Arena hub, match continues", exact: true })
       .click();
-    await expect(page).toHaveURL(//$/);
+    await expect(page).toHaveURL((url) => url.pathname === "/");
     await page
       .getByRole("button", { name: "Powers & loadout", exact: true })
       .click();
