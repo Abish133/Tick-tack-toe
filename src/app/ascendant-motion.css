@@ -107,3 +107,81 @@ button:nth-child(odd) > .emote-signal-ascendant > svg { animation-delay: 0.9s; }
   .collection-profile-title[data-cosmetic-theme="ascendant"],
   .emote-signal-ascendant > svg { animation: none !important; }
 }
+
+/* ===== Ascendant live light (AscendantFx): stars, edge light, shine and glow ===== */
+@property --asc-edge { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+:where(:has(> .asc-fx)) { position: relative; }
+.asc-fx { position: absolute; inset: 0; z-index: 4; border-radius: inherit; pointer-events: none; }
+
+/* Four-point lens-flare stars that bloom, turn and fade. */
+.asc-fx-star {
+  position: absolute; width: calc(28px * var(--asc-size, 1)); aspect-ratio: 1;
+  translate: -50% -50%; opacity: 0;
+  filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px #a4f7ff) drop-shadow(0 0 18px #fff1c2);
+  animation: ascStar 3.4s ease-in-out var(--asc-delay, 0s) infinite;
+}
+.asc-fx-star::before, .asc-fx-star::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(closest-side, #fff 30%, #e9fbff 55%, #fff1c2);
+  clip-path: polygon(50% 0, 57% 43%, 100% 50%, 57% 57%, 50% 100%, 43% 57%, 0 50%, 43% 43%);
+}
+.asc-fx-star::after { rotate: 45deg; scale: 0.55; }
+@keyframes ascStar {
+  0%, 100% { opacity: 0; transform: scale(0.15) rotate(0deg); }
+  16% { opacity: 1; transform: scale(1.2) rotate(30deg); }
+  32% { opacity: 0.75; transform: scale(0.75) rotate(55deg); }
+  48% { opacity: 1; transform: scale(1.05) rotate(80deg); }
+  72% { opacity: 0; transform: scale(0.15) rotate(110deg); }
+}
+
+/* Edge lighting: two bright runners chase each other around the border. */
+.asc-fx-edge { position: absolute; inset: 0; border-radius: inherit; filter: drop-shadow(0 0 5px #a4f7ff) drop-shadow(0 0 12px #fff1c2); }
+.asc-fx-edge::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: var(--asc-edge-width, 3px);
+  background: conic-gradient(from var(--asc-edge),
+    #fff1c266 0 12%, #a4f7ff 22%, #ffffff 28%, #fff1c2 34%, #fff1c266 44% 62%,
+    #d7c3ff 72%, #ffffff 78%, #a4f7ff 84%, #fff1c266 94%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: ascEdgeRun 3.6s linear infinite;
+}
+@keyframes ascEdgeRun { to { --asc-edge: 360deg; } }
+
+/* A diagonal beam of light sweeps across the art. */
+.asc-fx-sweep { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; }
+.asc-fx-sweep::before {
+  content: ""; position: absolute; inset: -20% auto -20% -60%; width: 45%; rotate: 18deg;
+  background: linear-gradient(90deg, transparent, #fff1c240 35%, #ffffff8c 50%, #a4f7ff40 65%, transparent);
+  mix-blend-mode: screen; animation: ascBeam 4.2s ease-in-out infinite;
+}
+@keyframes ascBeam { 0%, 30% { translate: 0 0; } 75%, 100% { translate: 420% 0; } }
+
+/* A soft halo that breathes behind the hero. */
+.asc-fx-glow {
+  position: absolute; left: 50%; top: 46%; width: 92%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
+  background: radial-gradient(closest-side, #fff1c255, #a4f7ff2e 45%, #d7c3ff14 70%, transparent);
+  mix-blend-mode: screen; animation: ascGlow 3.2s ease-in-out infinite;
+}
+@keyframes ascGlow { 50% { opacity: 0.45; scale: 0.9; } }
+
+/* Small hosts (header and battle avatars) get smaller stars. */
+.asc-fx-small .asc-fx-star { width: calc(15px * var(--asc-size, 1)); }
+.asc-fx-thin { --asc-edge-width: 2px; }
+
+/* Star dust: dozens of pin-point lights that shimmer in two alternating sets. */
+.asc-fx-dust, .asc-fx-dust::after {
+  position: absolute; inset: 0; border-radius: inherit;
+  background:
+    radial-gradient(1.6px 1.6px at 8% 22%, #fff, transparent), radial-gradient(1.4px 1.4px at 24% 64%, #e9fbff, transparent),
+    radial-gradient(2px 2px at 38% 12%, #fff1c2, transparent), radial-gradient(1.4px 1.4px at 47% 52%, #fff, transparent),
+    radial-gradient(1.8px 1.8px at 61% 28%, #a4f7ff, transparent), radial-gradient(1.4px 1.4px at 72% 74%, #fff, transparent),
+    radial-gradient(2px 2px at 86% 34%, #fff1c2, transparent), radial-gradient(1.4px 1.4px at 93% 84%, #e9fbff, transparent),
+    radial-gradient(1.6px 1.6px at 18% 90%, #fff, transparent), radial-gradient(1.6px 1.6px at 56% 94%, #d7c3ff, transparent);
+  animation: ascDust 2.2s ease-in-out infinite;
+}
+.asc-fx-dust::after { content: ""; scale: -1 1; animation-delay: -1.1s; }
+@keyframes ascDust { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
+
+.reduce-motion .asc-fx, .quality-low .asc-fx { display: none; }
+@media (prefers-reduced-motion: reduce) { .asc-fx { display: none; } }

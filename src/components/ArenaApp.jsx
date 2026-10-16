@@ -1,4 +1,5 @@
 "use client";
+import AscendantFx, { isAscendant } from "./AscendantFx";
 import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -226,6 +227,7 @@ function Avatar({
       <i />
       <CosmeticFrame cosmeticId={frame} />
       <CosmeticArrival cosmeticId={effect} />
+      {isAscendant(skin) && <AscendantFx stars={3} className="asc-fx-small" />}
     </div>
   );
 }

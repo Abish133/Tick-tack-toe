@@ -1,6 +1,7 @@
 "use client";
 
 import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
+import AscendantFx, { isAscendant } from "./AscendantFx";
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
@@ -306,6 +307,7 @@ export default function BattleHub({
             src={avatar}
             alt={`${user?.name || "Your"} equipped arena guardian`}
           />
+          {isAscendant(user?.profile?.avatar) && <AscendantFx stars={10} sweep glow />}
           <span className={styles.pedestal} />
           <div
             className={`${styles.nameplate} ${titleTheme ? "collection-profile-title" : ""}`}

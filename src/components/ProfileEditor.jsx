@@ -1,5 +1,6 @@
 "use client";
 
+import AscendantFx, { isAscendant } from "./AscendantFx";
 import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useEffect, useState } from "react";
 import {
@@ -90,6 +91,7 @@ function ProfilePortrait({ profile = {}, name, level }) {
       />
       <CosmeticFrame cosmeticId={profile.equippedFrame} />
       <CosmeticArrival cosmeticId={profile.equippedEffect} />
+      {isAscendant(profile.avatar) && <AscendantFx stars={5} className="asc-fx-small" />}
       <span className={`${styles.level} collection-profile-level`}>
         {level || 1}
       </span>
@@ -203,6 +205,7 @@ function PlayerCard({ player, children, publicView = false }) {
       className={`${styles.identity} ${cosmeticTheme(player.profile?.equippedBanner) ? "collection-profile-identity" : ""} ${player.profile?.equippedBanner || ""} ${player.profile?.equippedEffect || ""}`}
       style={cosmeticStyle(player.profile?.equippedBanner)}
     >
+      {isAscendant(player.profile?.equippedBanner) && <AscendantFx edge stars={8} sweep />}
       <ProfilePortrait
         profile={player.profile}
         name={player.name}

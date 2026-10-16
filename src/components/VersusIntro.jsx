@@ -5,6 +5,7 @@ import { Trophy, Zap } from "lucide-react";
 import { cosmeticAsset } from "../lib/cosmetic-collection";
 import { useCosmeticAnimation } from "./AnimatedCosmeticImage";
 import styles from "./VersusIntro.module.css";
+import AscendantFx, { isAscendant } from "./AscendantFx";
 
 const art = (skin = "avatar-void") =>
   cosmeticAsset(skin) ||
@@ -29,6 +30,7 @@ function Side({ side, name, detail, skin, reduced }) {
         animate={{ scale: 1, filter: "brightness(1) blur(0px)" }}
         transition={{ duration: 0.7, delay: side === "left" ? 0.15 : 0.28 }}
       />
+      {!reduced && isAscendant(skin) && <AscendantFx stars={10} sweep glow />}
       <div className={styles.plate}>
         <strong data-ellipsis>{name}</strong>
         <span>{detail}</span>

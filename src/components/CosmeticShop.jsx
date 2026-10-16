@@ -15,6 +15,7 @@ import {
   Box,
   Crown,
 } from "lucide-react";
+import AscendantFx from "./AscendantFx";
 import CosmeticArt from "./CosmeticArt";
 import { CosmeticMark } from "./CosmeticAppearance";
 import CommercePanel from "./CommercePanel";
@@ -122,6 +123,7 @@ export function CosmeticPreview({
         ) : (
           <CosmeticArt item={item} format="gif" />
         )}
+        {item.rarity === "ascendant" && <AscendantFx edge stars={isBoard ? 8 : 0} />}
       </div>
       {theme && <p className={styles.themeName}>{theme.name} collection</p>}
       <p className={styles.previewDescription}>{item.description}</p>
@@ -462,6 +464,9 @@ export default function CosmeticShop({
                           : undefined
                       }
                     >
+                      {item.rarity === "ascendant" && (
+                        <AscendantFx edge stars={0} className="asc-fx-thin" />
+                      )}
                       <button
                         className={`shop-art ${styles.art}`}
                         onClick={() => setPreview(item)}

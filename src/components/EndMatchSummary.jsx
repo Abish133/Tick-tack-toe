@@ -1,5 +1,6 @@
 "use client";
 
+import AscendantFx, { isAscendant } from "./AscendantFx";
 import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -211,6 +212,7 @@ export default function EndMatchSummary({
         />
         <CosmeticFrame cosmeticId={frame} />
         <CosmeticArrival cosmeticId={effect} />
+        {isAscendant(skin) && <AscendantFx stars={8} glow />}
         <strong>{portrait?.name || "Challenger"}</strong>
       </button>
 
