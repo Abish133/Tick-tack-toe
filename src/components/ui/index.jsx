@@ -230,7 +230,7 @@ export function Tabs({
   const refs = useRef({});
   return (
     <div
-      className={`${styles.tabs} ${className}`}
+      className={`${styles.tabs} scroll-row ${className}`}
       role="tablist"
       aria-label={label}
     >

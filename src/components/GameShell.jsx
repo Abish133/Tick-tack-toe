@@ -85,6 +85,37 @@ export default function GameShell({
     document.addEventListener("keydown", back);
     return () => document.removeEventListener("keydown", back);
   }, [pathname, battleActive, navigate]);
+  // Keep the selected chip of any horizontal scroll row in view.
+  useEffect(() => {
+    const reveal = (el) =>
+      el?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+    const selectedIn = (row) =>
+      row.querySelector(
+        '[aria-selected="true"],[aria-pressed="true"],[aria-current="true"],.active,.selected',
+      );
+    const timer = setTimeout(
+      () => document.querySelectorAll(".scroll-row").forEach((row) => {
+        const chip = selectedIn(row);
+        if (chip && row.scrollWidth > row.clientWidth)
+          {
+          const box = chip.getBoundingClientRect(),
+            frame = row.getBoundingClientRect();
+          if (box.left < frame.left || box.right > frame.right)
+            row.scrollLeft += box.left - frame.left - (frame.width - box.width) / 2;
+        }
+      }),
+      350,
+    );
+    const click = (event) => {
+      const chip = event.target.closest?.(".scroll-row > *");
+      if (chip) reveal(chip);
+    };
+    document.addEventListener("click", click);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("click", click);
+    };
+  }, [pathname]);
   const go = (path) => {
     setJourneyOpen(false);
     navigate(path);
@@ -275,6 +306,7 @@ export default function GameShell({
           </motion.div>
         </AnimatePresence>
       </main>
+      {!battleActive && (
       <nav className={styles.dock} aria-label="Game destinations">
         {dock.map(({ path, label, title, icon: Icon, active }) => (
           <button
@@ -295,6 +327,7 @@ export default function GameShell({
           </button>
         ))}
       </nav>
+      )}
       <Modal
         open={journeyOpen}
         title="Your arena journey"

@@ -1,0 +1,193 @@
+/* Responsive polish layer: loaded last. Layout tokens, screen header, scroll rows, toasts and state styles. */
+:root {
+  --hud-height: clamp(56px, 7dvh, 64px);
+  --dock-height: clamp(56px, 7.5dvh, 64px);
+  --screen-gap: clamp(8px, 1.4vw, 16px);
+  --screen-header-h: clamp(44px, 6dvh, 56px);
+  --gutter: clamp(8px, 2.5vw, 20px);
+  --back-size: 44px;
+  --state-ready: #f2c86b;
+  --state-claimed: #8fe0a8;
+  --state-dot: #e7475a;
+}
+@media (max-width: 600px) {
+  :root {
+    --hud-height: 52px;
+    --dock-height: clamp(50px, 7dvh, 56px);
+    --screen-gap: 8px;
+    --screen-header-h: 46px;
+    --back-size: 42px;
+  }
+}
+@media (max-height: 500px) {
+  :root {
+    --hud-height: 44px;
+    --dock-height: 46px;
+    --screen-gap: 6px;
+    --screen-header-h: 40px;
+    --back-size: 40px;
+  }
+}
+
+/* ---------- Screen header: back button sits beside the title, never over it ---------- */
+.screen-heading {
+  min-height: var(--screen-header-h);
+  padding-block: 0 8px;
+  align-items: center;
+}
+.screen-heading > h1 {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: normal;
+  line-height: var(--screen-header-h);
+}
+.screen-heading .help-info {
+  gap: 6px;
+}
+.screen-heading .help-info > .button,
+.screen-heading .help-info > button {
+  min-height: 44px;
+}
+.screen-action {
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .screen-heading > h1 {
+    font-size: 16px;
+  }
+  .screen-heading .help-info > .button,
+  .screen-heading .help-info > button {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+  }
+}
+/* Labels come back on wider phones where they fit. */
+@media (min-width: 420px) and (max-width: 600px) {
+  .screen-heading .screen-action {
+    width: auto;
+    min-width: 44px;
+    padding: 0 10px;
+  }
+  .screen-heading .screen-action .screen-action-copy {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    font-size: 12px;
+  }
+  .screen-heading .screen-action .screen-action-glyph {
+    display: none;
+  }
+}
+
+/* ---------- Horizontal scroll rows (tabs, chips, filters) ---------- */
+.scroll-row {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  max-width: 100%;
+  min-width: 0;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-row::-webkit-scrollbar {
+  display: none;
+}
+.scroll-row > * {
+  flex-shrink: 0 !important;
+  scroll-snap-align: start;
+}
+@property --fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@supports (animation-timeline: scroll()) {
+  .scroll-row {
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--fade-start),
+      #000 calc(100% - var(--fade-end)),
+      transparent 100%
+    );
+    animation: scroll-row-fade linear both;
+    animation-timeline: scroll(self inline);
+  }
+}
+@keyframes scroll-row-fade {
+  0% {
+    --fade-start: 0px;
+    --fade-end: 28px;
+  }
+  4%,
+  96% {
+    --fade-start: 28px;
+    --fade-end: 28px;
+  }
+  100% {
+    --fade-start: 28px;
+    --fade-end: 0px;
+  }
+}
+
+/* ---------- Toasts: above the dock, below the HUD, never wide ---------- */
+.toast {
+  max-width: min(360px, calc(100vw - 24px)) !important;
+  bottom: calc(var(--dock-height) + env(safe-area-inset-bottom) + 10px) !important;
+}
+.battle-active .toast {
+  bottom: calc(env(safe-area-inset-bottom) + 10px) !important;
+  top: auto;
+}
+@media (max-height: 500px) {
+  .toast {
+    bottom: auto !important;
+    top: calc(var(--hud-height) + 6px);
+  }
+}
+
+/* ---------- Text safety ---------- */
+[data-ellipsis] {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---------- Short screens: drop non-essential copy ---------- */
+@media (max-height: 500px) {
+  .screen-heading p,
+  .hide-short {
+    display: none !important;
+  }
+}
+
+/* ---------- Touch devices never keep hover previews ---------- */
+@media (hover: none), (pointer: coarse) {
+  .game-cell:hover .cell-hover {
+    opacity: 0;
+  }
+  .game-cell.valid-target .cell-hover {
+    opacity: 0.5;
+  }
+}

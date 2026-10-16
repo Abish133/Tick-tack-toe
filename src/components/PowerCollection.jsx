@@ -198,7 +198,7 @@ export default function PowerCollection({
             aria-label="Search powers"
           />
         </label>
-        <div className={styles.families} aria-label="Power roles">
+        <div className={`${styles.families} scroll-row`} aria-label="Power roles">
           {categories.map((role) => {
             const Icon =
               POWER_INFO.find((power) => power.role === role)?.icon || Layers3;

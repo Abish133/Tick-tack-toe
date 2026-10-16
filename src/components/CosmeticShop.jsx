@@ -296,7 +296,7 @@ export default function CosmeticShop({
   const ascendantAvatar = cosmeticById("avatar-collection-ascendant");
   return (
     <section className={styles.store} aria-label="Cosmetic collection">
-      <div className={styles.categories} aria-label="Cosmetic categories">
+      <div className={`${styles.categories} scroll-row`} aria-label="Cosmetic categories">
         {categories.map(([id, label]) => (
           <button
             key={id}

@@ -61,7 +61,7 @@ export default function HistoryPanel({ api, user, navigate, onError }) {
 
   return (
     <div className={styles.screen}>
-      <nav className={styles.filters} aria-label="Match history filters">
+      <nav className={`${styles.filters} scroll-row`} aria-label="Match history filters">
         {Object.entries(modes).map(([id, name]) => (
           <button
             type="button"

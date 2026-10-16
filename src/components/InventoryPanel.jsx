@@ -109,7 +109,7 @@ export default function InventoryPanel({
         </GameButton>
       </div>
       <div
-        className={`collection-inventory-filters ${styles.categories}`}
+        className={`collection-inventory-filters ${styles.categories} scroll-row`}
         aria-label="Inventory categories"
       >
         {categories.map(([value, label]) => (

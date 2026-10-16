@@ -209,7 +209,7 @@ export default function SocialPanel({
           Send request <Send size={17} />
         </GameButton>
       </GameFrame>
-      <nav className={styles.socialTabs} aria-label="Social sections">
+      <nav className={`${styles.socialTabs} scroll-row`} aria-label="Social sections">
         {[
           ["friends", `Friends (${data.friends?.length || 0})`],
           ["requests", `Requests (${incoming.length + outgoing.length})`],
