@@ -124,3 +124,4 @@
   .disclosureCopy>span{-webkit-line-clamp:1}
   .hubTop>button{min-height:40px}
 }
+.disclosureCopy{min-height:40px!important;align-items:center}

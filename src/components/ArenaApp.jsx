@@ -509,10 +509,13 @@ export default function ArenaApp() {
   }, []);
   useEffect(() => {
     if (!error && !notice) return;
-    const id = setTimeout(() => {
-      setError("");
-      setNotice("");
-    }, 5500);
+    const id = setTimeout(
+      () => {
+        setError("");
+        setNotice("");
+      },
+      error ? 5500 : 3500,
+    );
     return () => clearTimeout(id);
   }, [error, notice]);
   useEffect(() => {

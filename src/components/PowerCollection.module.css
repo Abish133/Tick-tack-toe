@@ -689,7 +689,7 @@
 }
 
 /* ---------- Polish: slim deck strip and compact cards on small screens ---------- */
-.slotNumber { top: 4px; left: 5px; right: auto; bottom: auto; width: 16px; height: 16px; display: grid; place-items: center; border-radius: 50%; background: #050c1dcc; border: 1px solid color-mix(in srgb, var(--power-color) 60%, #3b4357); color: #e8dcbf; font-size: 10px !important; line-height: 1; }
+.slotNumber { top: 4px; left: 5px; right: auto; bottom: auto; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; background: #050c1dcc; border: 1px solid color-mix(in srgb, var(--power-color) 60%, #3b4357); color: #e8dcbf; font-size: 11px !important; line-height: 1; }
 @media (max-width: 600px) {
   .slotChoice { min-height: 56px !important; flex-direction: row !important; justify-content: flex-start !important; gap: 6px !important; padding: 4px 22px 4px 8px !important; }
   .slotChoice strong { font-size: 12px; text-align: left !important; min-height: 0 !important; display: block !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }

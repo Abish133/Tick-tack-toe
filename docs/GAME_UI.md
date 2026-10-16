@@ -1,5 +1,58 @@
 # Elemental Arena game UI
 
+## Responsive polish and reward states — 16 October 2026
+
+This pass fixes overflow, overlap, clipping and oversized blocks on every screen size, and gives every reward, progress and ownership state one visual language. Game rules, the engine, matchmaking, payments and reward amounts are unchanged. The only data change adds two read-only fields to `GET /api/missions`: `daily.todayDay` and `dailyResetAt`.
+
+### Layout tokens and breakpoints
+
+`src/app/polish.css` loads last and owns the size tokens. Every screen is HUD, screen header, a scrolling content area, then the dock.
+
+| Token               | Default                 | Phones (≤600px)          | Short screens (≤500px tall) |
+| ------------------- | ----------------------- | ------------------------ | --------------------------- |
+| `--hud-height`      | `clamp(56px,7dvh,64px)` | 52px                     | 44px                        |
+| `--dock-height`     | `clamp(56px,7.5dvh,64px)` | `clamp(50px,7dvh,56px)` | 46px                        |
+| `--screen-header-h` | `clamp(44px,6dvh,56px)` | 46px                     | 40px                        |
+| `--screen-gap`      | `clamp(8px,1.4vw,16px)` | 8px                      | 6px                         |
+| `--back-size`       | 44px                    | 42px                     | 40px                        |
+
+- **Screen header:** the back button sits beside the title, which truncates with an ellipsis. Action buttons show a label from 420px wide and are icon-only below that. Each screen has one (i) button, and screen rules live in that header sheet.
+- **Scroll rows:** add `.scroll-row` to any tab or chip row. It scrolls sideways with snap, fades whichever edge has more content (CSS scroll-driven animation), and the shell keeps the selected chip in view.
+- **Landscape phones** (`orientation: landscape` and at most 500px tall) get two- and three-column layouts. The hub puts the guardian on the left and launch controls on the right. Battle puts the HUDs on the left, the board in the centre and powers on the right.
+- **Battle:** the dock is hidden during an active match; the battle menu offers *Arena hub · match continues*. The board area is a size container, so the board fills the space it is given. The hint has its own row, or moves into the turn banner below 700px tall. Cancel lives in the hotbar. From 1180px wide, the players flank the board.
+- **Hover effects** only apply on devices that really hover, so touch screens never keep ghost previews.
+- **Toasts** stay at most 360px wide, sit above the dock (or under the HUD on short screens), let taps pass through, and dismiss after 3.5s (5.5s for errors).
+- **Text helpers:** `[data-ellipsis]` truncates a single line and `.clamp-2` clamps to two lines.
+
+### Reward-state system
+
+`src/components/ui/index.jsx` adds `NotificationDot`, `StateBadge` and `ClaimButton`. Cards opt in with `className="reward-card"` and `data-state`:
+
+| State                      | Presentation                                                                     |
+| -------------------------- | -------------------------------------------------------------------------------- |
+| `locked`                   | Dimmed and desaturated, lock icon, requirement text                              |
+| `progress`                 | Normal art, progress numbers, a *Play* button or no button (never a grey slab)   |
+| `ready`                    | Gold glow and pulse, bouncing icon, red dot, primary CLAIM                       |
+| `claimed` / `completed`    | Green-gold `reward-stamp`, dimmed art, `.claimed-button` that reads as done      |
+| `new`                      | NEW ribbon for catalog items this browser has not seen (`src/lib/seen-cosmetics.js`) |
+| `equipped` / `owned`       | Gold or silver corner check; Equip for owned items, price only when not owned    |
+| can't afford               | `.cant-afford` price in red plus "Need N more"; tapping opens coin options       |
+
+`usePendingCounts` is the single source for red dots: claimable daily reward, ready missions, ready season tiers, incoming friend requests and challenges. It refreshes on reward screens, on balance changes and on window focus (at most once every 15s otherwise), and clears a dot as soon as its reward is claimed. The dots appear on the Journey and Social dock tabs, the Journey tiles, the hub tiles and the HUD mailbox.
+
+- **Daily reward:** the hub tile claims in place with a coin burst, then shows a dimmed tile with a check and "Next in 18h 44m". The Missions calendar stamps claimed days, labels today and tomorrow, and marks Day 7 as the big reward. The day bug is fixed: the server's `daily.day` is the *next* claimable day, and `daily.todayDay` is the day today's claim belongs to.
+- **Missions:** ready missions sort first; resets show as countdowns; a note explains that only human matches count.
+- **Season:** one compact header with "XP to Reward N". Each node shows its required XP; the next node has a NEXT marker; unowned premium rewards get a lock overlay.
+- **Achievements:** never combine a lock with *In progress*. They sort by closeness to completion, with an "N / M unlocked" summary.
+- **Errors:** `src/lib/friendly-errors.js` maps server codes to game copy, for example *Already claimed — come back tomorrow!*.
+- **Guest names:** `displayName()` shows guest accounts as `Spark #A13C`.
+
+### Verification
+
+- `tests/polish-ui.spec.js` checks all 16 player screens at nine sizes (360×640 to 1440×900, including 740×360 and 844×390 landscape). It fails on page overflow, clipped text without an ellipsis, text under 11px, tap targets under 40px and controls covered by other elements. It also covers the daily-reward states, season, achievement and shop state distinctness, and battle board coverage with the dock hidden.
+- `tests/friendly-errors.test.js` covers the error copy, countdown format and guest name tags.
+- Captures are in [screenshots/polish](screenshots/polish/README.md).
+
 ## Ascendant animated collection
 
 The new [Astral Ascendancy collection](ASCENDANT_COLLECTION.md) adds the Ascendant rarity above Legendary, with nine coordinated cosmetic styles. `AnimatedCosmeticImage` and `CosmeticMotionProvider` preserve the existing image markup while choosing optimized WebP for equipped art, actual GIF for opened artwork previews and static posters for saved or system reduced-motion preferences. System preference changes subscribe through `useSyncExternalStore`; media does not start before hydration. Missing animated media falls back to its still poster.

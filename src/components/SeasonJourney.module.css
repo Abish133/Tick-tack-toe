@@ -469,3 +469,4 @@
 :global(.reduce-motion) .claimNow { animation: none; }
 .purchase button { white-space: nowrap; }
 .purchase button > span { flex-wrap: nowrap; }
+.seasonNote button { min-height: 40px; padding-inline: 6px; }

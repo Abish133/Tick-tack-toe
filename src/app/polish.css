@@ -371,3 +371,11 @@ p.battlefield-info {
 .mark.o {
   color: #92dcea;
 }
+
+/* Toasts never block a tap on the screen underneath; only their close button is interactive. */
+.toast {
+  pointer-events: none;
+}
+.toast button {
+  pointer-events: auto;
+}

@@ -852,4 +852,4 @@
 .achievement[data-state=locked] .achievementIcon{filter:grayscale(1) brightness(.6)}
 .unread p{font-weight:700;color:#fff6dc}
 .missions>.title small{display:flex;align-items:center;gap:5px}
-@media(max-width:600px){.day{min-height:80px}.day small{font-size:10.5px;letter-spacing:.2px}}
+@media(max-width:600px){.day{min-height:80px}.day small{font-size:11px;letter-spacing:0}}
