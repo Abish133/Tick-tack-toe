@@ -1218,3 +1218,24 @@
 .search input{background:transparent!important;border:0!important}
 .hero{border-radius:22px!important;border:1px solid #ffffff40!important}
 .categories .selected>span{color:#2a1a06!important;background:#ffffff80!important}
+
+/* Animated cards stack two badges top-left: keep the centred art clear of them. */
+.card[data-animated="true"] .art > :global(.collection-board-art),
+.card[data-animated="true"] .art > :global(.collection-sigils),
+.card[data-animated="true"] .art > :global(.collection-emote-art),
+.card[data-animated="true"] .art > :global(.collection-title-art),
+.card[data-animated="true"] .art > :global(.collection-frame-art),
+.card[data-animated="true"] .art > :global(.collection-effect-art) {
+  scale: 0.86;
+  translate: 0 16px;
+}
+
+/* Tablets: two wide columns left the art strip too short for boards, frames and avatars. */
+@media (min-width: 601px) and (max-width: 800px) {
+  .art { height: 168px !important; }
+}
+/* Landscape phones: shrink the board art to the shorter art strip. */
+@media (max-height: 500px) {
+  .art :global(.collection-board-art) { padding: 4px; }
+  .art :global(.collection-board-art > .collection-board) { width: 100px; height: 100px; gap: 3px; padding: 5px; }
+}

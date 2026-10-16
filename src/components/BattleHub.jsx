@@ -34,7 +34,7 @@ import { readyMissionCount, readySeasonTiers } from "./usePendingCounts";
 import { countdownTo, nextUtcMidnight } from "../lib/time-format";
 import { displayName } from "../lib/display-name";
 import BoardSizePicker from "./BoardSizePicker";
-import { cosmeticAsset } from "../lib/cosmetic-collection";
+import { COSMETIC_THEMES, cosmeticAsset } from "../lib/cosmetic-collection";
 import { POWER_INFO } from "./PowerPresentation";
 import styles from "./BattleHub.module.css";
 
@@ -264,6 +264,9 @@ export default function BattleHub({
   const avatar =
     cosmeticAsset(user?.profile?.avatar) ||
     `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[user?.profile?.avatar] || user?.profile?.avatar || "avatar-void"}.png`;
+  const titleTheme = COSMETIC_THEMES.find(
+    (theme) => theme.title === user?.profile?.title,
+  );
   return (
     <section className={styles.hub} aria-label="Battle hub">
       <div className={styles.hubTop}>
@@ -304,7 +307,11 @@ export default function BattleHub({
             alt={`${user?.name || "Your"} equipped arena guardian`}
           />
           <span className={styles.pedestal} />
-          <div className={styles.nameplate} data-ellipsis>
+          <div
+            className={`${styles.nameplate} ${titleTheme ? "collection-profile-title" : ""}`}
+            data-cosmetic-theme={titleTheme?.id}
+            data-ellipsis
+          >
             {user?.profile?.title || displayName(user?.name) || "CHALLENGER"}
           </div>
         </motion.div>

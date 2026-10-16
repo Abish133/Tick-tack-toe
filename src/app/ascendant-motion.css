@@ -6,11 +6,20 @@
 /* Avatar: rotating starlight aura behind a floating portrait. */
 .collection-theme-ascendant.collection-portrait-art { position: relative; isolation: isolate; }
 .collection-theme-ascendant.collection-portrait-art::before {
-  content: ""; position: absolute; inset: 4%; z-index: -1; border-radius: 50%;
+  content: ""; position: absolute; z-index: -1; border-radius: 50%;
+  left: 50%; top: 50%; width: min(78%, 260px); aspect-ratio: 1; translate: -50% -50%;
   background: conic-gradient(from var(--asc-sweep), #a4f7ff00, #a4f7ff88, #fff1c2aa, #d7c3ff88, #a4f7ff00 70%);
   filter: blur(12px); animation: ascSweep 5s linear infinite;
 }
 .collection-theme-ascendant .collection-portrait { animation: ascFloat 4s ease-in-out infinite; }
+/* The Sovereign is a bust cut straight across the bottom and sides: fade those cuts so no
+   hard edge shows anywhere (hero, previews, results). :not(#_) outranks page-level masks. */
+img[data-cosmetic-gif$="/avatar.gif"]:not(#_) {
+  -webkit-mask-image: linear-gradient(to bottom, #000 74%, transparent 98%), linear-gradient(to right, transparent 1%, #000 12%, #000 88%, transparent 99%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to bottom, #000 74%, transparent 98%), linear-gradient(to right, transparent 1%, #000 12%, #000 88%, transparent 99%);
+  mask-composite: intersect;
+}
 .collection-theme-ascendant .collection-avatar-aura { animation: ascBreathe 3s ease-in-out infinite; }
 
 /* Arena: slow cinematic drift. */
@@ -63,6 +72,12 @@
 }
 .collection-theme-ascendant.collection-title-art > svg { animation: ascSpinSlow 9s linear infinite; }
 
+/* Battle emote wheel: the equipped Ascendant signals bob and glow. */
+.emote-signal-ascendant > svg { animation: ascSignal 1.8s ease-in-out infinite; filter: drop-shadow(0 0 6px #a4f7ff88); }
+button:nth-child(odd) > * > .emote-signal-ascendant > svg,
+button:nth-child(odd) > .emote-signal-ascendant > svg { animation-delay: 0.9s; }
+
+@keyframes ascSignal { 50% { transform: translateY(-3px) scale(1.12); filter: drop-shadow(0 0 10px #fff1c2); } }
 @keyframes ascSweep { to { --asc-sweep: 360deg; } }
 @keyframes ascFloat { 50% { transform: translateY(-6px) scale(1.02); } }
 @keyframes ascBreathe { 50% { opacity: 0.85; transform: scale(1.08); } }
@@ -80,7 +95,8 @@
 .reduce-motion [class*="collection-theme-ascendant"]::after,
 .reduce-motion .collection-board[data-cosmetic-theme="ascendant"] *,
 .reduce-motion .collection-board[data-cosmetic-theme="ascendant"]::after,
-.reduce-motion .collection-profile-title[data-cosmetic-theme="ascendant"] { animation: none !important; }
+.reduce-motion .collection-profile-title[data-cosmetic-theme="ascendant"],
+.reduce-motion .emote-signal-ascendant > svg { animation: none !important; }
 @media (prefers-reduced-motion: reduce) {
   [class*="collection-theme-ascendant"],
   [class*="collection-theme-ascendant"] *,
@@ -88,5 +104,6 @@
   [class*="collection-theme-ascendant"]::after,
   .collection-board[data-cosmetic-theme="ascendant"] *,
   .collection-board[data-cosmetic-theme="ascendant"]::after,
-  .collection-profile-title[data-cosmetic-theme="ascendant"] { animation: none !important; }
+  .collection-profile-title[data-cosmetic-theme="ascendant"],
+  .emote-signal-ascendant > svg { animation: none !important; }
 }

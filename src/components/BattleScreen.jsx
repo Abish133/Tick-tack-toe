@@ -37,6 +37,7 @@ import {
   CosmeticArrival,
   CosmeticFrame,
   CosmeticMark,
+  CosmeticMotif,
 } from "./CosmeticAppearance";
 import {
   cosmeticAsset,
@@ -665,6 +666,8 @@ export default function BattleScreen({
       EMOTE_LABELS[id] || id,
     ]),
   ];
+  // Collection emotes show their own signal art; Ascendant signals animate.
+  const emoteTheme = cosmeticTheme(user?.profile?.equippedEmote);
   return (
     <section
       className={`${styles.screen} ${settings.reducedMotion ? styles.reduced : ""} battle-arena ${scoredBattle ? "scored-arena" : ""}`}
@@ -1204,7 +1207,7 @@ export default function BattleScreen({
           )}
           {drawer === "emotes" && (
             <div
-              className={styles.emoteWheel}
+              className={`${styles.emoteWheel} ${emoteChoices.length > 6 ? styles.emoteGrid : ""}`}
               aria-label="Match emotes"
               style={{ "--emote-count": emoteChoices.length }}
             >
@@ -1225,9 +1228,19 @@ export default function BattleScreen({
                     setDrawer(null);
                   }}
                 >
-                  <span aria-hidden="true">
-                    {["✦", "✧", "◇", "⌁", "♨", "◈"][index % 6]}
-                  </span>
+                  {emoteTheme?.emotes.includes(id) ? (
+                    <span
+                      className={`emote-signal emote-signal-${emoteTheme.id}`}
+                      style={cosmeticStyle(user?.profile?.equippedEmote)}
+                      aria-hidden="true"
+                    >
+                      <CosmeticMotif name={id} />
+                    </span>
+                  ) : (
+                    <span aria-hidden="true">
+                      {["✦", "✧", "◇", "⌁", "♨", "◈"][index % 6]}
+                    </span>
+                  )}
                   {label}
                 </GameButton>
               ))}

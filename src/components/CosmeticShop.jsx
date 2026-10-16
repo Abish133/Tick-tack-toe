@@ -76,6 +76,9 @@ export function CosmeticPreview({
   const theme = cosmeticTheme(item.id),
     animated = Boolean(cosmeticMotion(item.id)),
     isBoard = ["board", "marks"].includes(item.type),
+    // A themed board previews with its own collection's marks, as on its card.
+    previewMarks =
+      item.type === "marks" ? item.id : theme ? `marks-collection-${theme.id}` : "",
     equipped = isEquipped(item, user);
   return (
     <Modal
@@ -106,15 +109,10 @@ export function CosmeticPreview({
                 <div className="preview-cell" key={index}>
                   {mark && (
                     <span
-                      className={`mark ${mark.toLowerCase()} ${theme && item.type === "marks" ? "collection-marks" : ""}`}
-                      style={
-                        item.type === "marks" ? cosmeticStyle(item.id) : {}
-                      }
+                      className={`mark ${mark.toLowerCase()} ${theme ? "collection-marks" : ""}`}
+                      style={theme ? cosmeticStyle(previewMarks) : {}}
                     >
-                      <CosmeticMark
-                        mark={mark}
-                        cosmeticId={item.type === "marks" ? item.id : ""}
-                      />
+                      <CosmeticMark mark={mark} cosmeticId={previewMarks} />
                     </span>
                   )}
                 </div>
