@@ -1,0 +1,215 @@
+.screen {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 2dvh, 18px);
+  width: 100%;
+  max-width: 560px;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 8px 4px 12px;
+  text-align: center;
+}
+.embers {
+  position: absolute;
+  inset: -40px -20vw;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 12% 80%, #ffcf7a 0 1.5px, transparent 3px),
+    radial-gradient(circle at 78% 70%, #9be6ff 0 1.5px, transparent 3px),
+    radial-gradient(circle at 40% 90%, #ffb070 0 1px, transparent 2.5px),
+    radial-gradient(circle at 60% 85%, #d9b8ff 0 1px, transparent 2.5px),
+    radial-gradient(circle at 25% 60%, #ffe2a0 0 1px, transparent 2px);
+  background-size: 300px 420px, 380px 360px, 260px 300px, 340px 460px, 420px 380px;
+  animation: rise 9s linear infinite;
+  opacity: 0.7;
+}
+.mode {
+  margin: 0;
+  font: 700 12px/1 var(--font-ui);
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: #e8d5a5;
+}
+.heading {
+  margin: 0 !important;
+  font-family: var(--font-display);
+  font-size: clamp(20px, 5vw, 30px) !important;
+  color: #fff0c6;
+  text-shadow: 0 0 18px #f2c86b66;
+}
+.dots i {
+  font-style: normal;
+  animation: dot 1.4s infinite;
+}
+.dots i:nth-child(2) { animation-delay: 0.2s; }
+.dots i:nth-child(3) { animation-delay: 0.4s; }
+
+/* The summoning circle. */
+.portal {
+  position: relative;
+  width: min(62vw, 34dvh, 250px) !important;
+  height: min(62vw, 34dvh, 250px) !important;
+  display: grid;
+  place-items: center;
+}
+.radar {
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 70%, #f2c86b22 82%, #f2c86b88 99%, transparent 100%);
+  animation: spin 2.4s linear infinite;
+  mask: radial-gradient(circle, transparent 30%, #000 31%);
+}
+.rings {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 8px #f2c86b66);
+}
+.rings circle { fill: none; transform-origin: 100px 100px; }
+.ringOuter { stroke: #f2c86b; stroke-width: 1.5; stroke-dasharray: 3 7; animation: spin 18s linear infinite; }
+.ringMid { stroke: #a483ff; stroke-width: 2; stroke-dasharray: 60 22; animation: spin 7s linear infinite reverse; }
+.ringInner { stroke: #76ddf4; stroke-width: 1.5; stroke-dasharray: 2 5; animation: spin 11s linear infinite; }
+.rune {
+  fill: #ffe7a6;
+  font-size: 11px;
+  text-anchor: middle;
+  opacity: 0.55;
+  animation: runeGlow 2.4s ease-in-out infinite;
+}
+.rings g, .rings text { transform-box: view-box; }
+.core {
+  position: relative;
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  width: 52%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid #f2c86b;
+  background: radial-gradient(circle at 50% 35%, #3b2f52, #0b1426 70%);
+  box-shadow: 0 0 0 6px #f2c86b18, 0 0 40px #a483ff55, inset 0 0 24px #f2c86b33;
+  color: #f2c86b;
+  animation: corePulse 2s ease-in-out infinite;
+}
+.core b {
+  font: 700 clamp(30px, 8vw, 46px) / 1 var(--font-ui) !important;
+  color: #fff3cf;
+  text-shadow: 0 0 14px #f2c86b;
+}
+.core small {
+  font: 700 10.5px/1 var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #c9b88f;
+}
+
+/* You vs the unknown. */
+.versus {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.card {
+  display: grid !important;
+  justify-items: center;
+  gap: 4px;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 10px 8px;
+  border: 2px solid #a57c3d;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #1f3550ee, #0b1628f0);
+  box-shadow: 0 8px 20px #0007;
+  animation: cardIn 0.5s ease-out both;
+}
+.card strong { max-width: 100%; font: 700 14px/1.2 var(--font-ui); color: #fff1cf; }
+.card small { font-size: 12px; color: #b9c9dc; }
+.avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid #f2c86b;
+  background: radial-gradient(circle, #2b3d5a, #0b1426);
+  box-shadow: 0 0 18px #f2c86b44;
+  overflow: hidden;
+}
+.avatar :global(.avatar) { width: 100%; height: 100%; margin: 0; }
+.mystery { border-color: #6c5a96; animation-delay: 0.12s; }
+.mystery .avatar { border-color: #a483ff; box-shadow: 0 0 18px #a483ff66; }
+.silhouette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 36%, #5b4c86 0 18%, transparent 19%),
+    radial-gradient(ellipse at 50% 92%, #5b4c86 0 38%, transparent 39%);
+  animation: flicker 1.6s ease-in-out infinite;
+}
+.mystery .avatar b { position: relative; font: 800 28px/1 var(--font-display); color: #e4d6ff; text-shadow: 0 0 12px #a483ff; }
+.status { animation: statusIn 0.4s ease-out both; color: #d9c8ff !important; font-size: 13px !important; }
+.vs {
+  font: 900 clamp(24px, 7vw, 34px) / 1 var(--font-display);
+  color: #ffe08f;
+  text-shadow: 0 0 16px #f2c86b, 0 3px 0 #000;
+  animation: vsPulse 1.6s ease-in-out infinite;
+}
+
+.fallback { width: 100%; display: grid; gap: 6px; }
+.fallbackBar {
+  height: 8px;
+  border-radius: 6px;
+  border: 1px solid #a57c3d;
+  background: #071321;
+  overflow: hidden;
+}
+.fallbackBar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #a483ff, #f2c86b);
+  box-shadow: 0 0 10px #f2c86b;
+  transition: width 0.9s linear;
+}
+.fallback :global(.queue-bot-policy) { margin: 0; font-size: 12px !important; color: #e8d5a5; }
+.disclosure { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0; font-size: 12px; color: #b9c9dc; line-height: 1.4; }
+.disclosure svg { flex: none; color: #e8d5a5; }
+.tip { margin: 0; font-size: 12px; color: #9fb3c9; font-style: italic; animation: statusIn 0.5s ease-out both; }
+.cancel { width: min(360px, 100%) !important; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes rise { to { transform: translateY(-420px); } }
+@keyframes dot { 0%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
+@keyframes runeGlow { 50% { opacity: 1; fill: #fff6d6; } }
+@keyframes corePulse { 50% { box-shadow: 0 0 0 10px #f2c86b10, 0 0 60px #a483ff88, inset 0 0 30px #f2c86b55; } }
+@keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(0.95); } }
+@keyframes flicker { 50% { opacity: 0.35; } }
+@keyframes statusIn { from { opacity: 0; transform: translateY(6px); } }
+@keyframes vsPulse { 50% { transform: scale(1.12); } }
+
+@media (max-height: 640px) {
+  .tip, .mode { display: none; }
+  .avatar { width: 48px; height: 48px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .embers, .radar, .rings circle, .rune, .core, .vs, .silhouette, .dots i { animation: none; }
+}
+:global(.reduce-motion) .embers, :global(.reduce-motion) .radar { animation: none; }
+/* Keep the core a true circle regardless of the legacy queue styles. */
+.portal { display: grid !important; }
+.core { width: 54%; height: 54%; aspect-ratio: auto; align-content: center; gap: 0; overflow: hidden; z-index: 2; }
+.core > svg { width: 22px; height: 22px; }
+.core b { margin: 0 !important; line-height: 1 !important; }
+.radar { z-index: 1; opacity: 0.85; }
+.core { position: absolute !important; inset: 23% !important; width: auto !important; height: auto !important; }

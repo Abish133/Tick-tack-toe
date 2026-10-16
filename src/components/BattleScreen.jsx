@@ -46,6 +46,7 @@ import {
 } from "../lib/cosmetic-collection";
 import { boardSizeOf } from "../lib/game-engine/geometry";
 import { POWER_INFO } from "./PowerPresentation";
+import { ATTACKS, CastSequence, TurnSweep } from "./BattleJuice";
 import PowerEffects from "./PowerEffects";
 import PowerTargetControls, {
   CellStatuses,
@@ -532,6 +533,51 @@ export default function BattleScreen({
       power.id ===
       (game?.lastEvent?.powerId || game?.lastEvent?.action?.powerId),
   );
+  const reduced = Boolean(settings.reducedMotion);
+  // Each new cast plays once: flash, callout, impacts and outcome labels.
+  const [castShown, setCastShown] = useState(null);
+  const [shake, setShake] = useState(false);
+  const lastCast = useRef(game?.revision);
+  useEffect(() => {
+    if (!game || lastCast.current === game.revision) return;
+    lastCast.current = game.revision;
+    if (!powerCast) return;
+    setCastShown(game.revision);
+    const attack = ATTACKS.has(powerCast.id) && !reduced;
+    if (attack) setShake(true);
+    const clear = setTimeout(() => setCastShown(null), 1500),
+      still = setTimeout(() => setShake(false), 700);
+    return () => {
+      clearTimeout(clear);
+      clearTimeout(still);
+    };
+  }, [game?.revision]);
+  // A gold sweep announces the start of your turn.
+  const [turnSweep, setTurnSweep] = useState(null);
+  const selectedPowerRef = useRef(selectedPower);
+  const wasMyTurn = useRef(myTurn);
+  useEffect(() => {
+    const started = myTurn && !wasMyTurn.current;
+    wasMyTurn.current = myTurn;
+    if (!started || spectator || game?.status !== "active" || intro) return;
+    if (selectedPowerRef.current) return;
+    const key = `${game.round}:${game.turnNumber}`;
+    const delay = castShown ? 1250 : 150;
+    const timer = setTimeout(() => {
+      if (!selectedPowerRef.current) setTurnSweep(key);
+    }, delay);
+    const clear = setTimeout(() => setTurnSweep(null), delay + 1100);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(clear);
+    };
+  }, [myTurn]);
+  const targeting = POWER_INFO.find((power) => power.id === selectedPower);
+  // Choosing a power always wins over the turn sweep.
+  useEffect(() => {
+    selectedPowerRef.current = selectedPower;
+    if (selectedPower) setTurnSweep(null);
+  }, [selectedPower]);
 
   useEffect(() => {
     if (
@@ -692,16 +738,20 @@ export default function BattleScreen({
         disconnected={opponentDisconnected}
       />
 
-      <div className={`turn-banner ${styles.turnBar}`} aria-live="polite">
+      <div
+        className={`turn-banner ${styles.turnBar} ${targeting && myTurn ? styles.turnTargeting : ""}`}
+        style={{ "--target-color": targeting?.color }}
+        aria-live="polite"
+      >
         <motion.span
-          key={`${game.currentPlayerId}:${game.turnNumber}`}
+          key={`${game.currentPlayerId}:${game.turnNumber}:${selectedPower || ""}`}
           initial={
             settings.reducedMotion ? { opacity: 0 } : { opacity: 0, x: -20 }
           }
           animate={{ opacity: 1, x: 0 }}
           className={`${myTurn ? "your-turn" : ""} ${myTurn ? styles.yourTurn : ""}`}
         >
-          <Swords size={16} />
+          {targeting && myTurn ? <targeting.icon size={17} /> : <Swords size={16} />}
           {spectator
             ? game.players.find((player) => player.id === game.currentPlayerId)
                 ?.name + "’s turn"
@@ -730,11 +780,12 @@ export default function BattleScreen({
         )}
         <div className={styles.pedestal}>
           <div
-            className={`game-board board-size-${battleSize} ${styles.board} ${cosmeticTheme(user?.profile?.equippedBoard) ? "collection-board" : ""}`}
+            className={`game-board board-size-${battleSize} ${styles.board} ${cosmeticTheme(user?.profile?.equippedBoard) ? "collection-board" : ""} ${targeting ? `targeting ${styles.targeting}` : ""} ${shake ? "board-shake" : ""} ${myTurn && !spectator ? styles.myTurnBoard : ""}`}
             style={{
               ...cosmeticStyle(user?.profile?.equippedBoard),
               gridTemplateColumns: `repeat(${battleSize}, minmax(0,1fr))`,
               "--board-size": battleSize,
+              "--target-color": targeting?.color,
             }}
             data-cosmetic-theme={
               cosmeticTheme(user?.profile?.equippedBoard)?.id
@@ -807,6 +858,21 @@ export default function BattleScreen({
               reducedMotion={settings.reducedMotion}
               quality={settings.quality}
             />
+            {castShown === game.revision && (
+              <CastSequence
+                event={game.lastEvent}
+                revision={game.revision}
+                playerId={playerId}
+                players={game.players}
+                boardSize={battleSize}
+                reduced={reduced}
+              />
+            )}
+            <TurnSweep
+              show={Boolean(turnSweep)}
+              turnKey={turnSweep}
+              reduced={reduced}
+            />
             {!!game.winningLines?.length && (
               <svg
                 className={styles.winningBeams}
@@ -847,26 +913,6 @@ export default function BattleScreen({
               </span>
             ))}
           </div>
-        )}
-        {powerCast && (
-          <motion.div
-            key={`cast-${game.revision}`}
-            className={styles.powerCallout}
-            style={{ "--power-color": powerCast.color }}
-            initial={{
-              opacity: 0,
-              ...(settings.reducedMotion ? {} : { scale: 1.15 }),
-            }}
-            animate={{
-              opacity: [0, 1, 1, 0],
-              ...(settings.reducedMotion ? {} : { scale: [1.15, 1, 1, 1] }),
-            }}
-            transition={{ duration: 1.3, times: [0, 0.15, 0.7, 1] }}
-            aria-hidden="true"
-          >
-            <powerCast.icon size={27} />
-            {powerCast.name}
-          </motion.div>
         )}
         <AnimatePresence>
           {roundBanner && (

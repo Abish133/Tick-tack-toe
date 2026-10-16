@@ -237,3 +237,48 @@
 }
 .playerName{min-width:0;flex:0 1 auto}
 .you{flex:none}
+
+/* ---------- Battle feel: targeting, stamps, turn glow ---------- */
+.pedestal { transform: perspective(1100px) rotateX(2deg) !important; }
+.screen .board { transition: box-shadow 0.4s, border-color 0.4s; }
+.screen .board.myTurnBoard { border-color: #f2c86b; box-shadow: inset 0 1px 1px #fff6, inset 0 -2px 0 #0008, 0 0 0 1px #f2c86b55, 0 0 36px #f2c86b44; animation: turnGlow 2.4s ease-in-out infinite; }
+@keyframes turnGlow { 50% { box-shadow: inset 0 1px 1px #fff6, inset 0 -2px 0 #0008, 0 0 0 1px #f2c86b88, 0 0 52px #f2c86b66; } }
+
+/* Targeting: everything else dims; valid targets get an animated reticle. */
+.screen .board.targeting { border-color: var(--target-color); box-shadow: 0 0 0 1px var(--target-color), 0 0 40px color-mix(in srgb, var(--target-color) 45%, transparent); animation: none; }
+.screen .targeting .cell:not(:global(.valid-target)):not(:global(.selected-source)) { filter: brightness(0.42) saturate(0.4); transition: filter 0.25s; }
+.screen .targeting .cell:global(.valid-target) { border-color: var(--target-color); background: radial-gradient(circle, color-mix(in srgb, var(--target-color) 26%, #1c2c40), #12263a 75%); box-shadow: inset 0 0 22px color-mix(in srgb, var(--target-color) 55%, transparent), 0 0 14px color-mix(in srgb, var(--target-color) 45%, transparent); z-index: 2; }
+.screen .targeting .cell:global(.valid-target)::after { content: ""; position: absolute; inset: 9%; border-radius: 50%; border: 3px dashed var(--target-color); filter: drop-shadow(0 0 6px var(--target-color)); animation: reticleSpin 2.6s linear infinite, reticlePulse 1.1s ease-in-out infinite; pointer-events: none; }
+.screen .targeting .cell:global(.valid-target) :global(.cell-hover) { opacity: 0.9 !important; color: var(--target-color); }
+.screen .targeting .cell:global(.selected-source) { border-color: #fff; box-shadow: 0 0 0 2px var(--target-color), 0 0 24px var(--target-color); }
+@keyframes reticleSpin { to { rotate: 360deg; } }
+@keyframes reticlePulse { 50% { scale: 0.86; opacity: 0.75; } }
+.screen .turnBar.turnTargeting { padding: 6px 10px; border-radius: 999px; border: 2px solid var(--target-color); background: linear-gradient(90deg, color-mix(in srgb, var(--target-color) 40%, #0b1426), #0b1426ee 70%); box-shadow: 0 0 18px color-mix(in srgb, var(--target-color) 50%, transparent); max-width: 560px; }
+.screen .turnBar.turnTargeting > span:first-child { color: #fff; text-shadow: 0 0 8px var(--target-color); }
+.screen .turnBar.turnTargeting > span:first-child svg { color: var(--target-color); filter: drop-shadow(0 0 4px var(--target-color)); }
+
+/* Selected power card: lifted with an elemental aura. */
+.screen .powerCard:global(.selected) { animation: cardAura 1.2s ease-in-out infinite; }
+@keyframes cardAura { 50% { box-shadow: 0 4px 0 #050b14, 0 0 34px color-mix(in srgb, var(--power-color) 75%, transparent); } }
+.screen .powerCard:not(:disabled):not(:global(.used)) .powerArt { animation: artBreathe 3s ease-in-out infinite; }
+@keyframes artBreathe { 50% { filter: drop-shadow(0 0 8px var(--power-color)); } }
+
+/* Marks stamp onto the board with a ripple. */
+.screen .mark { animation: stamp 0.42s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+.screen .cell:has(.mark)::before { content: ""; position: absolute; inset: 14%; border-radius: 50%; border: 2px solid currentColor; opacity: 0; animation: ripple 0.6s 0.05s ease-out; pointer-events: none; }
+.screen .cell:has(:global(.mark.x))::before { color: #e8b77d; }
+.screen .cell:has(:global(.mark.o))::before { color: #92dcea; }
+@keyframes stamp { 0% { transform: scale(1.7); opacity: 0; filter: blur(3px) brightness(2); } 60% { transform: scale(0.92); opacity: 1; filter: blur(0) brightness(1.4); } 100% { transform: scale(1); filter: none; } }
+@keyframes ripple { 0% { opacity: 0.9; transform: scale(0.6); } 100% { opacity: 0; transform: scale(1.5); } }
+
+/* Elemental bursts grow with the cells they hit. */
+.board :global([data-power-effect]) > span { scale: 1.4; }
+.board:global(.board-size-4) :global([data-power-effect]) > span { scale: 1.15; }
+.board:global(.board-size-5) :global([data-power-effect]) > span,
+.board:global(.board-size-6) :global([data-power-effect]) > span { scale: 0.95; }
+@media (min-width: 900px) and (min-height: 700px) { .board:global(.board-size-3) :global([data-power-effect]) > span { scale: 1.9; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .screen .board.myTurnBoard, .screen .targeting .cell:global(.valid-target)::after, .screen .powerCard:global(.selected), .screen .mark, .screen .cell:has(.mark)::before, .powerArt { animation: none !important; }
+}
+.reduced .board.myTurnBoard, .reduced .targeting .cell:global(.valid-target)::after, .reduced .powerCard:global(.selected), .reduced .mark, .reduced .cell:has(.mark)::before, .reduced .powerArt { animation: none !important; }

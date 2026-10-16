@@ -6,6 +6,8 @@ import CosmeticShop from "./CosmeticShop";
 import GameShell from "./GameShell";
 import ScreenHeading from "./ScreenHeading";
 import usePendingCounts from "./usePendingCounts";
+import MatchmakingScreen from "./MatchmakingScreen";
+import { displayName } from "../lib/display-name";
 import { friendlyError } from "../lib/friendly-errors";
 import { GameUIProvider, Modal as GameModal, Tabs } from "./ui";
 import GameEntrance from "./GameEntrance";
@@ -2398,52 +2400,25 @@ export default function ArenaApp() {
               })
             }
           >
-            <h2 className="queue-heading">SEARCHING FOR OPPONENT…</h2>
-            <div className="queue-visual">
-              <div className="queue-ring" />
-              <Swords size={47} />
-            </div>
-            <div className="queue-player">
-              <Avatar name={user?.name} skin={user?.profile?.avatar} />
-              <div>
-                <strong>{user?.name}</strong>
-                <small>
-                  {rank(user?.cups)} · {pretty(user?.cups)} cups
-                </small>
-              </div>
-            </div>
-            <div className="queue-time">
-              {Math.floor((now - queueStarted) / 1000)}
-              <span>SECONDS IN QUEUE</span>
-            </div>
-            <p className="muted small center">
-              {queue.mode === "ranked"
-                ? "If no real world players are found you'll play against a competitive bot"
-                : "Waiting for another real player."}
-            </p>
-            {queue.mode === "ranked" && (
-              <p className="queue-bot-policy">
-                {queue.rankedBot?.difficulty || "Hard"} or above · competitive
-                bot fallback in{" "}
-                {Math.max(
-                  0,
-                  (queue.rankedBot?.fallbackSeconds || 25) -
-                    Math.floor((now - queueStarted) / 1000),
-                )}
-                s
-              </p>
-            )}
-            <button
-              className="button secondary wide"
-              onClick={() =>
+            <MatchmakingScreen
+              seconds={Math.max(0, Math.floor((now - queueStarted) / 1000))}
+              ranked={queue.mode === "ranked"}
+              boardSize={queue.boardSize || boardSize}
+              fallbackSeconds={queue.rankedBot?.fallbackSeconds || 25}
+              botDifficulty={queue.rankedBot?.difficulty || "Hard"}
+              disclosure="If no real world players are found you'll play against a competitive bot"
+              player={{
+                name: displayName(user?.name),
+                rank: `${rank(user?.cups)} · ${pretty(user?.cups)} cups`,
+              }}
+              avatar={<Avatar name={user?.name} skin={user?.profile?.avatar} />}
+              onCancel={() =>
                 run(async () => {
                   await emit("queue:leave");
                   setQueue(null);
                 })
               }
-            >
-              Cancel matchmaking
-            </button>
+            />
           </Modal>
         )}
         {surrender && (

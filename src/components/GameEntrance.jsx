@@ -48,6 +48,7 @@ export default function GameEntrance({
       <div className={styles.landscape} aria-hidden="true" />
       <div className={styles.light} aria-hidden="true" />
       <div className={styles.sparks} aria-hidden="true" />
+      <div className={styles.rays} aria-hidden="true" />
       {ready && (
         <>
           <img
@@ -76,6 +77,7 @@ export default function GameEntrance({
       </div>
       <div className={styles.titleContent}>
         <div className={styles.seal} aria-hidden="true">
+          <span className={styles.sealRunes} />
           <div />
           <Swords size={39} />
           <i />
@@ -94,7 +96,11 @@ export default function GameEntrance({
         <p className={styles.tagline}>Think. Strike. Conquer.</p>
         {!ready ? (
           <div className={styles.loading} role="status" aria-live="polite">
-            <LoaderCircle size={22} />
+            <span className={styles.runeSpinner} aria-hidden="true">
+              <i />
+              <i />
+              <LoaderCircle size={18} />
+            </span>
             <span>Opening the arena…</span>
             <div
               className={styles.loadingTrack}

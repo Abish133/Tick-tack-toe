@@ -125,3 +125,12 @@
   .hubTop>button{min-height:40px}
 }
 .disclosureCopy{min-height:40px!important;align-items:center}
+/* Hub feel: the call to battle breathes and shines; the guardian's aura pulses. */
+.battle{animation:battleBreathe 2.8s ease-in-out infinite}
+.battle::before{animation:battleShine 4s ease-in-out 1.5s infinite}
+.aura{animation:auraPulse 3.6s ease-in-out infinite}
+@keyframes battleBreathe{50%{filter:drop-shadow(0 0 16px #f2c86bbb) brightness(1.06)}}
+@keyframes battleShine{0%,62%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@keyframes auraPulse{50%{transform:scale(1.12);opacity:.75}}
+@media(prefers-reduced-motion:reduce){.battle,.battle::before,.aura{animation:none}}
+:global(.reduce-motion) .battle,:global(.reduce-motion) .battle::before,:global(.reduce-motion) .aura{animation:none}
