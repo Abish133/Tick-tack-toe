@@ -1244,3 +1244,5 @@
 .categories button.selected span,.categories button[aria-pressed=true] span{color:#1b1203!important;background:#1b120326!important}
 .search{border-radius:0!important;border:0!important;background:#0a0f18e6!important;box-shadow:inset 0 0 0 1px #ffffff26,inset 0 -2px 0 #ffc21a!important}
 @media (max-width: 600px) { .pickerButton { letter-spacing: 0 !important; font-size: 11px !important; padding-inline: 6px !important; text-overflow: ellipsis; } }
+.shownOn { margin: 6px 0 0; font-size: 12px; line-height: 1.45; color: #c8d3e2; }
+.shownOn strong { margin-right: 6px; color: var(--tac-accent, #ffc21a); font-size: 11px; letter-spacing: .8px; text-transform: uppercase; }

@@ -51,6 +51,7 @@ import { ATTACKS, CastSequence, TurnSweep } from "./BattleJuice";
 import VersusIntro, { versusDetail } from "./VersusIntro";
 import { pingLabel, pingQuality } from "../lib/ping";
 import AscendantFx, { fxTheme } from "./AscendantFx";
+import PlayerTitle from "./PlayerTitle";
 import PowerEffects from "./PowerEffects";
 import PowerTargetControls, {
   CellStatuses,
@@ -243,6 +244,7 @@ function PlayerHUD({
           <span className={styles.playerName} data-ellipsis>
             {displayName(player?.name) || "Opponent"}
           </span>
+          <PlayerTitle title={player?.profile?.title || (self ? profile?.title : null)} />
           {self && (
             <span className={styles.you}>
               {spectator ? "SPECTATING" : "YOU"} · {player?.mark}
@@ -446,6 +448,7 @@ export default function BattleScreen({
   selectedPower,
   source,
   emote,
+  emoteSignal = null,
   muteEmotes,
   availableActions,
   selectedActions,
@@ -969,7 +972,17 @@ export default function BattleScreen({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            <MessageCircle size={19} />
+            {cosmeticTheme(emoteSignal?.cosmeticId)?.emotes.includes(emoteSignal.id) ? (
+              <span
+                className={`emote-signal emote-signal-${cosmeticTheme(emoteSignal.cosmeticId).id}`}
+                style={cosmeticStyle(emoteSignal.cosmeticId)}
+                aria-hidden="true"
+              >
+                <CosmeticMotif name={emoteSignal.id} />
+              </span>
+            ) : (
+              <MessageCircle size={19} />
+            )}
             {emote}
           </motion.div>
         )}
@@ -1289,11 +1302,13 @@ export default function BattleScreen({
             me={{
               name: displayName(me?.name),
               skin: me?.profile?.avatar || user?.profile?.avatar,
+              title: me?.profile?.title || user?.profile?.title,
               detail: versusDetail(match, me, difficulty, rank, pretty, true),
             }}
             opponent={{
               name: displayName(opponent?.name) || "Opponent",
               skin: opponent?.profile?.avatar,
+              title: opponent?.profile?.title,
               detail: versusDetail(match, opponent, difficulty, rank, pretty, false),
             }}
           />

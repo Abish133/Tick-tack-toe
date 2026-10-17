@@ -6,12 +6,13 @@ import { cosmeticAsset } from "../lib/cosmetic-collection";
 import { useCosmeticAnimation } from "./AnimatedCosmeticImage";
 import styles from "./VersusIntro.module.css";
 import AscendantFx, { fxTheme } from "./AscendantFx";
+import PlayerTitle from "./PlayerTitle";
 
 const art = (skin = "avatar-void") =>
   cosmeticAsset(skin) ||
   `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[skin] || skin}.webp`;
 
-function Side({ side, name, detail, skin, reduced }) {
+function Side({ side, name, title, detail, skin, reduced }) {
   const from = side === "left" ? -1 : 1;
   const media = useCosmeticAnimation(skin, art(skin));
   return (
@@ -33,6 +34,7 @@ function Side({ side, name, detail, skin, reduced }) {
       {!reduced && fxTheme(skin) && <AscendantFx theme={fxTheme(skin)} stars={10} sweep glow />}
       <div className={styles.plate}>
         <strong data-ellipsis>{name}</strong>
+        <PlayerTitle title={title} />
         <span>{detail}</span>
       </div>
     </motion.div>

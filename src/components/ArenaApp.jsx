@@ -355,6 +355,7 @@ export default function ArenaApp() {
     [source, setSource] = useState(null),
     [now, setNow] = useState(Date.now()),
     [emote, setEmote] = useState(""),
+    [emoteSignal, setEmoteSignal] = useState(null),
     [surrender, setSurrender] = useState(false);
   const [loadout, setLoadout] = useState(["fire", "shield", "portal"]),
     [catalog, setCatalog] = useState({}),
@@ -774,10 +775,14 @@ export default function ArenaApp() {
     socket.on("match:emote", (payload) => {
       if (muteRef.current) return;
       const label = EMOTE_LABELS[payload.emote] || payload.emote;
-      setEmote(
-        `${matchRef.current?.state?.players.find((p) => p.id === payload.playerId)?.name || "Challenger"}: ${label}`,
-      );
-      setTimeout(() => setEmote(""), 3500);
+      const sender = matchRef.current?.state?.players.find((p) => p.id === payload.playerId);
+      setEmote(`${sender?.name || "Challenger"}: ${label}`);
+      // The sender's collection signal art travels with the bubble, as in their own wheel.
+      setEmoteSignal({ id: payload.emote, cosmeticId: sender?.profile?.equippedEmote });
+      setTimeout(() => {
+        setEmote("");
+        setEmoteSignal(null);
+      }, 3500);
     });
     socket.on("match:playerDisconnected", (payload) => {
       if (payload.matchId !== matchRef.current?.matchId || payload.playerId === user.id) return;
@@ -831,10 +836,12 @@ export default function ArenaApp() {
   // Round-trip latency to the game server (header and battle): every 3s in a match,
   // every 5s elsewhere, paused while the tab is hidden.
   const [ping, setPing] = useState(null);
+  const pingSamples = useRef([]);
   const [pendingCell, setPendingCell] = useState(null);
   const inBattle = pathname === "/battle";
   useEffect(() => {
     if (!connected) {
+      pingSamples.current = [];
       setPing(null);
       return;
     }
@@ -843,9 +850,16 @@ export default function ArenaApp() {
       if (!socket?.connected) return setPing(null);
       if (document.hidden) return;
       const sent = performance.now();
-      socket.timeout(3000).emit("net:ping", (error) =>
-        setPing(error ? null : Math.round(performance.now() - sent)),
-      );
+      socket.timeout(3000).emit("net:ping", (error) => {
+        if (error) return setPing(null);
+        // Median of the last three round trips: one busy frame on this device
+        // does not paint a spike that the network did not cause.
+        const samples = (pingSamples.current = [
+          ...pingSamples.current.slice(-2),
+          performance.now() - sent,
+        ]);
+        setPing(Math.round([...samples].sort((a, b) => a - b)[samples.length >> 1]));
+      });
     };
     probe();
     const id = setInterval(probe, inBattle ? 3000 : 5000);
@@ -1253,6 +1267,39 @@ export default function ArenaApp() {
     "/privacy": "PRIVACY",
     "/terms": "TERMS",
   };
+  // Reduced motion or Low quality switch every collection animation off, which reads
+  // as "animations are broken"; collection screens say so and offer the switch.
+  const motionOffReason = settings.reducedMotion
+    ? "Reduced motion is on"
+    : settings.quality === "Low"
+      ? "Animation quality is Low"
+      : null;
+  const motionOffNotice = motionOffReason && (
+    <div className="motion-off-notice" role="note">
+      <span>
+        Collection animations are paused: {motionOffReason}.
+      </span>
+      <button
+        type="button"
+        className="button primary"
+        onClick={() =>
+          run(async () => {
+            const next = {
+              ...settings,
+              reducedMotion: false,
+              quality: settings.quality === "Low" ? "High" : settings.quality,
+            };
+            setSettings(next);
+            localStorage.setItem("ea:settings", JSON.stringify(next));
+            if (user) await api("/settings", "PATCH", { reducedMotion: false });
+            setNotice("Animations are on.");
+          })
+        }
+      >
+        Turn animations on
+      </button>
+    </div>
+  );
   const screenHeading = (_eyebrow, heading, description, aside) => (
     <ScreenHeading
       title={heading}
@@ -1465,6 +1512,7 @@ export default function ArenaApp() {
                   selectedPower={selectedPower}
                   source={source}
                   emote={emote}
+                  emoteSignal={emoteSignal}
                   muteEmotes={muteEmotes}
                   availableActions={availableActions}
                   selectedActions={selectedActions}
@@ -1532,6 +1580,7 @@ export default function ArenaApp() {
                     title,
                     "Express yourself with cosmetic collections, transparent avatars and extraordinary arenas.",
                   )}
+                  {motionOffNotice}
                   <CosmeticShop
                     items={allItems}
                     ownedIds={ownedIds}
@@ -1607,6 +1656,7 @@ export default function ArenaApp() {
                     "Your cosmetic collection",
                     "Make your marks, board, and player identity your own.",
                   )}
+                  {motionOffNotice}
                   <InventoryPanel
                     api={api}
                     user={user}
@@ -2487,7 +2537,14 @@ export default function ArenaApp() {
                 name: displayName(user?.name),
                 rank: `${rank(user?.cups)} · ${pretty(user?.cups)} cups`,
               }}
-              avatar={<Avatar name={user?.name} skin={user?.profile?.avatar} />}
+              avatar={
+                <Avatar
+                  name={user?.name}
+                  skin={user?.profile?.avatar}
+                  frame={user?.profile?.equippedFrame}
+                  effect={user?.profile?.equippedEffect}
+                />
+              }
               onCancel={() =>
                 run(async () => {
                   await emit("queue:leave");

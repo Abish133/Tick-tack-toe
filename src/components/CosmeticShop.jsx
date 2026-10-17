@@ -65,6 +65,19 @@ function isEquipped(item, user) {
     : user?.profile?.[fields[item.type]] === item.id;
 }
 
+// Where an equipped item is seen, so a preview says what owning it changes.
+const SHOWN_ON = {
+  avatar: "Lobby hero, header, matchmaking, versus intro, battle panel, results, profile, leaderboard and friends",
+  frame: "Around your portrait in the header, matchmaking, battle panel, results and profile",
+  effect: "Animated aura on your portrait in the header, matchmaking, battle panel, results and profile",
+  banner: "Behind your battle panel (seen by both players) and your profile card",
+  title: "Under your name in the lobby, in battle and the versus intro for both players, and on your profile",
+  board: "Your battle board in every match",
+  marks: "Your X or O marks in every match, seen by both players",
+  emote: "Your battle emote wheel; opponents see its signal art when you send one",
+  arena: "The world behind every screen",
+};
+
 export function CosmeticPreview({
   item,
   owned,
@@ -126,6 +139,11 @@ export function CosmeticPreview({
         {theme && <AscendantFx theme={theme.id} edge stars={isBoard ? 8 : 0} />}
       </div>
       {theme && <p className={styles.themeName}>{theme.name} collection</p>}
+      {SHOWN_ON[item.type] && (
+        <p className={styles.shownOn}>
+          <strong>Shown on</strong> {SHOWN_ON[item.type]}
+        </p>
+      )}
       <p className={styles.previewDescription}>{item.description}</p>
       <div className={styles.previewActions}>
         <span>
