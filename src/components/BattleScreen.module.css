@@ -339,3 +339,4 @@
   .modePlate .connectionSignal { position: static !important; order: 2; }
   .modePlate > span:not(.connectionSignal) { order: 3; flex-basis: 100%; }
 }
+.connectionSignal::after{content:attr(data-ping);font-weight:800}

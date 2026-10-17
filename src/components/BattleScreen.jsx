@@ -699,6 +699,7 @@ export default function BattleScreen({
             data-quality={
               !connectionReady ? "offline" : ping === null ? "measuring" : ping < 80 ? "good" : ping < 150 ? "fair" : "poor"
             }
+            data-ping={!connectionReady ? "Offline" : ping === null ? "-- ms" : `${ping} ms`}
             title={connectionReady ? "Ping to the arena server" : "Connecting"}
             role="status"
             aria-label={
@@ -714,9 +715,8 @@ export default function BattleScreen({
             ) : (
               <WifiOff size={13} aria-hidden="true" />
             )}
-            <b aria-hidden="true">
-              {!connectionReady ? "Offline" : ping === null ? "-- ms" : `${ping} ms`}
-            </b>
+            {/* The text stays the connection status; the ping figure is drawn from data-ping. */}
+            <span>{connectionReady ? "Arena connected" : "Connecting"}</span>
           </span>
           <strong>{mode}</strong>
           <span>
