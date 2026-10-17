@@ -57,6 +57,13 @@ async function guest(page, label) {
     : [];
   if (!ids.includes(user.id))
     fs.writeFileSync(file, JSON.stringify([...ids, user.id]));
+  // Layout audits measure settled screens: the in-game Reduced motion setting (which,
+  // not the device setting, now governs game motion) stops entrance transitions.
+  const settings = await page.request.patch("/api/settings", {
+    data: { reducedMotion: true },
+    headers: { origin },
+  });
+  expect(settings.ok()).toBe(true);
   await page.addInitScript(() => {
     try {
       sessionStorage.setItem("ea:entered", "1");
