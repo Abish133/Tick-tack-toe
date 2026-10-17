@@ -1237,3 +1237,10 @@
   .art :global(.collection-board-art) { padding: 4px; }
   .art :global(.collection-board-art > .collection-board) { width: 100px; height: 100px; gap: 3px; padding: 5px; }
 }
+
+/* Tactical chips: angled plates, the selected one lit yellow. */
+.categories button,.pickerButton{--cut:7px;clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut));border-radius:0!important;border:0!important;background:linear-gradient(180deg,#1c2533f2,#0c121cf2)!important;box-shadow:inset 0 0 0 1px #ffffff26!important;backdrop-filter:none!important;color:#c9d2df!important;font-weight:800;text-transform:uppercase;letter-spacing:.8px}
+.categories button.selected,.categories button[aria-pressed=true],.categories button[aria-selected=true]{background:linear-gradient(180deg,#ffe066,#ffc21a 50%,#f59e0b)!important;color:#1b1203!important;box-shadow:inset 0 -2px 0 #b45f06!important;text-shadow:none!important}
+.categories button.selected span,.categories button[aria-pressed=true] span{color:#1b1203!important;background:#1b120326!important}
+.search{border-radius:0!important;border:0!important;background:#0a0f18e6!important;box-shadow:inset 0 0 0 1px #ffffff26,inset 0 -2px 0 #ffc21a!important}
+@media (max-width: 600px) { .pickerButton { letter-spacing: 0 !important; font-size: 11px !important; padding-inline: 6px !important; text-overflow: ellipsis; } }

@@ -84,3 +84,44 @@
 
 .button>span{position:relative;z-index:1}
 .button::after{z-index:0}
+
+/* ===== Tactical (PUBG-style) layer: angular cut corners, yellow accent, flat dark plates =====
+   Buttons and tabs are clipped to a chamfer (top-left and bottom-right corners cut), so their
+   highlight follows the shape and nothing pokes out as a stray rectangle. */
+.button{--cut:9px;clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut));border-radius:0!important;border:0!important;
+  background:linear-gradient(180deg,#ffe066 0%,#ffc21a 48%,#f59e0b 100%)!important;color:#1b1203!important;
+  box-shadow:inset 0 -3px 0 #b45f06,inset 0 1px 0 #fff6c4!important;text-transform:uppercase;letter-spacing:1px;font-weight:800;text-shadow:0 1px 0 #fff3b0}
+.button::after{left:0!important;right:0!important;top:0!important;height:45%!important;border-radius:0!important;background:linear-gradient(180deg,#ffffff70,#ffffff00)!important}
+.button:hover:not(:disabled){transform:none!important;filter:brightness(1.08)}
+.button:active:not(:disabled){transform:translateY(1px)!important;filter:brightness(.95)}
+.button:focus-visible{outline:2px solid #fff;outline-offset:-4px}
+.secondary,.ghost,.icon{background:linear-gradient(180deg,#1c2533f2,#0c121cf2)!important;color:#eef2f8!important;text-shadow:none!important;backdrop-filter:none!important;
+  box-shadow:inset 0 0 0 1px #ffffff2e,inset 0 1px 0 #ffffff26,inset 3px 0 0 #ffc21a!important}
+.secondary::after,.ghost::after,.icon::after{background:linear-gradient(180deg,#ffffff1a,#ffffff00)!important}
+.secondary:hover:not(:disabled),.ghost:hover:not(:disabled),.icon:hover:not(:disabled){box-shadow:inset 0 0 0 1px #ffc21a99,inset 0 1px 0 #ffffff26,inset 3px 0 0 #ffc21a!important}
+.icon{--cut:8px;border-radius:0!important;box-shadow:inset 0 0 0 1px #ffffff2e,inset 0 1px 0 #ffffff26!important}
+.danger{background:linear-gradient(180deg,#ff6b6b,#e03131 55%,#a51d1d)!important;color:#fff!important;text-shadow:0 1px 0 #6b0f0f!important;box-shadow:inset 0 -3px 0 #7a1212!important}
+
+/* Panels: flat dark plate, hairline outline, yellow corner brackets and a top accent tab. */
+.frame{border-radius:4px!important;border:1px solid #ffffff1f!important;
+  background:
+    linear-gradient(#ffc21a,#ffc21a) top left/22px 2px no-repeat,
+    linear-gradient(#ffc21a,#ffc21a) top left/2px 22px no-repeat,
+    linear-gradient(#ffffff59,#ffffff59) bottom right/22px 1px no-repeat,
+    linear-gradient(#ffffff59,#ffffff59) bottom right/1px 22px no-repeat,
+    linear-gradient(180deg,#141b27eb,#0a0f18f2)!important;
+  box-shadow:0 14px 34px #000a,inset 0 1px 0 #ffffff14!important;backdrop-filter:blur(8px)}
+.frame::before{display:none!important}
+.modal{border-radius:4px!important}
+.modalHeader{border-bottom:1px solid #ffffff1a!important;background:linear-gradient(90deg,#ffc21a1f,transparent 60%)}
+.modalHeader h2{font-family:var(--font-ui)!important;font-weight:800!important;letter-spacing:1.5px!important;color:#fff!important;padding-left:10px;border-left:3px solid #ffc21a}
+
+/* Tabs: text tabs on a dark strip, the active one lit yellow with an underline bar. */
+.tabs>button{border-radius:0!important;border:0!important;background:transparent!important;backdrop-filter:none!important;box-shadow:none!important;color:#aab4c4!important;
+  text-transform:uppercase;letter-spacing:1px;font-weight:800;position:relative}
+.tabs>button[aria-selected=true]{background:linear-gradient(0deg,#ffc21a33,transparent 85%)!important;color:#ffd23f!important;box-shadow:inset 0 -3px 0 #ffc21a!important;text-shadow:0 0 12px #ffc21a66}
+
+/* Resource plates: angled dark wells with a yellow value. */
+.resource{--cut:8px;clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut));border-radius:0!important;border:0!important;
+  background:linear-gradient(180deg,#0b111bf2,#151d2bf2)!important;box-shadow:inset 0 0 0 1px #ffffff26,inset 0 -2px 0 #ffc21a!important;backdrop-filter:none!important}
+.resource strong{color:#ffd23f!important}

@@ -100,21 +100,29 @@
 .inBattle .shade{background:linear-gradient(180deg,#0307138c,#03071340 30%,#03071340 70%,#030713b3),radial-gradient(ellipse 75% 60% at 50% 50%,transparent 45%,#0307137a 100%)}
 :global(.high-contrast) .shade{background:#030713cc}
 
-/* HUD: a dark plate with a gold rule and centre jewel, like a game menu bar. */
-.hud{background:linear-gradient(180deg,#0a1226f7,#070d1ee6)!important;border-bottom:0!important;box-shadow:0 8px 24px #000a!important}
-.hud::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none;background:linear-gradient(90deg,transparent,#a8742a 12%,#ffe5a0 50%,#a8742a 88%,transparent);box-shadow:0 0 10px #f2c86b66}
-.hud::before{content:"";position:absolute;left:50%;bottom:-6px;width:10px;height:10px;translate:-50% 0;rotate:45deg;z-index:1;pointer-events:none;background:linear-gradient(135deg,#fff3c8,#c48d36);box-shadow:0 0 10px #f2c86baa,0 0 0 2px #070d1e}
-.resources>button{background:linear-gradient(180deg,#050a16,#0f1a30)!important;border:1px solid #c9a15a99!important;box-shadow:inset 0 2px 6px #000d,inset 0 -1px 0 #ffffff14,0 1px 0 #ffffff12!important;backdrop-filter:none!important}
-.resources>button>svg:first-child{filter:drop-shadow(0 0 6px #f2c86b88) drop-shadow(0 2px 0 #000)}
-.resources>button>strong{color:#ffe7a6;text-shadow:0 0 8px #f2c86b55,0 2px 0 #000!important}
-.hudTools>button{background:linear-gradient(180deg,#1a2744,#0a1226)!important;border:1px solid #ffffff26!important;box-shadow:inset 0 1px 0 #ffffff26,0 3px 0 #02050d!important}
-.hudTools>button:active{translate:0 2px;box-shadow:inset 0 1px 0 #ffffff26,0 1px 0 #02050d!important}
+/* HUD: a flat tactical bar with a yellow rule, like a battle-royale lobby. The old mobile
+   rectangles drawn behind each button are removed so no shape pokes out of another. */
+.hud{background:linear-gradient(180deg,#05080ef7,#0a0f18eb)!important;border-bottom:0!important;box-shadow:0 8px 24px #000b!important}
+.hud::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none;background:linear-gradient(90deg,#ffc21a,#ffc21a66 30%,#ffffff1a 60%,transparent)}
+.hud::before{display:none}
+.resources>button::before,.hudTools>button::after{display:none!important}
+.resources>button{background:linear-gradient(180deg,#0b111bf2,#151d2bf2)!important;border:0!important;box-shadow:inset 0 0 0 1px #ffffff26,inset 0 -2px 0 #ffc21a!important}
+.resources>button>svg:first-child{color:#ffd23f;filter:drop-shadow(0 0 5px #ffc21a88)}
+.resources>button>strong{color:#ffd23f!important;text-shadow:0 1px 0 #000!important}
+.hudTools>button{background:linear-gradient(180deg,#1c2533,#0c121c)!important;border:0!important;box-shadow:inset 0 0 0 1px #ffffff2e!important}
+.hudTools>button:active{translate:0 1px}
 
-/* Dock: the same plate turned upside down. */
-.dock{background:linear-gradient(0deg,#0a1226fa,#070d1eeb)!important;box-shadow:0 -8px 24px #000a!important}
+/* Dock: flat dark bar; the active destination lights yellow with a top bar. */
+.dock{background:linear-gradient(0deg,#05080efa,#0a0f18f0)!important;box-shadow:0 -8px 24px #000b!important;border-top:1px solid #ffffff1a!important;border-radius:0!important}
+.dockButton{border-radius:0!important}
+.active .dockIcon{background:linear-gradient(180deg,#ffe066,#f59e0b)!important;color:#1b1203!important;box-shadow:0 0 14px #ffc21a66!important;border-radius:4px!important}
+.active .dockLabel{color:#ffd23f!important}
+.active::before{content:"";position:absolute;left:18%;right:18%;top:0;height:3px;background:#ffc21a;box-shadow:0 0 10px #ffc21a}
 
 /* Screen change: a gold light streak sweeps across as the next screen arrives. */
 .sweep{position:absolute;inset:0;z-index:40;pointer-events:none;overflow:hidden}
-.sweep::before{content:"";position:absolute;top:-20%;bottom:-20%;left:-40%;width:35%;rotate:14deg;background:linear-gradient(90deg,transparent,#f2c86b22 30%,#fff3c866 50%,#a4f7ff22 70%,transparent);filter:blur(6px);animation:screenSweep .65s cubic-bezier(.22,1,.36,1) forwards}
+.sweep::before{content:"";position:absolute;top:-20%;bottom:-20%;left:-40%;width:35%;rotate:14deg;background:linear-gradient(90deg,transparent,#ffc21a22 30%,#fff3c866 50%,#ffc21a22 70%,transparent);filter:blur(6px);animation:screenSweep .65s cubic-bezier(.22,1,.36,1) forwards}
 @keyframes screenSweep{to{translate:480% 0}}
 :global(html.reduce-motion) .sweep{display:none}
+.active{background:linear-gradient(0deg,transparent,#ffc21a1c)!important}
+.active::after{display:none!important}

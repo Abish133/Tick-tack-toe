@@ -1,92 +1,134 @@
-/* Game UI layer: the last word on shared chrome so every screen reads as a game menu,
-   not a web page. Tabs sit in a sunken track with a raised gold plate, titles are gold
-   plaques, section headings carry a crest rule. Presentation only. */
+/* Game UI layer (tactical, PUBG-style): the last word on shared chrome. Angular cut-corner
+   controls, a yellow accent, bold uppercase type and flat dark plates. Presentation only. */
+:root {
+  --tac-accent: #ffc21a;
+  --tac-accent-hi: #ffe066;
+  --tac-accent-lo: #f59e0b;
+  --tac-plate: #0a0f18f0;
+  --tac-line: #ffffff24;
+  --tac-cut: 9px;
+}
 
-/* ---------- Tab bars ---------- */
+/* ---------- Legacy .button (screen actions etc.): same chamfered plates as GameButton ---------- */
+.button.button {
+  clip-path: polygon(var(--tac-cut) 0, 100% 0, 100% calc(100% - var(--tac-cut)), calc(100% - var(--tac-cut)) 100%, 0 100%, 0 var(--tac-cut));
+  border-radius: 0 !important;
+  border: 0 !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 800;
+}
+.button.button::after { left: 0 !important; right: 0 !important; top: 0 !important; height: 45% !important; border-radius: 0 !important; }
+.button.button.primary {
+  background: linear-gradient(180deg, var(--tac-accent-hi) 0%, var(--tac-accent) 48%, var(--tac-accent-lo) 100%) !important;
+  color: #1b1203 !important;
+  box-shadow: inset 0 -3px 0 #b45f06, inset 0 1px 0 #fff6c4 !important;
+  text-shadow: 0 1px 0 #fff3b0;
+}
+.button.button.secondary, .button.button.ghost {
+  background: linear-gradient(180deg, #1c2533f2, #0c121cf2) !important;
+  color: #eef2f8 !important;
+  box-shadow: inset 0 0 0 1px #ffffff2e, inset 3px 0 0 var(--tac-accent) !important;
+}
+.button.button:hover:not(:disabled) { transform: none !important; filter: brightness(1.08); }
+.button:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
+
+/* ---------- Tab bars: dark strip, active tab lit yellow with an underline ---------- */
 [role="tablist"].scroll-row {
-  gap: 4px !important;
-  padding: 4px !important;
-  border-radius: 14px;
-  border: 1px solid #f2c86b38;
-  background: linear-gradient(180deg, #050a16e6, #0c1528d9);
-  box-shadow: inset 0 2px 7px #000c, inset 0 -1px 0 #ffffff12, 0 1px 0 #ffffff10;
+  gap: 0 !important;
+  padding: 0 !important;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid var(--tac-line);
+  background: linear-gradient(180deg, #05080ecc, #0a0f18e6);
+  box-shadow: none;
 }
 [role="tablist"].scroll-row > button[role="tab"] {
   flex: 1 0 auto;
-  min-height: 40px;
-  padding: 0 14px !important;
-  border-radius: 10px !important;
-  border: 1px solid transparent !important;
+  min-height: 44px;
+  padding: 0 16px !important;
+  border-radius: 0 !important;
+  border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
   backdrop-filter: none;
-  color: #d3dbee !important;
+  color: #aab4c4 !important;
   opacity: 1 !important;
   font-family: var(--font-ui);
-  font-weight: 700;
-  letter-spacing: 0.6px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
   white-space: nowrap;
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.12s;
+  transition: color 0.2s, background 0.2s, box-shadow 0.2s;
 }
-[role="tablist"].scroll-row > button[role="tab"] svg { color: #9fb4d8; opacity: 1; }
-[role="tablist"].scroll-row > button[role="tab"]:hover:not(:disabled):not([aria-selected="true"]) {
-  background: linear-gradient(180deg, #ffffff14, #ffffff05) !important;
-  color: #fff !important;
-}
+[role="tablist"].scroll-row > button[role="tab"] svg { color: currentColor; opacity: 0.85; }
+[role="tablist"].scroll-row > button[role="tab"]:hover:not(:disabled):not([aria-selected="true"]) { color: #fff !important; background: #ffffff0d !important; }
 [role="tablist"].scroll-row > button[role="tab"][aria-selected="true"] {
-  background: linear-gradient(180deg, #fff3c8 0%, #f2c86b 42%, #b9862f 100%) !important;
-  border-color: #ffe9ad !important;
-  color: #2a1a06 !important;
-  box-shadow: inset 0 1px 0 #fffbe9, inset 0 -3px 0 #8a5d1c, 0 3px 10px #f2c86b55 !important;
-  text-shadow: 0 1px 0 #fff6d8;
+  background: linear-gradient(0deg, #ffc21a38, transparent 90%) !important;
+  color: #ffd23f !important;
+  box-shadow: inset 0 -3px 0 var(--tac-accent) !important;
+  text-shadow: 0 0 12px #ffc21a66;
 }
-[role="tablist"].scroll-row > button[role="tab"][aria-selected="true"] svg { color: #4a2e08; }
-[role="tablist"].scroll-row > button[role="tab"]:active:not(:disabled) { transform: translateY(1px); }
-[role="tablist"].scroll-row > button[role="tab"]:disabled { color: #7d879c !important; }
+[role="tablist"].scroll-row > button[role="tab"]:disabled { color: #6b7587 !important; }
 @media (max-width: 600px) {
-  [role="tablist"].scroll-row > button[role="tab"] { min-height: 40px; padding: 0 11px !important; font-size: 12px !important; }
+  [role="tablist"].scroll-row > button[role="tab"] { min-height: 42px; padding: 0 12px !important; font-size: 12px !important; }
 }
-
-/* ---------- Screen title plaque ---------- */
-.screen-heading { position: relative; }
-.screen-heading::after {
-  content: ""; position: absolute; left: 52px; right: 0; bottom: 3px; height: 1px; pointer-events: none;
-  background: linear-gradient(90deg, #f2c86bb3, #f2c86b33 55%, transparent);
-}
-.screen-heading > h1 {
-  background: linear-gradient(180deg, #fff8dc 10%, #f2c86b 55%, #c08a36 95%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 2px 0 #1a1004) drop-shadow(0 0 10px #f2c86b40);
-  letter-spacing: 1.4px !important;
-}
-
-/* Header actions: the label returns from 420px and the button grows to fit it. */
-@media (min-width: 420px) and (max-width: 600px) {
-  .screen-heading .help-info > .button.screen-action,
-  .screen-heading .help-info > button.screen-action {
-    width: auto;
-    min-width: 44px;
-    padding: 0 12px;
-  }
-}
-
-/* ---------- Section headings inside screens ---------- */
-.content h2:not(.screen-heading h2) {
-  letter-spacing: 0.8px;
-  text-shadow: 0 2px 0 #0a0d18, 0 0 12px #f2c86b30;
-}
-/* Wider screens: the tab track hugs its tabs instead of stretching edge to edge. */
 @media (min-width: 1025px) {
   [role="tablist"].scroll-row { width: fit-content; }
   [role="tablist"].scroll-row > button[role="tab"] { flex: 0 0 auto; min-width: 150px; }
 }
-/* Tablets: tighter tabs so three labels fit a side column. */
 @media (min-width: 601px) and (max-width: 1024px) {
   [role="tablist"].scroll-row > button[role="tab"] { padding: 0 10px !important; font-size: 13px !important; gap: 5px !important; }
 }
 
+/* ---------- Screen title: bold uppercase with a yellow bar, like a lobby menu header ---------- */
+.screen-heading { position: relative; }
+.screen-heading::after {
+  content: ""; position: absolute; left: 52px; right: 0; bottom: 3px; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, #ffc21acc, #ffffff1f 40%, transparent);
+}
+.screen-heading > h1 {
+  font-family: var(--font-ui) !important;
+  font-weight: 800 !important;
+  letter-spacing: 2px !important;
+  color: #fff !important;
+  text-shadow: 0 2px 0 #000, 0 0 14px #ffc21a40;
+  padding-left: 10px;
+  box-shadow: inset 3px 0 0 var(--tac-accent);
+}
+@media (min-width: 420px) and (max-width: 600px) {
+  .screen-heading .help-info > .button.screen-action,
+  .screen-heading .help-info > button.screen-action { width: auto; min-width: 44px; padding: 0 12px; }
+}
+
+/* ---------- Section headings and card titles: tactical type ---------- */
+.content :is(h2, h3) {
+  font-family: var(--font-ui);
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 #000;
+}
+
+/* ---------- Legacy panels and cards: flat dark plates with yellow corner brackets ---------- */
+.content .panel {
+  border-radius: 4px !important;
+  border: 1px solid var(--tac-line) !important;
+  background:
+    linear-gradient(var(--tac-accent), var(--tac-accent)) top left / 22px 2px no-repeat,
+    linear-gradient(var(--tac-accent), var(--tac-accent)) top left / 2px 22px no-repeat,
+    linear-gradient(180deg, #141b27eb, #0a0f18f2) !important;
+}
+
 /* Small hint and helper copy stays readable over the busy arena art. */
 .content :is(p, small, label, [class*="hint"], [class*="Hint"]) { text-shadow: 0 1px 2px #000c, 0 0 6px #0009; }
+
+/* ---------- Text inputs: dark wells with a yellow underline ---------- */
+.content :is(input[type="text"], input[type="search"], input:not([type]), input[type="email"], input[type="password"], textarea, select):not([role="switch"]) {
+  border-radius: 2px !important;
+  border: 1px solid #ffffff26 !important;
+  background: #070b12e6 !important;
+  box-shadow: inset 0 -2px 0 #ffc21a99 !important;
+  color: #fff;
+}
+.content :is(input, textarea, select):focus-visible { outline: 0; box-shadow: inset 0 0 0 1px #ffc21a, inset 0 -2px 0 #ffc21a !important; }

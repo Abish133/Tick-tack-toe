@@ -472,3 +472,7 @@
 /* glass */
 .tier{border-radius:20px!important}
 .tabs button{border-radius:999px!important}
+
+/* Tactical chips: angled plates, the selected one lit yellow. */
+.tabs button{--cut:7px;clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut));border-radius:0!important;border:0!important;background:linear-gradient(180deg,#1c2533f2,#0c121cf2)!important;box-shadow:inset 0 0 0 1px #ffffff26!important;backdrop-filter:none!important;color:#c9d2df!important;font-weight:800;text-transform:uppercase;letter-spacing:.8px}
+.tabs button[aria-pressed=true],.tabs button[aria-selected=true],.tabs button.active{background:linear-gradient(180deg,#ffe066,#ffc21a 50%,#f59e0b)!important;color:#1b1203!important;box-shadow:inset 0 -2px 0 #b45f06!important;text-shadow:none!important}
