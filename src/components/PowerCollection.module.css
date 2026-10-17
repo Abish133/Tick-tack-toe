@@ -727,3 +727,11 @@
 .slot{border:1px solid #ffffff2e!important;border-top-color:#ffffff4d!important;background:linear-gradient(165deg,#ffffff1f,#ffffff06 45%,#0a1528cc)!important;box-shadow:inset 0 1px 0 #ffffff40,0 10px 24px #0007!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:16px!important;border-color:color-mix(in srgb,var(--power-color) 70%,#fff)!important}
 .families button,.filters>label{border:1px solid #ffffff2e!important;border-top-color:#ffffff4d!important;background:linear-gradient(165deg,#ffffff1f,#ffffff06 45%,#0a1528cc)!important;box-shadow:inset 0 1px 0 #ffffff40,0 10px 24px #0007!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:999px!important}
 .families button.active{background:linear-gradient(180deg,#fff1c2,#e8b65a 60%,#b9862f)!important;color:#2a1a06!important}
+
+/* Equipped slots: names wrap onto two lines instead of cutting to "Shield G…". */
+@media (max-width: 600px) {
+  .slotChoice strong { white-space: normal !important; display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.12 !important; overflow-wrap: anywhere; }
+}
+@media (max-width: 400px) {
+  .slotChoice strong { font-size: 11px !important; }
+}

@@ -657,3 +657,11 @@
 /* glass */
 .row,.podiumCard{border:1px solid #ffffff2e!important;border-top-color:#ffffff4d!important;background:linear-gradient(165deg,#ffffff1f,#ffffff06 45%,#0a1528cc)!important;box-shadow:inset 0 1px 0 #ffffff40,0 10px 24px #0007!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:18px!important}
 .personal{border-color:#ffe08f!important}
+
+/* Phones: scope tabs get the full row; the ranking picker sits under them instead of
+   squeezing the tabs to "SEA…". */
+@media (max-width: 600px) {
+  .controls { grid-template-columns: minmax(0, 1fr) !important; gap: 6px !important; }
+  .ranking, .rankingChip { width: 100% !important; justify-content: stretch; }
+  .ranking > div { flex: 1 1 auto !important; }
+}

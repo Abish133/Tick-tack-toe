@@ -377,3 +377,24 @@
   .steps button { font-size: 11px !important; line-height: 1.15; white-space: normal; }
   .lessonCopy { font-size: 12px; }
 }
+
+/* Landscape phones: chapters shrink to a slim strip, the lesson keeps only its title and
+   the board sits beside its instruction and Next button instead of under them. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .root { padding: 6px 8px; gap: 6px; }
+  .steps button { min-height: 34px; padding: 2px 8px; font-size: 12px; }
+  .steps button span { width: 20px; height: 20px; font-size: 12px; }
+  .layout { gap: 10px; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); }
+  .label, .lessonCopy { display: none !important; }
+  .lesson { gap: 8px; padding: 2px 4px; justify-content: center; }
+  .lesson h2 { font-size: 17px; }
+  .arena {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(130px, 180px);
+    grid-template-rows: 1fr auto; align-items: center; gap: 6px 10px; padding: 0;
+  }
+  .boardStage { grid-column: 1; grid-row: 1 / span 2; height: 100%; padding: 0; }
+  .instruction { grid-column: 2; grid-row: 1; align-self: end; font-size: 12px; min-height: 0; }
+  .arena > button { grid-column: 2; grid-row: 2; align-self: start; width: 100%; min-width: 0; font-size: 12px; }
+  .board { width: min(100cqw, calc(100cqh - 4px)) !important; min-width: 0; gap: 3px !important; padding: 5px !important; border-width: 3px !important; }
+  .board :global(.game-cell) { min-height: 0; min-width: 0; }
+}
