@@ -252,17 +252,18 @@ export default function GameShell({
             className={`connection ${connected ? "online" : ""} ${styles.connection}`}
             data-quality={pingQuality(ping, connected)}
             data-ping={connected ? pingLabel(ping) : ""}
-            role="status"
             aria-label={
               connected
-                ? Number.isFinite(ping)
-                  ? `Arena connected, ping ${ping} milliseconds`
-                  : "Arena connected"
+                ? "Arena connected"
                 : user
                   ? "Connecting"
                   : "Welcome, challenger"
             }
-            title={connected ? "Ping to the arena server" : "Connecting"}
+            title={
+              connected
+                ? `Ping to the arena server: ${pingLabel(ping)}`
+                : "Connecting"
+            }
           >
             {connected ? <Wifi size={16} /> : <WifiOff size={16} />}
             <span className={styles.srOnly}>
