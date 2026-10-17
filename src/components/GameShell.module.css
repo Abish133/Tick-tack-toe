@@ -135,5 +135,7 @@
 .connection[data-quality=slow]{color:#fb923c}
 .connection[data-quality=poor],.connection[data-quality=offline]{color:#f87171}
 .connection[data-quality=measuring]{color:#aab4c4}
-@media(max-width:600px){.connection{display:inline-flex!important;min-height:26px;padding:0 6px;gap:3px!important;font-size:11px}.connection svg{width:12px;height:12px}}
-@media(max-width:380px){.connection svg{display:none}}
+/* Phones: balances come first. The ping shows from 390px once measured, without its
+   icon; narrower phones still see it on the battle screen. */
+@media(max-width:600px){.connection{min-height:26px;padding:0 5px;font-size:11px}.connection svg{display:none}}
+@media(min-width:390px) and (max-width:600px){.connection:is([data-quality=good],[data-quality=fair],[data-quality=slow],[data-quality=poor]){display:inline-flex!important}}
