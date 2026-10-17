@@ -382,11 +382,12 @@
    the board sits beside its instruction and Next button instead of under them. */
 @media (orientation: landscape) and (max-height: 500px) {
   .root { padding: 6px 8px; gap: 6px; }
-  .steps button { min-height: 34px; padding: 2px 8px; font-size: 12px; }
+  .steps button { min-height: 40px; padding: 2px 8px; font-size: 12px; }
   .steps button span { width: 20px; height: 20px; font-size: 12px; }
-  .layout { gap: 10px; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); }
+  .layout { display: grid; gap: 10px; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); }
   .label, .lessonCopy { display: none !important; }
-  .lesson { gap: 8px; padding: 2px 4px; justify-content: center; }
+  .lesson { flex-direction: column; align-items: flex-start; gap: 8px; padding: 2px 4px; justify-content: center; }
+  .lesson h2 { white-space: normal; flex: none; }
   .lesson h2 { font-size: 17px; }
   .arena {
     display: grid; grid-template-columns: minmax(0, 1fr) minmax(130px, 180px);
@@ -395,6 +396,29 @@
   .boardStage { grid-column: 1; grid-row: 1 / span 2; height: 100%; padding: 0; }
   .instruction { grid-column: 2; grid-row: 1; align-self: end; font-size: 12px; min-height: 0; }
   .arena > button { grid-column: 2; grid-row: 2; align-self: start; width: 100%; min-width: 0; font-size: 12px; }
-  .board { width: min(100cqw, calc(100cqh - 4px)) !important; min-width: 0; gap: 3px !important; padding: 5px !important; border-width: 3px !important; }
+  .board { width: max(150px, min(100cqw, calc(100cqh - 4px))) !important; min-width: 150px; gap: 3px !important; padding: 5px !important; border-width: 3px !important; }
+  .boardStage { min-height: 156px; overflow: visible; }
   .board :global(.game-cell) { min-height: 0; min-width: 0; }
 }
+@media (orientation: landscape) and (max-height: 500px) {
+  .root { display: grid; grid-template-columns: minmax(150px, 200px) minmax(0, 1fr); align-items: stretch; }
+  .steps { flex-direction: column; justify-content: center; gap: 4px; }
+  .steps button { flex: 0 0 auto; justify-content: flex-start; text-align: left; }
+}
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 800px) {
+  .layout { grid-template-columns: minmax(0, 0.55fr) minmax(0, 1.45fr); gap: 6px; }
+  .arena { grid-template-columns: minmax(150px, 1fr) minmax(104px, 140px); gap: 6px; }
+  .arena > button { padding-inline: 6px; }
+}
+
+/* The glass board style used to override the target, so "Choose the highlighted cell"
+   pointed at nothing. The lesson's target cell now glows gold and pulses. */
+.board:global(.game-board) :global(.game-cell).target {
+  border-color: #ffe19a !important;
+  background: radial-gradient(circle, #f2c86b55, #2c344499 70%) !important;
+  box-shadow: inset 0 0 14px #f4cd6366, 0 0 18px #f2c86b88 !important;
+  animation: tutorialTarget 1.4s ease-in-out infinite;
+}
+@keyframes tutorialTarget { 50% { box-shadow: inset 0 0 20px #f4cd6399, 0 0 28px #f2c86bcc; } }
+@media (prefers-reduced-motion: reduce) { .board:global(.game-board) :global(.game-cell).target { animation: none; } }
+:global(.reduce-motion) .board:global(.game-board) :global(.game-cell).target { animation: none; }

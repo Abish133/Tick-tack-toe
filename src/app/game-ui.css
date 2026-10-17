@@ -45,7 +45,7 @@
 [role="tablist"].scroll-row > button[role="tab"]:active:not(:disabled) { transform: translateY(1px); }
 [role="tablist"].scroll-row > button[role="tab"]:disabled { color: #7d879c !important; }
 @media (max-width: 600px) {
-  [role="tablist"].scroll-row > button[role="tab"] { min-height: 38px; padding: 0 11px !important; font-size: 12px !important; }
+  [role="tablist"].scroll-row > button[role="tab"] { min-height: 40px; padding: 0 11px !important; font-size: 12px !important; }
 }
 
 /* ---------- Screen title plaque ---------- */
