@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {loopbackPeer,requestClientIp} from '../src/server/client-ip.mjs';
+import {loopbackPeer,privatePeer,requestClientIp} from '../src/server/client-ip.mjs';
 
 const request=(peer,headers={})=>({socket:{remoteAddress:peer},headers});
 
@@ -32,4 +32,13 @@ test('loopback detection accepts mapped addresses and rejects external or malfor
   for(const ip of ['127.0.0.1','127.255.1.1','::1','::ffff:127.0.0.1'])assert.equal(loopbackPeer(ip),true);
   for(const ip of ['128.0.0.1','192.168.1.1','::ffff:192.0.2.10','::2','localhost','127.0.0.1.evil',null])assert.equal(loopbackPeer(ip),false);
   assert.equal(requestClientIp({headers:{'cf-connecting-ip':'203.0.113.8'}},'cloudflare'),'unknown');
+});
+
+test('Railway mode trusts only the last forwarded hop from private ingress peers',()=>{
+  assert.equal(requestClientIp(request('10.1.2.3',{'x-forwarded-for':'203.0.113.8'}),'railway'),'203.0.113.8');
+  assert.equal(requestClientIp(request('100.64.0.7',{'x-forwarded-for':'198.51.100.1, 203.0.113.8'}),'railway'),'203.0.113.8');
+  assert.equal(requestClientIp(request('fd12:3456::1',{'x-forwarded-for':'2001:db8::9'}),'railway'),'2001:db8::9');
+  assert.equal(requestClientIp(request('192.0.2.10',{'x-forwarded-for':'203.0.113.8'}),'railway'),'192.0.2.10');
+  for(const value of ['203.0.113.8, invalid','a'.repeat(513),['203.0.113.8'],undefined])assert.equal(requestClientIp(request('10.1.2.3',{'x-forwarded-for':value}),'railway'),'10.1.2.3');
+  assert.equal(privatePeer('172.32.0.1'),false);assert.equal(privatePeer('100.128.0.1'),false);assert.equal(privatePeer('8.8.8.8'),false);
 });

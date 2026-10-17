@@ -24,7 +24,7 @@ export async function createGooglePlayer(google){const base=String(google.name||
 export async function handleAPI(request,context={}){
   try{
     const url=new URL(request.url),method=request.method;const path=url.pathname.replace(/^\/api\/?/,'').replace(/\/$/,'');
-    rateLimit(`http:${request.headers.get('x-arena-ip')||'unknown'}`,240,60000);
+    rateLimit(`http:${request.headers.get('x-arena-ip')||'unknown'}`,600,60000);
     if(path==='payments/razorpay/webhook'&&method==='POST')return json(await razorpayWebhook(await readProviderBody(request),request.headers.get('x-razorpay-signature'),request.headers.get('x-razorpay-event-id')));
     if(path==='ads/admob/ssv'&&method==='GET')return json(await admobCallback(request.url));
     if(!['GET','HEAD','OPTIONS'].includes(method))checkOrigin(request.headers.get('origin'));
@@ -53,7 +53,7 @@ export async function handleAPI(request,context={}){
     if(path==='tournaments'&&method==='GET'){const tournaments=await db.tournament.findMany({orderBy:{startsAt:'desc'},take:50,include:{_count:{select:{participants:true}}}});return json({tournaments:tournaments.map(t=>({...t,capacity:t.maxPlayers}))});}
     if(path.startsWith('tournaments/')&&method==='GET'){const id=path.split('/')[1];const tournament=await db.tournament.findUnique({where:{id},include:{participants:{include:{user:{select:{id:true,name:true}}}},rounds:{orderBy:{number:'asc'},include:{matches:{orderBy:{position:'asc'},include:{match:{select:{id:true,status:true,result:true}}}}}}}});fail(tournament,'NOT_FOUND','Tournament not found.',404);return json({tournament});}
 
-    const user=await requireUser(cookie);rateLimit(`user-http:${user.id}`,180,60000);
+    const user=await requireUser(cookie);rateLimit(`user-http:${user.id}`,300,60000);
     if(path==='commerce/orders'&&method==='POST'){rateLimit(`checkout:${user.id}`,10,60000);return json(await createCheckout(user.id,body),201);}
     if(path==='commerce/verify'&&method==='POST')return json(await verifyCheckout(user.id,body));
     if(/^commerce\/orders\/[^/]+$/.test(path)&&method==='GET')return json(await orderStatus(user.id,path.split('/')[2]));

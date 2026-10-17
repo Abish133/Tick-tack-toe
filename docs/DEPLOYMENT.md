@@ -20,7 +20,7 @@ Railway's current documentation says new services cannot opt into legacy `railwa
 | `NODE_ENV` | `production` |
 | `HOST` | `0.0.0.0` |
 | `PORT` | Let Railway supply its application port, or set `3000` and use the same target port for the public domain |
-| `TRUST_PROXY` | Leave unset for conservative socket-peer rate limiting; the local Cloudflare mode is for a laptop tunnel, not Railway's remote ingress |
+| `TRUST_PROXY` | Leave unset on Railway: `railway` mode is chosen automatically and rate limits use the last `X-Forwarded-For` hop added by Railway's private ingress. Set `false` to rate-limit by socket peer only; the local Cloudflare mode is for a laptop tunnel |
 | `DB_READY_TIMEOUT_MS` | Optional; defaults to `120000`, bounded to a maximum of five minutes |
 | `RAILWAY_DEPLOYMENT_OVERLAP_SECONDS` | `0` |
 | `RAILWAY_DEPLOYMENT_DRAINING_SECONDS` | `45` |
