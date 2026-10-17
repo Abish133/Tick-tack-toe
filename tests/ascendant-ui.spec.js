@@ -102,11 +102,13 @@ test('Ascendant animated cosmetics preview safely, buy once, equip every slot an
     await expect(image).toHaveAttribute('data-cosmetic-motion','animated');
     await expect(image).toHaveAttribute('src',avatarMotion.animatedAsset);
     await expect.poll(()=>image.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
+    // The device's reduced-motion request no longer silences cosmetics; the in-game
+    // Reduced motion setting (checked below) is the switch.
     await page.emulateMedia({reducedMotion:'reduce'});
-    await expect(image).toHaveAttribute('data-cosmetic-motion','still');
-    await expect(image).toHaveAttribute('src',avatarMotion.posterAsset);
-    await page.emulateMedia({reducedMotion:'no-preference'});
+    await expect(image).toHaveAttribute('data-cosmetic-motion','animated');
     await expect(image).toHaveAttribute('src',avatarMotion.animatedAsset);
+    await expect(dialog.locator('.asc-fx').first()).toBeVisible();
+    await page.emulateMedia({reducedMotion:'no-preference'});
     await closePreview(page);
 
     dialog=await preview(page,'Astral Ascendancy Halo');

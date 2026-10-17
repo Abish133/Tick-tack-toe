@@ -878,19 +878,17 @@
     width: 200px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .heroArt img,
-  .reveal,
-  .revealRays {
+:global(html.reduce-motion) .heroArt img,
+  :global(html.reduce-motion) .reveal,
+  :global(html.reduce-motion) .revealRays {
     animation: none;
   }
-  .art :global(.cosmetic-portrait) {
+:global(html.reduce-motion) .art :global(.cosmetic-portrait) {
     transition: none;
   }
-  .art:hover :global(.cosmetic-portrait) {
+:global(html.reduce-motion) .art:hover :global(.cosmetic-portrait) {
     transform: none;
   }
-}
 @media (prefers-contrast: more) {
   .pickerButton,
   .search,

@@ -334,11 +334,9 @@
     width: min(100%, calc(100dvh - 410px));
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .board {
+:global(html.reduce-motion) .board {
     transform: none;
   }
-}
 :global(.reduce-motion) .board {
   transform: none;
 }
@@ -420,5 +418,5 @@
   animation: tutorialTarget 1.4s ease-in-out infinite;
 }
 @keyframes tutorialTarget { 50% { box-shadow: inset 0 0 20px #f4cd6399, 0 0 28px #f2c86bcc; } }
-@media (prefers-reduced-motion: reduce) { .board:global(.game-board) :global(.game-cell).target { animation: none; } }
+:global(html.reduce-motion) .board:global(.game-board) :global(.game-cell).target { animation: none; }
 :global(.reduce-motion) .board:global(.game-board) :global(.game-cell).target { animation: none; }

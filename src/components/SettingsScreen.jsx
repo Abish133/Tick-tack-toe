@@ -90,6 +90,11 @@ export default function SettingsScreen({
     }, 600);
     return () => clearTimeout(timer);
   }, [settings]);
+  // The device setting no longer silences the game; it is surfaced here instead.
+  const [systemReduced, setSystemReduced] = useState(false);
+  useEffect(() => {
+    setSystemReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
   const update = (key, value) =>
     setSettings((previous) => ({ ...previous, [key]: value }));
   const toggle = (key) => (
@@ -140,6 +145,12 @@ export default function SettingsScreen({
           {tab === "graphics" && (
             <div className={styles.options}>
               {toggle("reducedMotion")}
+              {systemReduced && !settings.reducedMotion && (
+                <p className={styles.motionHint} role="note">
+                  Your device asks apps to reduce motion. Turn on Reduced motion
+                  to calm the game's animations too.
+                </p>
+              )}
               {toggle("highContrast")}
               {toggle("screenShake")}
               <CustomSelect

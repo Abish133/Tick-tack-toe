@@ -3,7 +3,9 @@
 @media(max-width:1100px){.crest{display:none}.hud{gap:12px}.rank>span{min-width:80px}.resources{gap:8px}.hudTools{gap:6px}}
 @media(max-width:600px){.hud{gap:5px;padding-inline:max(8px,env(safe-area-inset-left));}.account{width:48px;height:54px;padding:0}.account :global([role=progressbar]){width:48px!important;height:48px!important}.account :global(.avatar){width:40px;height:40px}.rank,.connection{display:none!important}.resources{gap:5px;flex:1;justify-content:center;margin:0}.hudTools{gap:3px}.hudTools>button{border-width:1px;width:48px;border-radius:9px}.dock{gap:4px;padding-inline:12px}.dockButton{flex-direction:column;gap:0;padding:3px 5px;font-size:12px}.dockIcon{width:36px;height:36px}.dockIcon svg{width:25px;height:25px}.dockLabel{display:none}.active .dockLabel{display:block;font-size:12px;line-height:12px}.active .dockIcon{transform:translateY(-5px) scale(1.1)}.dock:before,.dock:after{display:none}.journeyGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.journeyTile{min-height:98px;font-size:14px}.stage{padding-bottom:8px}}
 @media(max-width:340px){.hud{gap:2px;padding-inline:3px}.hudTools{gap:1px}.resources{gap:3px}.resources>button{min-width:57px!important}.resources>button>strong{font-size:17px!important}.resources>button>svg:last-of-type{display:none}}
-@media(prefers-reduced-motion:reduce){.environment:before,.atmosphere{animation:none}.active .dockIcon{transform:none}.dockButton{transition:none}}
+:global(html.reduce-motion) .environment:before,:global(html.reduce-motion) .atmosphere{animation:none}
+:global(html.reduce-motion) .active .dockIcon{transform:none}
+:global(html.reduce-motion) .dockButton{transition:none}
 :global(.reduce-motion) .environment:before,:global(.reduce-motion) .atmosphere{animation:none}:global(.high-contrast) .hud,:global(.high-contrast) .dock{background:#061020;border-color:#fff0a2}
 .resources{min-width:0}.resources>button{min-width:0}.resources>button>strong{min-width:0;white-space:nowrap}
 .world{grid-template-columns:minmax(0,1fr)}.hud{min-width:0}@media(max-width:340px){.resources>button{min-width:48px!important;padding-inline:9px 3px}.resources>button>strong{font-size:17px!important}.resources>button>svg:last-of-type{display:none}.hudTools{gap:1px}}
@@ -88,3 +90,31 @@
 .journeyTile:hover{transform:translateY(-3px)}
 .environment:before{opacity:.9!important;filter:saturate(1.15)}
 .atmosphere{opacity:.65!important}
+
+/* ===== Game chrome: shaded world, plated HUD and dock, cinematic screen changes ===== */
+/* A dark shade over the arena art keeps every equipped background readable: darker at the
+   HUD and dock, lighter in the middle so the art still shows. Battles keep a lighter shade. */
+.shade{position:absolute;inset:0;pointer-events:none;background:
+  linear-gradient(180deg,#030713e6 0,#03071399 calc(var(--hud-height) + 40px),#0307134d 38%,#03071359 62%,#030713d9 calc(100% - var(--dock-height) - 20px),#030713f2 100%),
+  radial-gradient(ellipse 70% 55% at 50% 45%,transparent 40%,#03071366 100%)}
+.inBattle .shade{background:linear-gradient(180deg,#0307138c,#03071340 30%,#03071340 70%,#030713b3),radial-gradient(ellipse 75% 60% at 50% 50%,transparent 45%,#0307137a 100%)}
+:global(.high-contrast) .shade{background:#030713cc}
+
+/* HUD: a dark plate with a gold rule and centre jewel, like a game menu bar. */
+.hud{background:linear-gradient(180deg,#0a1226f7,#070d1ee6)!important;border-bottom:0!important;box-shadow:0 8px 24px #000a!important}
+.hud::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none;background:linear-gradient(90deg,transparent,#a8742a 12%,#ffe5a0 50%,#a8742a 88%,transparent);box-shadow:0 0 10px #f2c86b66}
+.hud::before{content:"";position:absolute;left:50%;bottom:-6px;width:10px;height:10px;translate:-50% 0;rotate:45deg;z-index:1;pointer-events:none;background:linear-gradient(135deg,#fff3c8,#c48d36);box-shadow:0 0 10px #f2c86baa,0 0 0 2px #070d1e}
+.resources>button{background:linear-gradient(180deg,#050a16,#0f1a30)!important;border:1px solid #c9a15a99!important;box-shadow:inset 0 2px 6px #000d,inset 0 -1px 0 #ffffff14,0 1px 0 #ffffff12!important;backdrop-filter:none!important}
+.resources>button>svg:first-child{filter:drop-shadow(0 0 6px #f2c86b88) drop-shadow(0 2px 0 #000)}
+.resources>button>strong{color:#ffe7a6;text-shadow:0 0 8px #f2c86b55,0 2px 0 #000!important}
+.hudTools>button{background:linear-gradient(180deg,#1a2744,#0a1226)!important;border:1px solid #ffffff26!important;box-shadow:inset 0 1px 0 #ffffff26,0 3px 0 #02050d!important}
+.hudTools>button:active{translate:0 2px;box-shadow:inset 0 1px 0 #ffffff26,0 1px 0 #02050d!important}
+
+/* Dock: the same plate turned upside down. */
+.dock{background:linear-gradient(0deg,#0a1226fa,#070d1eeb)!important;box-shadow:0 -8px 24px #000a!important}
+
+/* Screen change: a gold light streak sweeps across as the next screen arrives. */
+.sweep{position:absolute;inset:0;z-index:40;pointer-events:none;overflow:hidden}
+.sweep::before{content:"";position:absolute;top:-20%;bottom:-20%;left:-40%;width:35%;rotate:14deg;background:linear-gradient(90deg,transparent,#f2c86b22 30%,#fff3c866 50%,#a4f7ff22 70%,transparent);filter:blur(6px);animation:screenSweep .65s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes screenSweep{to{translate:480% 0}}
+:global(html.reduce-motion) .sweep{display:none}

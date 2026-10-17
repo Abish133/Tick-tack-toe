@@ -118,19 +118,17 @@
 }
 
 /* Staggered entrance for grids and lists so screens feel alive. */
-@media (prefers-reduced-motion: no-preference) {
-  .shop-grid > *,
-  .power-grid > *,
-  [aria-label="Achievement badge wall"] > *,
-  .season-tier {
+html:not(.reduce-motion) .shop-grid > *,
+  html:not(.reduce-motion) .power-grid > *,
+  html:not(.reduce-motion) [aria-label="Achievement badge wall"] > *,
+  html:not(.reduce-motion) .season-tier {
     animation: cardRise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-  .shop-grid > :nth-child(2), .power-grid > :nth-child(2), [aria-label="Achievement badge wall"] > :nth-child(2), .season-tier:nth-child(2) { animation-delay: 0.04s; }
-  .shop-grid > :nth-child(3), .power-grid > :nth-child(3), [aria-label="Achievement badge wall"] > :nth-child(3), .season-tier:nth-child(3) { animation-delay: 0.08s; }
-  .shop-grid > :nth-child(4), .power-grid > :nth-child(4), [aria-label="Achievement badge wall"] > :nth-child(4), .season-tier:nth-child(4) { animation-delay: 0.12s; }
-  .shop-grid > :nth-child(5), .power-grid > :nth-child(5), [aria-label="Achievement badge wall"] > :nth-child(5), .season-tier:nth-child(5) { animation-delay: 0.16s; }
-  .shop-grid > :nth-child(n + 6), .power-grid > :nth-child(n + 6), [aria-label="Achievement badge wall"] > :nth-child(n + 6) { animation-delay: 0.2s; }
-}
+html:not(.reduce-motion) .shop-grid > :nth-child(2), html:not(.reduce-motion) .power-grid > :nth-child(2), html:not(.reduce-motion) [aria-label="Achievement badge wall"] > :nth-child(2), html:not(.reduce-motion) .season-tier:nth-child(2) { animation-delay: 0.04s; }
+html:not(.reduce-motion) .shop-grid > :nth-child(3), html:not(.reduce-motion) .power-grid > :nth-child(3), html:not(.reduce-motion) [aria-label="Achievement badge wall"] > :nth-child(3), html:not(.reduce-motion) .season-tier:nth-child(3) { animation-delay: 0.08s; }
+html:not(.reduce-motion) .shop-grid > :nth-child(4), html:not(.reduce-motion) .power-grid > :nth-child(4), html:not(.reduce-motion) [aria-label="Achievement badge wall"] > :nth-child(4), html:not(.reduce-motion) .season-tier:nth-child(4) { animation-delay: 0.12s; }
+html:not(.reduce-motion) .shop-grid > :nth-child(5), html:not(.reduce-motion) .power-grid > :nth-child(5), html:not(.reduce-motion) [aria-label="Achievement badge wall"] > :nth-child(5), html:not(.reduce-motion) .season-tier:nth-child(5) { animation-delay: 0.16s; }
+html:not(.reduce-motion) .shop-grid > :nth-child(n + 6), html:not(.reduce-motion) .power-grid > :nth-child(n + 6), html:not(.reduce-motion) [aria-label="Achievement badge wall"] > :nth-child(n + 6) { animation-delay: 0.2s; }
 .reduce-motion .shop-grid > *,
 .reduce-motion .power-grid > *,
 .reduce-motion .season-tier {
@@ -185,11 +183,9 @@
 .quality-low .battle-arena .game-board.collection-board[data-cosmetic-theme="ascendant"] {
   background: linear-gradient(#0b102690, #111326b8), var(--cosmetic-art) center/cover !important;
 }
-@media (prefers-reduced-motion: reduce) {
-  .battle-arena .game-board.collection-board[data-cosmetic-theme="ascendant"] {
+html.reduce-motion .battle-arena .game-board.collection-board[data-cosmetic-theme="ascendant"] {
     background: linear-gradient(#0b102690, #111326b8), var(--cosmetic-art) center/cover !important;
   }
-}
 /* Let the board art show between translucent cosmetic tiles. */
 .battle-arena .collection-board > .game-cell:not(.frozen):not(.locked):not(.winning):not(.valid-target) {
   background: linear-gradient(135deg, color-mix(in srgb, var(--cosmetic-primary) 14%, #0b1026a8), #111326b0) !important;

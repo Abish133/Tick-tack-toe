@@ -283,8 +283,6 @@
 :global(.reduce-motion) :global(.board-shake) {
   animation: none;
 }
-@media (prefers-reduced-motion: reduce) {
-  :global(.board-shake) { animation: none; }
-}
+:global(html.reduce-motion) :global(.board-shake) { animation: none; }
 
 .reduced .callout:before { display: none; }

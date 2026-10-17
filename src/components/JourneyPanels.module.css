@@ -800,11 +800,9 @@
     font-size: 12px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .historyRow:hover {
+:global(html.reduce-motion) .historyRow:hover {
     transform: none;
   }
-}
 :global(.high-contrast) .mission,
 :global(.high-contrast) .historyRow,
 :global(.high-contrast) .socialCard,
@@ -842,7 +840,7 @@
   .bigDay{flex-basis:68px;min-width:68px}
   .missionGrid{grid-template-columns:1fr}
 }
-@media(prefers-reduced-motion:reduce){.claimDaily{animation:none}}
+:global(html.reduce-motion) .claimDaily{animation:none}
 :global(.reduce-motion) .claimDaily{animation:none}
 .achievementSummary{display:flex;align-items:center;gap:10px;padding:8px 14px;flex-shrink:0;color:#f2c86b}
 .achievementSummary strong{font-family:var(--font-ui);font-size:16px;white-space:nowrap;color:#fff0c7}

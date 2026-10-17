@@ -16,8 +16,6 @@
 .collection-profile-title[data-cosmetic-theme='ascendant']{color:#fff1c2!important;text-shadow:0 0 12px #a4f7ff55}
 .reduce-motion .collection-board[data-cosmetic-theme='ascendant'],.quality-low .collection-board[data-cosmetic-theme='ascendant']{background-image:linear-gradient(#0b1026b8,#111326de),var(--cosmetic-art)}
 .reduce-motion .collection-profile-identity::before{background-image:linear-gradient(0deg,#111320,transparent 85%),var(--cosmetic-art)}
-@media(prefers-reduced-motion:reduce){
-  .collection-board[data-cosmetic-theme='ascendant']{background-image:linear-gradient(#0b1026b8,#111326de),var(--cosmetic-art)}
-  .collection-profile-identity::before{background-image:linear-gradient(0deg,#111320,transparent 85%),var(--cosmetic-art)}
-}
+html.reduce-motion .collection-board[data-cosmetic-theme='ascendant']{background-image:linear-gradient(#0b1026b8,#111326de),var(--cosmetic-art)}
+html.reduce-motion .collection-profile-identity::before{background-image:linear-gradient(0deg,#111320,transparent 85%),var(--cosmetic-art)}
 @media(prefers-contrast:more){.collection-board[data-cosmetic-theme='ascendant']>.game-cell{background:#080d1d!important;border-color:#fff1c2!important}.collection-ascendant-ambient{opacity:.1}}

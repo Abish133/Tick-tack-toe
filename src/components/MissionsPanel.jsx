@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useGameReducedMotion } from "./AnimatedCosmeticImage";
 import {
   Gift,
   Coins,
@@ -32,7 +33,7 @@ export default function MissionsPanel({
   const [busy, setBusy] = useState("");
   const [now, setNow] = useState(() => Date.now());
   const [burst, setBurst] = useState(0);
-  const reduce = useReducedMotion();
+  const reduce = useGameReducedMotion();
   const load = useCallback(
     () =>
       api("/missions")

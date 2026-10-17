@@ -123,7 +123,7 @@ export function CosmeticPreview({
         ) : (
           <CosmeticArt item={item} format="gif" />
         )}
-        {item.rarity === "ascendant" && <AscendantFx edge stars={isBoard ? 8 : 0} />}
+        {theme && <AscendantFx theme={theme.id} edge stars={isBoard ? 8 : 0} />}
       </div>
       {theme && <p className={styles.themeName}>{theme.name} collection</p>}
       <p className={styles.previewDescription}>{item.description}</p>

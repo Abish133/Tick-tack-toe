@@ -1,5 +1,5 @@
 "use client";
-import AscendantFx, { isAscendant } from "./AscendantFx";
+import AscendantFx, { fxTheme } from "./AscendantFx";
 import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -227,7 +227,7 @@ function Avatar({
       <i />
       <CosmeticFrame cosmeticId={frame} />
       <CosmeticArrival cosmeticId={effect} />
-      {isAscendant(skin) && <AscendantFx stars={3} className="asc-fx-small" />}
+      {fxTheme(skin) && <AscendantFx theme={fxTheme(skin)} stars={3} className="asc-fx-small" />}
     </div>
   );
 }
@@ -386,6 +386,13 @@ export default function ArenaApp() {
     [muteEmotes, setMuteEmotes] = useState(false),
     [rematchRequested, setRematchRequested] = useState(false),
     [rematchOffer, setRematchOffer] = useState(false);
+  // Motion and quality classes live on <html> so portalled dialogs follow them too.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("reduce-motion", Boolean(settings.reducedMotion));
+    for (const level of ["low", "medium", "high", "ultra"])
+      root.classList.toggle(`quality-${level}`, settings.quality?.toLowerCase() === level);
+  }, [settings.reducedMotion, settings.quality]);
   const socketRef = useRef(null),
     pendingIntent = useRef(null),
     settingsRef = useRef(settings),

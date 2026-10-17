@@ -443,18 +443,16 @@
     font-size: 12px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .bundleAvatar,
-  .chest {
+:global(html.reduce-motion) .bundleAvatar,
+  :global(html.reduce-motion) .chest {
     transition: none;
   }
-  .bundle:hover .bundleAvatar {
+:global(html.reduce-motion) .bundle:hover .bundleAvatar {
     transform: none;
   }
-  .product:hover .chest {
+:global(html.reduce-motion) .product:hover .chest {
     translate: none;
   }
-}
 @media (prefers-contrast: more) {
   .product p,
   .bundlePrice span,
@@ -528,11 +526,9 @@
     scale: 1;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .reveal {
+:global(html.reduce-motion) .reveal {
     animation: none;
   }
-}
 
 .ascendantBundle {
   border-color: #e8e4c7;
@@ -611,5 +607,5 @@
   .premiumTier > span { color: white; background: #081421; border-color: white; }
 }
 @keyframes ascendantRim { to { background-position: 100% 0; } }
-@media (prefers-reduced-motion: reduce) { .ascendantBundle:before { animation: none; } }
+:global(html.reduce-motion) .ascendantBundle:before { animation: none; }
 :global(.reduce-motion) .ascendantBundle:before { animation: none; }

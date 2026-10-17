@@ -198,11 +198,9 @@
     width: min(100%, 300px, calc(100dvh - 340px));
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .board {
+:global(html.reduce-motion) .board {
     transform: none;
   }
-}
 :global(.reduce-motion) .board {
   transform: none;
 }
@@ -231,4 +229,4 @@
 .missed { color: #ffb1a1 !important; }
 .board :global(.mark.x) { color: #e8b77d !important; }
 .board :global(.mark.o) { color: #92dcea !important; }
-@media (prefers-reduced-motion: reduce) { .missCell { animation: none; } }
+:global(html.reduce-motion) .missCell { animation: none; }

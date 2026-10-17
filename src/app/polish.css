@@ -243,12 +243,10 @@
   0%, 100% { transform: translateY(0); }
   40% { transform: translateY(-5px) rotate(-6deg); }
 }
-@media (prefers-reduced-motion: reduce) {
-  .reward-card[data-state="ready"],
-  .reward-card[data-state="ready"] .reward-icon {
+html.reduce-motion .reward-card[data-state="ready"],
+  html.reduce-motion .reward-card[data-state="ready"] .reward-icon {
     animation: none;
   }
-}
 .reduce-motion .reward-card[data-state="ready"],
 .reduce-motion .reward-card[data-state="ready"] .reward-icon {
   animation: none;

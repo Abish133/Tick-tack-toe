@@ -97,16 +97,14 @@ button:nth-child(odd) > .emote-signal-ascendant > svg { animation-delay: 0.9s; }
 .reduce-motion .collection-board[data-cosmetic-theme="ascendant"]::after,
 .reduce-motion .collection-profile-title[data-cosmetic-theme="ascendant"],
 .reduce-motion .emote-signal-ascendant > svg { animation: none !important; }
-@media (prefers-reduced-motion: reduce) {
-  [class*="collection-theme-ascendant"],
-  [class*="collection-theme-ascendant"] *,
-  [class*="collection-theme-ascendant"]::before,
-  [class*="collection-theme-ascendant"]::after,
-  .collection-board[data-cosmetic-theme="ascendant"] *,
-  .collection-board[data-cosmetic-theme="ascendant"]::after,
-  .collection-profile-title[data-cosmetic-theme="ascendant"],
-  .emote-signal-ascendant > svg { animation: none !important; }
-}
+html.reduce-motion [class*="collection-theme-ascendant"],
+  html.reduce-motion [class*="collection-theme-ascendant"] *,
+  html.reduce-motion [class*="collection-theme-ascendant"]::before,
+  html.reduce-motion [class*="collection-theme-ascendant"]::after,
+  html.reduce-motion .collection-board[data-cosmetic-theme="ascendant"] *,
+  html.reduce-motion .collection-board[data-cosmetic-theme="ascendant"]::after,
+  html.reduce-motion .collection-profile-title[data-cosmetic-theme="ascendant"],
+  html.reduce-motion .emote-signal-ascendant > svg { animation: none !important; }
 
 /* ===== Ascendant live light (AscendantFx): stars, edge light, shine and glow ===== */
 @property --asc-edge { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
@@ -184,4 +182,46 @@ button:nth-child(odd) > .emote-signal-ascendant > svg { animation-delay: 0.9s; }
 @keyframes ascDust { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
 
 .reduce-motion .asc-fx, .quality-low .asc-fx { display: none; }
-@media (prefers-reduced-motion: reduce) { .asc-fx { display: none; } }
+html.reduce-motion .asc-fx { display: none; }
+
+/* ===== Collection light for the other ten collections (AscendantFx theme=...) ===== */
+.asc-fx-lite { --fx-a: #fff1c2; --fx-b: #a4f7ff; }
+.asc-fx-lite .asc-fx-star { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 8px var(--fx-a)) drop-shadow(0 0 14px var(--fx-b)); }
+.asc-fx-lite .asc-fx-star::before, .asc-fx-lite .asc-fx-star::after { background: radial-gradient(closest-side, #fff 30%, var(--fx-a) 60%, var(--fx-b)); }
+.asc-fx-lite .asc-fx-edge { filter: drop-shadow(0 0 4px var(--fx-a)) drop-shadow(0 0 9px var(--fx-b)); }
+.asc-fx-lite .asc-fx-edge::before {
+  background: conic-gradient(from var(--asc-edge), transparent 0 30%, var(--fx-a) 42%, #fff 48%, var(--fx-b) 54%, transparent 66% 100%);
+  animation-duration: 5s;
+}
+.asc-fx-lite .asc-fx-sweep::before { background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--fx-a) 30%, transparent) 35%, #ffffff66 50%, color-mix(in srgb, var(--fx-b) 30%, transparent) 65%, transparent); }
+.asc-fx-lite .asc-fx-glow { background: radial-gradient(closest-side, color-mix(in srgb, var(--fx-a) 35%, transparent), color-mix(in srgb, var(--fx-b) 18%, transparent) 50%, transparent); }
+
+/* Storm: quick electric flickers instead of slow blooms. */
+[data-fx-motion="flicker"] .asc-fx-star { animation: fxFlicker 1.6s steps(1, end) var(--asc-delay, 0s) infinite; }
+@keyframes fxFlicker {
+  0%, 100% { opacity: 0; transform: scale(0.4); }
+  8% { opacity: 1; transform: scale(1.1) rotate(20deg); }
+  12% { opacity: 0.2; }
+  16% { opacity: 1; transform: scale(0.9) rotate(-15deg); }
+  24% { opacity: 0; }
+}
+
+/* Embers and bubbles: glowing motes that rise and fade. */
+[data-fx-motion="rise"] .asc-fx-star { width: calc(13px * var(--asc-size, 1)); border-radius: 50%; background: radial-gradient(circle, #fff 18%, var(--fx-a) 48%, transparent 72%); box-shadow: 0 0 10px 2px color-mix(in srgb, var(--fx-a) 70%, transparent); animation: fxRise 4.2s ease-in var(--asc-delay, 0s) infinite; }
+[data-fx-motion="rise"] .asc-fx-star::before, [data-fx-motion="rise"] .asc-fx-star::after { display: none; }
+@keyframes fxRise {
+  0% { opacity: 0; transform: translate(0, 30px) scale(0.6); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(10px, -60px) scale(1.1); }
+}
+
+/* Petals, leaves and snow: soft flakes that drift down with a sway. */
+[data-fx-motion="fall"] .asc-fx-star { width: calc(10px * var(--asc-size, 1)); border-radius: 60% 0 60% 0; background: linear-gradient(135deg, #fff, var(--fx-a) 55%, var(--fx-b)); animation: fxFall 5s linear var(--asc-delay, 0s) infinite; }
+[data-fx-motion="fall"] .asc-fx-star::before, [data-fx-motion="fall"] .asc-fx-star::after { display: none; }
+@keyframes fxFall {
+  0% { opacity: 0; transform: translate(0, -40px) rotate(0deg); }
+  15% { opacity: 1; }
+  50% { transform: translate(14px, 10px) rotate(160deg); }
+  85% { opacity: 0.9; }
+  100% { opacity: 0; transform: translate(-6px, 60px) rotate(320deg); }
+}

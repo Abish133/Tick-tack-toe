@@ -271,11 +271,9 @@
     grid-template-columns: 1fr;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .arena :global(.game-board) {
+:global(html.reduce-motion) .arena :global(.game-board) {
     transform: none;
   }
-}
 @media (prefers-contrast: more) {
   .details p,
   .details > small,

@@ -11,7 +11,6 @@ import {
 import {
   AnimatePresence,
   motion,
-  useReducedMotion,
   MotionConfig,
 } from "motion/react";
 import {
@@ -26,7 +25,7 @@ import {
   Zap,
 } from "lucide-react";
 import styles from "./GameUI.module.css";
-import { CosmeticMotionProvider } from "../AnimatedCosmeticImage";
+import { CosmeticMotionProvider, useGameReducedMotion } from "../AnimatedCosmeticImage";
 
 const Feedback = createContext(() => {});
 const modalStack = [];
@@ -36,7 +35,7 @@ export function GameUIProvider({
   reducedMotion = false,
 }) {
   return (
-    <MotionConfig reducedMotion={reducedMotion ? "always" : "user"}>
+    <MotionConfig reducedMotion={reducedMotion ? "always" : "never"}>
       <CosmeticMotionProvider reducedMotion={reducedMotion}>
         <Feedback.Provider value={onFeedback || (() => {})}>
           {children}
@@ -172,7 +171,7 @@ export function ResourcePill({
     frame = useRef(),
     [display, setDisplay] = useState(Number(value) || 0),
     [delta, setDelta] = useState(0),
-    reduced = useReducedMotion();
+    reduced = useGameReducedMotion();
   useEffect(() => {
     const next = Number(value) || 0,
       start = previous.current;
@@ -295,7 +294,7 @@ export function Modal({
   const ref = useRef(null),
     closeRef = useRef(onClose),
     titleId = useId(),
-    reduced = useReducedMotion();
+    reduced = useGameReducedMotion();
   closeRef.current = onClose;
   useEffect(() => {
     if (!open) return;

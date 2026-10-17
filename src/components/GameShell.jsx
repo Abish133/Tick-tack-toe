@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowLeft,
   Swords,
@@ -36,7 +36,7 @@ import {
 } from "./ui";
 import { displayName } from "../lib/display-name";
 import styles from "./GameShell.module.css";
-import { useCosmeticAnimation } from "./AnimatedCosmeticImage";
+import { useCosmeticAnimation, useGameReducedMotion } from "./AnimatedCosmeticImage";
 
 const destinations = [
   { path: "/notifications", label: "Notifications", icon: Mail },
@@ -81,7 +81,7 @@ export default function GameShell({
     "/notifications": notificationCount,
   };
   const [journeyOpen, setJourneyOpen] = useState(false),
-    reduced = useReducedMotion();
+    reduced = useGameReducedMotion();
   const arenaArt = useCosmeticAnimation(backgroundCosmeticId, background);
   useEffect(() => setJourneyOpen(false), [pathname]);
   useEffect(() => {
@@ -184,6 +184,7 @@ export default function GameShell({
         <div className={styles.worldLight} />
         <div className={styles.atmosphere} />
         <div className={styles.vignette} />
+        <div className={styles.shade} />
       </div>
       {!battleActive && (
         <header className={styles.hud} aria-label="Player HUD">
@@ -304,6 +305,9 @@ export default function GameShell({
           >
             <ArrowLeft size={24} />
           </GameButton>
+        )}
+        {!reduced && !settings?.reducedMotion && (
+          <span key={`sweep-${pathname}`} className={styles.sweep} aria-hidden="true" />
         )}
         <AnimatePresence mode="wait" initial={false}>
           <motion.div

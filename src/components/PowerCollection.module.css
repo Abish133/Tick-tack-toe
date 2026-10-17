@@ -595,16 +595,14 @@
     gap: 6px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .card,
-  .slot {
+:global(html.reduce-motion) .card,
+  :global(html.reduce-motion) .slot {
     transition: none;
   }
-  .card:hover,
-  .card:active {
+:global(html.reduce-motion) .card:hover,
+  :global(html.reduce-motion) .card:active {
     transform: none;
   }
-}
 @media (prefers-contrast: more) {
   .card,
   .slot,

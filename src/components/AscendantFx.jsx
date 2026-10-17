@@ -2,7 +2,7 @@
 
 import { cosmeticTheme } from "../lib/cosmetic-collection";
 
-// Star positions (x%, y%), start delay (s) and size scale: spread so no two flare together.
+// Particle positions (x%, y%), start delay (s) and size scale: spread so no two flare together.
 const STARS = [
   [14, 18, 0, 1],
   [84, 14, 0.7, 0.8],
@@ -16,21 +16,59 @@ const STARS = [
   [6, 46, 3.1, 0.7],
 ];
 
+// How each collection's light moves: stars twinkle, embers and bubbles rise,
+// petals, leaves and snow drift down, storm sparks flicker.
+const MOTION = {
+  ascendant: "twinkle",
+  solar: "twinkle",
+  clockwork: "twinkle",
+  lunar: "twinkle",
+  nebula: "twinkle",
+  storm: "flicker",
+  abyss: "rise",
+  emberglass: "rise",
+  jade: "fall",
+  rose: "fall",
+  arctic: "fall",
+};
+
 export const isAscendant = (id) => cosmeticTheme(id)?.id === "ascendant";
+/** The collection theme id of an equipped cosmetic, or null for plain styles. */
+export const fxTheme = (id) => cosmeticTheme(id)?.id || null;
 
 /**
- * Live Ascendant light over any host: twinkling lens-flare stars, a light that runs
- * around the host's edge, a diagonal shine and a breathing glow. Presentation only;
- * it never takes clicks, and reduced motion or low quality hide it.
+ * Live collection light over any host: particles in the collection's colours, a light
+ * that runs around the host's edge, a diagonal shine and a breathing glow. Ascendant
+ * gets the full show; other collections a lighter one. Presentation only; it never
+ * takes clicks, and in-game reduced motion or low quality hide it.
  */
-export default function AscendantFx({ edge = false, stars = 6, sweep = false, glow = false, className = "" }) {
+export default function AscendantFx({
+  theme = "ascendant",
+  edge = false,
+  stars = 6,
+  sweep = false,
+  glow = false,
+  className = "",
+}) {
+  const info = cosmeticTheme(`avatar-collection-${theme}`);
+  const full = theme === "ascendant";
+  const count = full ? stars : Math.min(stars, 6);
   return (
-    <span className={`asc-fx ${className}`} aria-hidden="true">
+    <span
+      className={`asc-fx ${full ? "" : "asc-fx-lite"} ${className}`}
+      data-fx-motion={MOTION[theme] || "twinkle"}
+      style={
+        info && !full
+          ? { "--fx-a": info.primary, "--fx-b": info.secondary }
+          : undefined
+      }
+      aria-hidden="true"
+    >
       {glow && <span className="asc-fx-glow" />}
       {sweep && <span className="asc-fx-sweep" />}
-      {stars > 0 && <span className="asc-fx-dust" />}
+      {count > 0 && full && <span className="asc-fx-dust" />}
       {edge && <span className="asc-fx-edge" />}
-      {STARS.slice(0, stars).map(([x, y, delay, size], index) => (
+      {STARS.slice(0, count).map(([x, y, delay, size], index) => (
         <span
           key={index}
           className="asc-fx-star"

@@ -8,8 +8,8 @@ export default function CosmeticArt({item,format='webp'}){
  const id=item?.id||'',type=item?.type||'',theme=cosmeticTheme(id),themeStyle=cosmeticStyle(id);
  if(theme){
   const themeClass=`collection-art collection-theme-${theme.id}`;
-  // Ascendant art carries live light: stars on every item, a beam across the big pictures.
-  const fx=theme.id==='ascendant'?<AscendantFx stars={type==='board'||type==='marks'?6:8} sweep={['avatar','arena','banner','title'].includes(type)} glow={type==='avatar'||type==='effect'}/>:null;
+  // Every collection's art carries live light in its colours; Ascendant gets the full show.
+  const fx=<AscendantFx theme={theme.id} stars={type==='board'||type==='marks'?6:8} sweep={['avatar','arena','banner','title'].includes(type)} glow={type==='avatar'||type==='effect'}/>;
   if(type==='avatar')return <span className={`${themeClass} collection-portrait-art`} style={themeStyle}><span className="collection-avatar-aura"/><AnimatedCosmeticImage cosmeticId={id} format={format} className="cosmetic-portrait collection-portrait" src={cosmeticAsset(id)} alt="" loading="lazy"/>{fx}</span>;
   if(type==='arena')return <span className={`${themeClass} collection-landscape-art`} style={themeStyle}><AnimatedCosmeticImage cosmeticId={id} format={format} className="cosmetic-arena-art collection-landscape" src={cosmeticAsset(id)} alt="" loading="lazy"/><span className="collection-landscape-label"><CosmeticMotif name={theme.motif}/>{theme.arena}</span>{fx}</span>;
   if(type==='board')return <span className={`${themeClass} collection-board-art`} style={themeStyle}><span className="collection-board" data-cosmetic-theme={theme.id}>{['X',null,'O',null,'X',null,'O',null,null].map((mark,i)=><span key={i} className="collection-board-cell">{mark&&<span className={`mark collection-marks ${mark.toLowerCase()}`}><CosmeticMark mark={mark} cosmeticId={`marks-collection-${theme.id}`}/></span>}</span>)}</span>{fx}</span>;

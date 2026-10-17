@@ -49,7 +49,7 @@ import { boardSizeOf } from "../lib/game-engine/geometry";
 import { POWER_INFO } from "./PowerPresentation";
 import { ATTACKS, CastSequence, TurnSweep } from "./BattleJuice";
 import VersusIntro, { versusDetail } from "./VersusIntro";
-import AscendantFx, { isAscendant } from "./AscendantFx";
+import AscendantFx, { fxTheme } from "./AscendantFx";
 import PowerEffects from "./PowerEffects";
 import PowerTargetControls, {
   CellStatuses,
@@ -147,7 +147,7 @@ function BattleAvatar({
         />
         <CosmeticFrame cosmeticId={frame} />
         <CosmeticArrival cosmeticId={effect} />
-        {isAscendant(skin) && <AscendantFx stars={3} className="asc-fx-small" />}
+        {fxTheme(skin) && <AscendantFx theme={fxTheme(skin)} stars={3} className="asc-fx-small" />}
       </div>
       {active && (
         <span
@@ -220,8 +220,13 @@ function PlayerHUD({
       variant="banner"
       className={`battle-player ${self ? "self" : "opponent"} ${styles.playerHUD} ${self ? styles.selfHUD : ""} ${active ? styles.activeHUD : ""}`}
     >
-      {isAscendant(player?.profile?.equippedBanner || profile?.equippedBanner) && (
-        <AscendantFx edge stars={4} className="asc-fx-small asc-fx-thin" />
+      {fxTheme(player?.profile?.equippedBanner || profile?.equippedBanner) && (
+        <AscendantFx
+          theme={fxTheme(player?.profile?.equippedBanner || profile?.equippedBanner)}
+          edge
+          stars={4}
+          className="asc-fx-small asc-fx-thin"
+        />
       )}
       <BattleAvatar
         player={player}
@@ -877,8 +882,8 @@ export default function BattleScreen({
                 reduced={reduced}
               />
             )}
-            {isAscendant(user?.profile?.equippedBoard) && (
-              <AscendantFx edge stars={8} />
+            {fxTheme(user?.profile?.equippedBoard) && (
+              <AscendantFx theme={fxTheme(user?.profile?.equippedBoard)} edge stars={8} />
             )}
             <TurnSweep
               show={Boolean(turnSweep)}

@@ -405,16 +405,14 @@
     font-size: 18px;
   }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .claimable > button {
+:global(html:not(.reduce-motion)) .claimable > button {
     animation: claimPulse 1.8s ease-in-out infinite;
   }
-  @keyframes claimPulse {
+@keyframes claimPulse {
     50% {
       filter: brightness(1.18);
     }
   }
-}
 :global(.reduce-motion) .claimable > button {
   animation: none;
 }
@@ -465,7 +463,7 @@
   .rewardRow { grid-template-columns: repeat(5, 120px); }
   .path { min-width: 0; }
 }
-@media (prefers-reduced-motion: reduce) { .claimNow { animation: none; } }
+:global(html.reduce-motion) .claimNow { animation: none; }
 :global(.reduce-motion) .claimNow { animation: none; }
 .purchase button { white-space: nowrap; }
 .purchase button > span { flex-wrap: nowrap; }

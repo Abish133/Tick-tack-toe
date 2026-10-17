@@ -166,6 +166,6 @@
   .vs { top: 45%; width: 90px; }
 }
 .reduced .glow, .reduced .seam, .reduced .bolt { animation: none; }
-@media (prefers-reduced-motion: reduce) { .glow, .seam, .bolt { animation: none; } }
+:global(html.reduce-motion) .glow, :global(html.reduce-motion) .seam, :global(html.reduce-motion) .bolt { animation: none; }
 .right .art { scale: -1 1; }
 .art{-webkit-mask-image:linear-gradient(#000 78%,transparent);mask-image:linear-gradient(#000 78%,transparent)}

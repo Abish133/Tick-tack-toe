@@ -1,19 +1,11 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { cosmeticAsset, cosmeticMotion } from "../lib/cosmetic-collection";
 
 const MotionPreference = createContext(false);
-let motionQuery;
-function mediaQuery() {
-  return typeof window === "undefined" ? null : (motionQuery ||= window.matchMedia("(prefers-reduced-motion: reduce)"));
-}
-function subscribeMotion(listener) {
-  const query = mediaQuery();
-  query?.addEventListener("change", listener);
-  return () => query?.removeEventListener("change", listener);
-}
-const reducedMotionSnapshot = () => mediaQuery()?.matches || false;
+/** The in-game Reduced motion setting, the one switch for all game motion. */
+export const useGameReducedMotion = () => useContext(MotionPreference);
 
 export function CosmeticMotionProvider({ reducedMotion = false, children }) {
   return <MotionPreference.Provider value={reducedMotion}>{children}</MotionPreference.Provider>;
@@ -21,20 +13,19 @@ export function CosmeticMotionProvider({ reducedMotion = false, children }) {
 
 export function useCosmeticAnimation(cosmeticId, fallback, format = "webp") {
   const preference = useContext(MotionPreference);
-  const system = useSyncExternalStore(subscribeMotion, reducedMotionSnapshot, () => false);
   const [ready, setReady] = useState(false);
   useEffect(() => setReady(true), []);
   const art = cosmeticMotion(cosmeticId);
   const still = art?.posterAsset || fallback || cosmeticAsset(cosmeticId);
   return {
-    src: art && ready && !preference && !system ? (format === "gif" ? art.animatedAsset : art.motionAsset) : still,
+    src: art && ready && !preference ? (format === "gif" ? art.animatedAsset : art.motionAsset) : still,
     poster: still,
     gif: art?.animatedAsset,
-    animated: Boolean(art && ready && !preference && !system),
+    animated: Boolean(art && ready && !preference),
   };
 }
 
-/** Actual looping media, with static art for system or in-game reduced motion. */
+/** Actual looping media, with static art when in-game Reduced motion is on. */
 export default function AnimatedCosmeticImage({ cosmeticId, src, format = "webp", alt = "", onError, ...props }) {
   const art = useCosmeticAnimation(cosmeticId, src, format);
   const [failedSource, setFailedSource] = useState(null);

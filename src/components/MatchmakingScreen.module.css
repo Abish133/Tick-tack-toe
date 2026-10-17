@@ -202,9 +202,7 @@
   .tip, .mode { display: none; }
   .avatar { width: 48px; height: 48px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .embers, .radar, .rings circle, .rune, .core, .vs, .silhouette, .dots i { animation: none; }
-}
+:global(html.reduce-motion) .embers, :global(html.reduce-motion) .radar, :global(html.reduce-motion) .rings circle, :global(html.reduce-motion) .rune, :global(html.reduce-motion) .core, :global(html.reduce-motion) .vs, :global(html.reduce-motion) .silhouette, :global(html.reduce-motion) .dots i { animation: none; }
 :global(.reduce-motion) .embers, :global(.reduce-motion) .radar { animation: none; }
 /* Keep the core a true circle regardless of the legacy queue styles. */
 .portal { display: grid !important; }

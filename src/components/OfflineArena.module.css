@@ -313,11 +313,9 @@
     gap: 7px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .board {
+:global(html.reduce-motion) .board {
     transform: none;
   }
-}
 :global(.reduce-motion) .board {
   transform: none;
 }
