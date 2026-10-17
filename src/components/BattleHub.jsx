@@ -264,7 +264,7 @@ export default function BattleHub({
   };
   const avatar =
     cosmeticAsset(user?.profile?.avatar) ||
-    `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[user?.profile?.avatar] || user?.profile?.avatar || "avatar-void"}.png`;
+    `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[user?.profile?.avatar] || user?.profile?.avatar || "avatar-void"}.webp`;
   const titleTheme = COSMETIC_THEMES.find(
     (theme) => theme.title === user?.profile?.title,
   );

@@ -9,7 +9,7 @@ import AscendantFx, { fxTheme } from "./AscendantFx";
 
 const art = (skin = "avatar-void") =>
   cosmeticAsset(skin) ||
-  `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[skin] || skin}.png`;
+  `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[skin] || skin}.webp`;
 
 function Side({ side, name, detail, skin, reduced }) {
   const from = side === "left" ? -1 : 1;
@@ -47,7 +47,7 @@ export default function VersusIntro({ me, opponent, countdown, onSkip, reduced =
       className={`${styles.intro} ${reduced ? styles.reduced : ""}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: reduced ? 1 : 1.06, filter: "blur(8px)" }}
+      exit={{ opacity: 0, scale: reduced ? 1 : 1.06 }}
       transition={{ duration: 0.3 }}
       aria-label="Battle introduction"
       role="dialog"

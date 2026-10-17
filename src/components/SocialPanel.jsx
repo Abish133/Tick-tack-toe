@@ -21,7 +21,7 @@ import styles from "./JourneyPanels.module.css";
 
 const portrait = (id) =>
   cosmeticAsset(id) ||
-  `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[id] || id || "avatar-void"}.png`;
+  `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[id] || id || "avatar-void"}.webp`;
 const reportReasons = [
   "Unsporting behavior",
   "Suspected cheating",

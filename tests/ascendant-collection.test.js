@@ -21,7 +21,7 @@ test('Ascendant adds a complete nine-slot cosmetic collection without altering l
   const previous=COLLECTION_COSMETICS.filter(item=>item.rarity!=='ascendant');assert.equal(previous.length,90);
   assert.deepEqual(previous.filter(item=>item.type==='avatar').map(item=>item.price),Array(10).fill(500));
   assert.equal(cosmeticAsset('avatar-collection-solar'),'/assets/collection/avatar-solar.webp');
-  assert.equal(cosmeticAsset('avatar-void'),'/assets/avatar-void.png');
+  assert.equal(cosmeticAsset('avatar-void'),'/assets/avatar-void.webp');
   assert.equal(cosmeticById('title-collection-ascendant').name,'Beyond the Stars');
 });
 

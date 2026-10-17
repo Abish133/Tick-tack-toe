@@ -18,17 +18,17 @@
 
 
 /* ===== Ascendant motion: marks, frame and arrival ===== */
-.mark.ascendant{animation:ascMarkGlow 2.6s ease-in-out infinite,ascMarkHue 4s ease-in-out infinite}
-@keyframes ascMarkHue{0%,100%{color:#d7c3ff}33%{color:#fff1c2}66%{color:#a4f7ff}}
+/* Glow stays still; only scale moves, so the phone's GPU animates it without repainting. */
+.mark.ascendant{filter:drop-shadow(0 0 5px #b1f4ffa0);animation:ascMarkPulse 2.6s ease-in-out infinite;will-change:transform}
 /* The stars twinkle in place; the strokes stay solid so the mark always reads as X or O. */
 .mark.ascendant>path:last-child{transform-box:fill-box;transform-origin:center;animation:ascTwinkle 1.8s ease-in-out infinite}
-@keyframes ascMarkGlow{0%,100%{filter:drop-shadow(0 0 4px #b1f4ff90) drop-shadow(0 0 1px #fff)}50%{filter:drop-shadow(0 0 8px #ffe7a6b0) drop-shadow(0 0 2px #fff);transform:scale(1.05)}}
-@keyframes ascTwinkle{0%,100%{opacity:.55;stroke-width:1.6}50%{opacity:1;stroke-width:2.6}}
+@keyframes ascMarkPulse{50%{transform:scale(1.05)}}
+/* Fade only: scaling a shape inside an SVG makes the browser redo layout every frame. */
+@keyframes ascTwinkle{0%,100%{opacity:.45}50%{opacity:1}}
 
-@property --asc-angle{syntax:"<angle>";inherits:false;initial-value:0deg}
-.frame.ascendant::before{content:"";position:absolute;inset:17%;border-radius:50%;background:conic-gradient(from var(--asc-angle),transparent 0 50%,#a4f7ff 66%,#fff 74%,#ffe7a6 82%,transparent 96%);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px));mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px));filter:drop-shadow(0 0 6px #b1f4ff);animation:ascSpin 2.6s linear infinite;z-index:2}
+.frame.ascendant::before{content:"";position:absolute;inset:17%;border-radius:50%;background:conic-gradient(transparent 0 50%,#a4f7ff 66%,#fff 74%,#ffe7a6 82%,transparent 96%);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px));mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px));filter:drop-shadow(0 0 6px #b1f4ff);animation:ascRingSpin 2.6s linear infinite;will-change:rotate;z-index:2}
 .frame.ascendant::after{content:"";position:absolute;left:calc(50% - 4px);top:15%;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 10px 3px #a4f7ff,0 0 18px 6px #ffe7a688;transform-origin:4px 230%;animation:ascOrbit 3.4s linear infinite;z-index:3}
-@keyframes ascSpin{to{--asc-angle:360deg}}
+@keyframes ascRingSpin{to{rotate:360deg}}
 @keyframes ascOrbit{to{rotate:360deg}}
 
 .arrival.ascendant .arrivalRing{animation:ascRing 2.4s ease-out infinite}

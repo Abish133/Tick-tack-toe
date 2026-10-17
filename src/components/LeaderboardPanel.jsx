@@ -34,7 +34,7 @@ const scopes = [
 const number = (value) => Number(value || 0).toLocaleString();
 const portrait = (profile) =>
   cosmeticAsset(profile?.avatar) ||
-  `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[profile?.avatar] || profile?.avatar || "avatar-void"}.png`;
+  `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[profile?.avatar] || profile?.avatar || "avatar-void"}.webp`;
 const metric = (entry, category) =>
   category === "weekly"
     ? (entry.weeklyWins ?? entry.score ?? entry.value ?? entry.wins)

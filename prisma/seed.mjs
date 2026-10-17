@@ -8,18 +8,18 @@ const cosmetics = [
   ...COLLECTION_COSMETICS,
   {id:'frame-eclipse',name:'Eclipse Halo',type:'frame',rarity:'legendary',description:'Premium season reward: an obsidian halo with a violet eclipse rim. Cosmetic only.',price:0,asset:''},
   {id:'banner-solar',name:'Solar Horizon',type:'banner',rarity:'epic',description:'Premium season reward: a luminous amber and indigo profile horizon. Cosmetic only.',price:0,asset:''},
-  {id:'marks-galaxy',name:'Galaxy Sigils',type:'marks',rarity:'legendary',description:'Premium season reward: starlit violet and cyan marks. Cosmetic only.',price:0,asset:'/assets/elements.png'},
+  {id:'marks-galaxy',name:'Galaxy Sigils',type:'marks',rarity:'legendary',description:'Premium season reward: starlit violet and cyan marks. Cosmetic only.',price:0,asset:'/assets/elements.webp'},
   {id:'effect-dragon',name:'Dragon Arrival',type:'effect',rarity:'legendary',description:'Premium season reward: a warm dragon-fire glow around your identity. Cosmetic only.',price:0,asset:''},
-  {id:'arena-starlight',name:'Starlight Sanctuary',type:'arena',rarity:'legendary',description:'Premium season reward: a violet and cyan starfield arena. Cosmetic only.',price:0,asset:'/assets/arena-aurora.png'},
+  {id:'arena-starlight',name:'Starlight Sanctuary',type:'arena',rarity:'legendary',description:'Premium season reward: a violet and cyan starfield arena. Cosmetic only.',price:0,asset:'/assets/arena-aurora.webp'},
   {id:'frame-astral',name:'Astral Halo',type:'frame',rarity:'epic',description:'A violet and gold portrait frame. Cosmetic only.',price:300,asset:''},
   {id:'banner-convergence',name:'Elemental Convergence',type:'banner',rarity:'rare',description:'A flowing cyan and violet profile banner.',price:300,asset:''},
-  {id:'arena-aurora',name:'Aurora Nexus',type:'arena',rarity:'legendary',description:'An aurora-lit arena environment. Cosmetic only.',price:650,asset:'/assets/arena-aurora.png'},
+  {id:'arena-aurora',name:'Aurora Nexus',type:'arena',rarity:'legendary',description:'An aurora-lit arena environment. Cosmetic only.',price:650,asset:'/assets/arena-aurora.webp'},
   {id:'emote-celestial',name:'Celestial Signals',type:'emote',rarity:'rare',description:'Unlocks Star and Snow emotes when equipped.',price:200,asset:''},
-  {id:'avatar-void',name:'Void Warden',type:'avatar',rarity:'starter',description:'The original guardian of the arena.',price:0,asset:'/assets/avatar-void.png'},
+  {id:'avatar-void',name:'Void Warden',type:'avatar',rarity:'starter',description:'The original guardian of the arena.',price:0,asset:'/assets/avatar-void.webp'},
   {id:'board-void',name:'Elemental Nexus',type:'board',rarity:'starter',description:'Midnight stone with violet energy.',price:0,asset:'/assets/arena-background.png'},
   {id:'marks-neon',name:'Neon Sigils',type:'marks',rarity:'starter',description:'Electric cyan and blazing violet marks.',price:0,asset:'/assets/marks.png'},
-  {id:'avatar-ember',name:'Ember Sovereign',type:'avatar',rarity:'epic',description:'Wear the fire champion portrait. Purely cosmetic.',price:350,asset:'/assets/avatar-fire.png'},
-  {id:'avatar-frost',name:'Frost Oracle',type:'avatar',rarity:'epic',description:'A glacial aura for your profile. Purely cosmetic.',price:350,asset:'/assets/avatar-ice.png'},
+  {id:'avatar-ember',name:'Ember Sovereign',type:'avatar',rarity:'epic',description:'Wear the fire champion portrait. Purely cosmetic.',price:350,asset:'/assets/avatar-fire.webp'},
+  {id:'avatar-frost',name:'Frost Oracle',type:'avatar',rarity:'epic',description:'A glacial aura for your profile. Purely cosmetic.',price:350,asset:'/assets/avatar-ice.webp'},
   {id:'board-cosmic',name:'Cosmic Void',type:'board',rarity:'legendary',description:'A distant starscape board treatment. Purely cosmetic.',price:700,asset:'/assets/arena-background.png'},
   {id:'marks-gold',name:'Solar Gold',type:'marks',rarity:'rare',description:'Golden sigils and a warm trail. Purely cosmetic.',price:500,asset:'/assets/marks.png'},
   {id:'title-strategist',name:'The Strategist',type:'title',rarity:'rare',description:'A profile title earned with play coins.',price:250,asset:''},
@@ -43,7 +43,7 @@ try {
     await db.playerPower.createMany({data:players.flatMap(player=>POWER_CATALOG.map(power=>({userId:player.id,powerId:power.id}))),skipDuplicates:true});
     cursor=players.at(-1).id;
   }
-  for (const item of cosmetics) {const avatarAsset={'avatar-void':'/assets/avatar-void.png','avatar-ember':'/assets/avatar-fire.png','avatar-frost':'/assets/avatar-ice.png'}[item.id];const generated=COLLECTION_COSMETICS.some(entry=>entry.id===item.id);const data={...item,asset:generated?item.asset:avatarAsset||(item.type==='board'?'/assets/arena.png':['title','effect','frame','banner','emote'].includes(item.type)?'':item.type==='arena'?item.asset:'/assets/elements.png')};await db.cosmeticItem.upsert({where:{id:item.id},create:data,update:{asset:data.asset}});}
+  for (const item of cosmetics) {const avatarAsset={'avatar-void':'/assets/avatar-void.webp','avatar-ember':'/assets/avatar-fire.webp','avatar-frost':'/assets/avatar-ice.webp'}[item.id];const generated=COLLECTION_COSMETICS.some(entry=>entry.id===item.id);const data={...item,asset:generated?item.asset:avatarAsset||(item.type==='board'?'/assets/arena.webp':['title','effect','frame','banner','emote'].includes(item.type)?'':item.type==='arena'?item.asset:'/assets/elements.webp')};await db.cosmeticItem.upsert({where:{id:item.id},create:data,update:{asset:data.asset}});}
   const divisions = [['rookie','Rookie',0,'#acb4d0'],['bronze','Bronze',100,'#c58c60'],['silver','Silver',250,'#d2def8'],['gold','Gold',450,'#ffd067'],['platinum','Platinum',700,'#89f2e8'],['diamond','Diamond',1000,'#77bcff'],['master','Master',1400,'#bd94ff'],['grandmaster','Grandmaster',1900,'#fa7dd7'],['legend','Legend',2500,'#ffb157'],['mythic','Mythic',3300,'#ff777b']];
   for(const [id,name,minCups,color] of divisions) await db.rankDivision.upsert({where:{id},create:{id,name,minCups,color},update:{name,minCups,color}});
   // Fixed dates describe the real local launch season; no artificial scarcity timer.

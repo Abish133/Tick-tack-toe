@@ -27,7 +27,7 @@ export const COLLECTION_COSMETICS=Object.freeze(COSMETIC_THEMES.flatMap(theme=>C
 const cosmetics=new Map(COLLECTION_COSMETICS.map(item=>[item.id,item]));
 export function cosmeticTheme(id){return COSMETIC_THEMES.find(theme=>COSMETIC_TYPES.some(type=>id===`${type}-collection-${theme.id}`))||null;}
 export function cosmeticById(id){return cosmetics.get(id)||null;}
-export function cosmeticAsset(id){return cosmetics.get(id)?.asset||({'avatar-ember':'/assets/avatar-fire.png','avatar-frost':'/assets/avatar-ice.png','avatar-void':'/assets/avatar-void.png'}[id])||null;}
+export function cosmeticAsset(id){return cosmetics.get(id)?.asset||({'avatar-ember':'/assets/avatar-fire.webp','avatar-frost':'/assets/avatar-ice.webp','avatar-void':'/assets/avatar-void.webp'}[id])||null;}
 // Motion metadata stays outside database records so the existing seed and purchase
 // contracts remain unchanged. Posters are also the reduced-motion fallback.
 export function cosmeticMotion(id){const item=cosmetics.get(id);if(!item||cosmeticTheme(id)?.id!=='ascendant')return null;const art=ascendantArtwork(item.type),base=`/assets/collection/ascendant/${art}`;return {animatedAsset:`${base}.gif`,motionAsset:`${base}.webp`,posterAsset:`${base}-poster.webp`};}

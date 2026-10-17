@@ -121,7 +121,7 @@ export function CosmeticPreview({
             )}
           </div>
         ) : (
-          <CosmeticArt item={item} format="gif" />
+          <CosmeticArt item={item} />
         )}
         {theme && <AscendantFx theme={theme.id} edge stars={isBoard ? 8 : 0} />}
       </div>

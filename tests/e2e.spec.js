@@ -331,7 +331,7 @@ test("two human accounts complete ranked play with synchronized powers, cups and
     expect((await session(b)).profile.avatar).toBe("avatar-ember");
     await expect(
       b.locator('[aria-label="Player account"] img'),
-    ).toHaveAttribute("src", "/assets/avatar-fire.png");
+    ).toHaveAttribute("src", "/assets/avatar-fire.webp");
     expect((await session(b)).loadout).toEqual(userB.loadout);
     await b
       .getByRole("button", { name: "Player account", exact: true })
@@ -352,7 +352,7 @@ test("two human accounts complete ranked play with synchronized powers, cups and
       .toBe("avatar-ember");
     await expect(
       b.locator('[aria-label="Player account"] img'),
-    ).toHaveAttribute("src", "/assets/avatar-fire.png");
+    ).toHaveAttribute("src", "/assets/avatar-fire.webp");
     if (process.env.DATABASE_URL && process.env.E2E_SKIP_ADMIN !== "1") {
       // A real local administrator fixture: no API bypass or mocked response is used for operations.
       const { PrismaClient } = await import("@prisma/client");

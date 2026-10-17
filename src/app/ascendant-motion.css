@@ -1,15 +1,14 @@
 /* Ascendant motion: every item animates in the shop, the preview and the game.
    Presentation only. Reduced motion (system or in-game) turns it all off. */
-@property --asc-sweep { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
-@property --asc-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+
 
 /* Avatar: rotating starlight aura behind a floating portrait. */
 .collection-theme-ascendant.collection-portrait-art { position: relative; isolation: isolate; }
 .collection-theme-ascendant.collection-portrait-art::before {
   content: ""; position: absolute; z-index: -1; border-radius: 50%;
   left: 50%; top: 50%; width: min(78%, 260px); aspect-ratio: 1; translate: -50% -50%;
-  background: conic-gradient(from var(--asc-sweep), #a4f7ff00, #a4f7ff88, #fff1c2aa, #d7c3ff88, #a4f7ff00 70%);
-  filter: blur(12px); animation: ascSweep 5s linear infinite;
+  background: conic-gradient(#a4f7ff00, #a4f7ff88, #fff1c2aa, #d7c3ff88, #a4f7ff00 70%);
+  filter: blur(12px); animation: ascSpinSlow 5s linear infinite; will-change: rotate;
 }
 .collection-theme-ascendant .collection-portrait { animation: ascFloat 4s ease-in-out infinite; }
 /* The Sovereign is a bust cut straight across the bottom and sides: fade those cuts so no
@@ -31,13 +30,16 @@ img[data-cosmetic-gif$="/avatar.gif"]:not(#_) {
 .collection-board[data-cosmetic-theme="ascendant"]::after {
   content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3;
   background: linear-gradient(115deg, transparent 38%, #fff1c266 48%, #a4f7ff55 52%, transparent 62%);
-  background-size: 260% 100%; animation: ascShine 3.6s ease-in-out infinite;
+  width: 260%; animation: ascShineMove 3.6s ease-in-out infinite; will-change: transform;
 }
-.collection-board[data-cosmetic-theme="ascendant"] > .collection-board-cell,
-.collection-board[data-cosmetic-theme="ascendant"] > .preview-cell,
-.collection-board[data-cosmetic-theme="ascendant"] > .game-cell { animation: ascTile 3s ease-in-out infinite; }
-.collection-board[data-cosmetic-theme="ascendant"] > :nth-child(2n) { animation-delay: 0.5s; }
-.collection-board[data-cosmetic-theme="ascendant"] > :nth-child(3n) { animation-delay: 1s; }
+.collection-board[data-cosmetic-theme="ascendant"] > .game-cell { position: relative; }
+.collection-board[data-cosmetic-theme="ascendant"] > :is(.collection-board-cell, .preview-cell, .game-cell)::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
+  box-shadow: inset 0 0 16px #a4f7ff66, inset 0 0 0 1px #fff1c2cc;
+  animation: ascTileGlow 3s ease-in-out infinite;
+}
+.collection-board[data-cosmetic-theme="ascendant"] > :nth-child(2n)::before { animation-delay: 0.5s; }
+.collection-board[data-cosmetic-theme="ascendant"] > :nth-child(3n)::before { animation-delay: 1s; }
 
 /* The animated crest behind marks, emotes and the title is clearly visible. */
 .collection-ascendant-ambient { opacity: 0.5 !important; animation: ascBreathe 3s ease-in-out infinite; }
@@ -46,12 +48,9 @@ img[data-cosmetic-gif$="/avatar.gif"]:not(#_) {
 .collection-theme-ascendant.collection-banner-art { position: relative; overflow: hidden; }
 .collection-theme-ascendant.collection-banner-art::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
-  background:
-    linear-gradient(100deg, #a4f7ff22, #fff1c240, #d7c3ff30, #a4f7ff22),
-    linear-gradient(115deg, transparent 40%, #ffffff77 50%, transparent 60%);
-  background-size: 300% 100%, 250% 100%;
-  mix-blend-mode: screen;
-  animation: ascIris 6s linear infinite, ascShine 3.4s ease-in-out infinite;
+  background: linear-gradient(115deg, transparent 40%, #ffffff77 50%, transparent 60%), linear-gradient(100deg, #a4f7ff22, #fff1c240, #d7c3ff30, #a4f7ff22);
+  width: 250%; mix-blend-mode: screen;
+  animation: ascShineMove 3.4s ease-in-out infinite; will-change: transform;
 }
 .collection-theme-ascendant .collection-banner-crest > svg { animation: ascSpinSlow 10s linear infinite; }
 
@@ -77,16 +76,14 @@ img[data-cosmetic-gif$="/avatar.gif"]:not(#_) {
 button:nth-child(odd) > * > .emote-signal-ascendant > svg,
 button:nth-child(odd) > .emote-signal-ascendant > svg { animation-delay: 0.9s; }
 
-@keyframes ascSignal { 50% { transform: translateY(-3px) scale(1.12); filter: drop-shadow(0 0 10px #fff1c2); } }
-@keyframes ascSweep { to { --asc-sweep: 360deg; } }
+@keyframes ascSignal { 50% { transform: translateY(-3px) scale(1.12); } }
 @keyframes ascFloat { 50% { transform: translateY(-6px) scale(1.02); } }
 @keyframes ascBreathe { 50% { opacity: 0.85; transform: scale(1.08); } }
 @keyframes ascDrift { from { transform: scale(1.05) translateX(-2%); } to { transform: scale(1.15) translateX(2%); } }
-@keyframes ascShine { 0%, 35% { background-position: 130% 0; } 100% { background-position: -30% 0; } }
-@keyframes ascTile { 50% { box-shadow: inset 0 0 16px #a4f7ff66, 0 0 10px #fff1c244; border-color: #fff1c2cc; } }
-@keyframes ascIris { to { background-position: -300% 0, 0 0; } }
+@keyframes ascShineMove { 0%, 35% { transform: translateX(0); } 100% { transform: translateX(-62%); } }
+@keyframes ascTileGlow { 50% { opacity: 1; } }
 @keyframes ascSpinSlow { to { rotate: 360deg; } }
-@keyframes ascBob { 50% { transform: translateY(-6px) scale(1.08); box-shadow: 0 0 18px #a4f7ff77; } }
+@keyframes ascBob { 50% { transform: translateY(-6px) scale(1.08); } }
 @keyframes ascText { to { background-position: -250% 0; } }
 
 .reduce-motion [class*="collection-theme-ascendant"],
@@ -107,7 +104,6 @@ html.reduce-motion [class*="collection-theme-ascendant"],
   html.reduce-motion .emote-signal-ascendant > svg { animation: none !important; }
 
 /* ===== Ascendant live light (AscendantFx): stars, edge light, shine and glow ===== */
-@property --asc-edge { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 :where(:has(> .asc-fx)) { position: relative; }
 .asc-fx { position: absolute; inset: 0; z-index: 4; border-radius: inherit; pointer-events: none; }
 
@@ -115,7 +111,8 @@ html.reduce-motion [class*="collection-theme-ascendant"],
 .asc-fx-star {
   position: absolute; width: calc(28px * var(--asc-size, 1)); aspect-ratio: 1;
   translate: -50% -50%; opacity: 0;
-  filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px #a4f7ff) drop-shadow(0 0 18px #fff1c2);
+  filter: drop-shadow(0 0 6px #a4f7ff);
+  will-change: transform, opacity;
   animation: ascStar 3.4s ease-in-out var(--asc-delay, 0s) infinite;
 }
 .asc-fx-star::before, .asc-fx-star::after {
@@ -133,18 +130,17 @@ html.reduce-motion [class*="collection-theme-ascendant"],
 }
 
 /* Edge lighting: two bright runners chase each other around the border. */
-.asc-fx-edge { position: absolute; inset: 0; border-radius: inherit; filter: drop-shadow(0 0 5px #a4f7ff) drop-shadow(0 0 12px #fff1c2); }
+.asc-fx-edge { position: absolute; inset: 0; border-radius: inherit; filter: drop-shadow(0 0 6px #a4f7ff); will-change: opacity; animation: ascEdgePulse 2.4s ease-in-out infinite; }
 .asc-fx-edge::before {
   content: ""; position: absolute; inset: 0; border-radius: inherit; padding: var(--asc-edge-width, 3px);
-  background: conic-gradient(from var(--asc-edge),
+  background: conic-gradient(from 20deg,
     #fff1c266 0 12%, #a4f7ff 22%, #ffffff 28%, #fff1c2 34%, #fff1c266 44% 62%,
     #d7c3ff 72%, #ffffff 78%, #a4f7ff 84%, #fff1c266 94%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  animation: ascEdgeRun 3.6s linear infinite;
 }
-@keyframes ascEdgeRun { to { --asc-edge: 360deg; } }
+@keyframes ascEdgePulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 
 /* A diagonal beam of light sweeps across the art. */
 .asc-fx-sweep { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; }
@@ -186,12 +182,11 @@ html.reduce-motion .asc-fx { display: none; }
 
 /* ===== Collection light for the other ten collections (AscendantFx theme=...) ===== */
 .asc-fx-lite { --fx-a: #fff1c2; --fx-b: #a4f7ff; }
-.asc-fx-lite .asc-fx-star { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 8px var(--fx-a)) drop-shadow(0 0 14px var(--fx-b)); }
+.asc-fx-lite .asc-fx-star { filter: drop-shadow(0 0 5px var(--fx-a)); }
 .asc-fx-lite .asc-fx-star::before, .asc-fx-lite .asc-fx-star::after { background: radial-gradient(closest-side, #fff 30%, var(--fx-a) 60%, var(--fx-b)); }
-.asc-fx-lite .asc-fx-edge { filter: drop-shadow(0 0 4px var(--fx-a)) drop-shadow(0 0 9px var(--fx-b)); }
+.asc-fx-lite .asc-fx-edge { filter: drop-shadow(0 0 5px var(--fx-a)); }
 .asc-fx-lite .asc-fx-edge::before {
-  background: conic-gradient(from var(--asc-edge), transparent 0 30%, var(--fx-a) 42%, #fff 48%, var(--fx-b) 54%, transparent 66% 100%);
-  animation-duration: 5s;
+  background: conic-gradient(from 20deg, color-mix(in srgb, var(--fx-a) 30%, transparent) 0 30%, var(--fx-a) 42%, #fff 48%, var(--fx-b) 54%, color-mix(in srgb, var(--fx-b) 30%, transparent) 66% 100%);
 }
 .asc-fx-lite .asc-fx-sweep::before { background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--fx-a) 30%, transparent) 35%, #ffffff66 50%, color-mix(in srgb, var(--fx-b) 30%, transparent) 65%, transparent); }
 .asc-fx-lite .asc-fx-glow { background: radial-gradient(closest-side, color-mix(in srgb, var(--fx-a) 35%, transparent), color-mix(in srgb, var(--fx-b) 18%, transparent) 50%, transparent); }
@@ -207,7 +202,7 @@ html.reduce-motion .asc-fx { display: none; }
 }
 
 /* Embers and bubbles: glowing motes that rise and fade. */
-[data-fx-motion="rise"] .asc-fx-star { width: calc(13px * var(--asc-size, 1)); border-radius: 50%; background: radial-gradient(circle, #fff 18%, var(--fx-a) 48%, transparent 72%); box-shadow: 0 0 10px 2px color-mix(in srgb, var(--fx-a) 70%, transparent); animation: fxRise 4.2s ease-in var(--asc-delay, 0s) infinite; }
+[data-fx-motion="rise"] .asc-fx-star { width: calc(13px * var(--asc-size, 1)); border-radius: 50%; background: radial-gradient(circle, #fff 18%, var(--fx-a) 48%, transparent 72%); filter: drop-shadow(0 0 4px var(--fx-a)); animation: fxRise 4.2s ease-in var(--asc-delay, 0s) infinite; }
 [data-fx-motion="rise"] .asc-fx-star::before, [data-fx-motion="rise"] .asc-fx-star::after { display: none; }
 @keyframes fxRise {
   0% { opacity: 0; transform: translate(0, 30px) scale(0.6); }
@@ -225,3 +220,15 @@ html.reduce-motion .asc-fx { display: none; }
   85% { opacity: 0.9; }
   100% { opacity: 0; transform: translate(-6px, 60px) rotate(320deg); }
 }
+
+/* ===== Performance: effects pause off screen and scale with Animation quality ===== */
+.asc-fx[data-offscreen], .asc-fx[data-offscreen] * { animation-play-state: paused !important; }
+.asc-fx[data-offscreen] { visibility: hidden; }
+/* Medium quality (the default on lower-power phones): stars only, no dust or beam, still edge. */
+html.quality-medium .asc-fx-dust, html.quality-medium .asc-fx-sweep { display: none; }
+html.quality-medium .asc-fx-edge { animation: none; opacity: 0.8; }
+html.quality-medium .asc-fx-star:nth-child(n + 9) { display: none; }
+html.quality-low .asc-fx { display: none; }
+/* Grid cards (shop, inventory) show a lighter version; the large preview and equipped items keep the full show. */
+.shop-card .asc-fx-dust, .shop-card .asc-fx-sweep { display: none; }
+.shop-card .asc-fx-star:nth-child(n + 6) { display: none; }

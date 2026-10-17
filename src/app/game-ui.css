@@ -132,3 +132,17 @@
   color: #fff;
 }
 .content :is(input, textarea, select):focus-visible { outline: 0; box-shadow: inset 0 0 0 1px #ffc21a, inset 0 -2px 0 #ffc21a !important; }
+
+/* ---------- Performance: background blur is costly on phones and barely visible behind
+   the near-opaque plates, so phones and lower quality settings skip it. ---------- */
+@media (max-width: 900px), (pointer: coarse) {
+  *, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+}
+html:is(.quality-low, .quality-medium) *, html:is(.quality-low, .quality-medium) *::before, html:is(.quality-low, .quality-medium) *::after {
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+}
+/* Lower quality: the full-screen arena art stops drifting. */
+html:is(.quality-low, .quality-medium) [class*="environment"]::before { animation: none !important; }
+
+/* Grid cards off screen are skipped entirely (no paint, no animations) until scrolled near. */
+.shop-card { content-visibility: auto; contain-intrinsic-size: auto 320px; }

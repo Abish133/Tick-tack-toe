@@ -20,11 +20,11 @@ export default function CosmeticArt({item,format='webp'}){
   if(type==='emote')return <span className={`${themeClass} collection-emote-art`} style={themeStyle}>{theme.id==='ascendant'&&<AnimatedCosmeticImage cosmeticId={id} format={format} className="collection-ascendant-ambient"/>}<span><CosmeticMotif name={theme.emotes[0]}/></span><span><CosmeticMotif name={theme.emotes[1]}/></span><small>{theme.name} signals</small>{fx}</span>;
   if(type==='title')return <span className={`${themeClass} collection-title-art`} style={themeStyle}>{theme.id==='ascendant'&&<AnimatedCosmeticImage cosmeticId={id} format={format} className="collection-ascendant-ambient"/>}<CosmeticMotif name={theme.motif}/><small>{theme.name}</small><strong>{item.name}</strong><span className="collection-title-flourish">◆ ━ ◆ ━ ◆</span>{fx}</span>;
  }
- const asset=cosmeticAsset(id)||`/assets/${{'avatar-ember':'avatar-fire','avatar-frost':'avatar-ice'}[id]||id}.png`;
+ const asset=cosmeticAsset(id)||`/assets/${{'avatar-ember':'avatar-fire','avatar-frost':'avatar-ice'}[id]||id}.webp`;
  if(type==='avatar')return <img className="cosmetic-portrait" src={asset} alt="" loading="lazy"/>;
- if(type==='arena')return <img className={`cosmetic-arena-art cosmetic-${id}`} src={item.asset||'/assets/arena.png'} alt="" loading="lazy"/>;
+ if(type==='arena')return <img className={`cosmetic-arena-art cosmetic-${id}`} src={item.asset||'/assets/arena.webp'} alt="" loading="lazy"/>;
  if(type==='board')return <span className={`collection-board-art cosmetic-${id}`}><span className="collection-board legacy-board">{['X',null,'O',null,'X',null,'O',null,null].map((mark,i)=><span key={i} className="collection-board-cell">{mark&&<span className={`mark ${mark.toLowerCase()}`}>{mark==='X'?<X/>:<Circle/>}</span>}</span>)}</span></span>;
- if(type==='frame')return <span className={`cosmetic-frame-art cosmetic-${id}`}><img src="/assets/avatar-void.png" alt=""/><i/>{id==='frame-eclipse'?<CloudMoon/>:<Crown/>}</span>;
+ if(type==='frame')return <span className={`cosmetic-frame-art cosmetic-${id}`}><img src="/assets/avatar-void.webp" alt=""/><i/>{id==='frame-eclipse'?<CloudMoon/>:<Crown/>}</span>;
  if(type==='banner')return <span className={`cosmetic-banner-art cosmetic-${id}`}>{id==='banner-solar'?<Sun/>:<Sparkles/>}<i/><span>ELEMENTAL ARENA</span></span>;
  if(type==='emote')return <span className="cosmetic-emote-art"><Sparkles/><Snowflake/><small>Star play! · Cool move!</small></span>;
  if(type==='title')return <span className="cosmetic-title-art"><Crown/><span>{item.name}</span></span>;

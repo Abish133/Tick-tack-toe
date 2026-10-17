@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { cosmeticTheme } from "../lib/cosmetic-collection";
 
 // Particle positions (x%, y%), start delay (s) and size scale: spread so no two flare together.
@@ -50,11 +51,24 @@ export default function AscendantFx({
   glow = false,
   className = "",
 }) {
+  const ref = useRef(null);
+  // Off-screen effects (most shop cards) pause, so only what the player sees costs frames.
+  useEffect(() => {
+    const node = ref.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => node.toggleAttribute("data-offscreen", !entry.isIntersecting),
+      { rootMargin: "80px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
   const info = cosmeticTheme(`avatar-collection-${theme}`);
   const full = theme === "ascendant";
   const count = full ? stars : Math.min(stars, 6);
   return (
     <span
+      ref={ref}
       className={`asc-fx ${full ? "" : "asc-fx-lite"} ${className}`}
       data-fx-motion={MOTION[theme] || "twinkle"}
       style={

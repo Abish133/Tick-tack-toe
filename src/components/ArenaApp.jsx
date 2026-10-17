@@ -209,7 +209,7 @@ function Avatar({
 }) {
   const asset =
     cosmeticAsset(skin) ||
-    `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[skin] || skin}.png`;
+    `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[skin] || skin}.webp`;
   return (
     <div
       className={`avatar ${size} ${tone} ${frame} ${cosmeticTheme(skin) ? "collection-avatar" : ""} ${cosmeticTheme(frame) ? "collection-framed" : ""}`}
@@ -501,7 +501,15 @@ export default function ArenaApp() {
       .catch(() => {});
     try {
       const s = localStorage.getItem("ea:settings");
-      if (s) setSettings((v) => ({ ...v, ...JSON.parse(s) }));
+      const saved = s ? JSON.parse(s) : {};
+      // Lower-power phones start on Medium animation quality; players can still choose High.
+      const lowPower =
+        (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+      setSettings((v) => ({
+        ...v,
+        ...(!saved.quality && lowPower ? { quality: "Medium" } : {}),
+        ...saved,
+      }));
     } catch {}
   }, [refresh, api]);
   useEffect(() => {
@@ -514,10 +522,16 @@ export default function ArenaApp() {
     window.addEventListener("online", online);
     return () => window.removeEventListener("online", online);
   }, [refresh, api]);
+  // The clock re-renders the whole game, so it only ticks where something shows time:
+  // fast for the battle turn timer and matchmaking, once a second for the hub countdown.
+  const clockRate =
+    pathname === "/battle" || queue ? 250 : pathname === "/" ? 1000 : 0;
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 250);
+    if (!clockRate) return;
+    setNow(Date.now());
+    const id = setInterval(() => setNow(Date.now()), clockRate);
     return () => clearInterval(id);
-  }, []);
+  }, [clockRate]);
   useEffect(() => {
     if (!error && !notice) return;
     const id = setTimeout(
@@ -1314,7 +1328,7 @@ export default function ArenaApp() {
             hasActiveMatch={game?.status === "active" && !spectator}
             backgroundCosmeticId={user?.profile?.equippedArena}
             background={
-              cosmeticAsset(user?.profile?.equippedArena) || "/assets/arena.png"
+              cosmeticAsset(user?.profile?.equippedArena) || "/assets/arena.webp"
             }
           >
             <div

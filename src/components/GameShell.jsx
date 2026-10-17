@@ -69,7 +69,7 @@ export default function GameShell({
   battleActive = false,
   dockHidden = false,
   hasActiveMatch = false,
-  background = "/assets/arena.png",
+  background = "/assets/arena.webp",
   backgroundCosmeticId,
   notificationCount = 0,
   pending = {},
@@ -316,13 +316,13 @@ export default function GameShell({
             initial={
               reduced || settings?.reducedMotion
                 ? { opacity: 0 }
-                : { opacity: 0, scale: 0.97, y: 14, filter: "blur(10px)" }
+                : { opacity: 0, scale: 0.97, y: 14 }
             }
-            animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={
               reduced || settings?.reducedMotion
                 ? { opacity: 0 }
-                : { opacity: 0, scale: 1.02, filter: "blur(8px)" }
+                : { opacity: 0, scale: 1.02 }
             }
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
           >

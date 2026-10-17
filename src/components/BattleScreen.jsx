@@ -116,7 +116,7 @@ function BattleAvatar({
   const effect = player?.profile?.equippedEffect || profile?.equippedEffect;
   const asset =
     cosmeticAsset(skin) ||
-    `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[skin] || skin}.png`;
+    `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[skin] || skin}.webp`;
   return (
     <div
       className={`${styles.avatarRing} ${active ? styles.activeRing : ""} ${urgent && active ? styles.urgentRing : ""}`}

@@ -100,13 +100,13 @@ test('Ascendant animated cosmetics preview safely, buy once, equip every slot an
     const avatarMotion=cosmeticMotion('avatar-collection-ascendant');
     let image=dialog.locator('img[data-cosmetic-gif$="/avatar.gif"]');
     await expect(image).toHaveAttribute('data-cosmetic-motion','animated');
-    await expect(image).toHaveAttribute('src',avatarMotion.animatedAsset);
+    await expect(image).toHaveAttribute('src',avatarMotion.motionAsset);
     await expect.poll(()=>image.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
     // The device's reduced-motion request no longer silences cosmetics; the in-game
     // Reduced motion setting (checked below) is the switch.
     await page.emulateMedia({reducedMotion:'reduce'});
     await expect(image).toHaveAttribute('data-cosmetic-motion','animated');
-    await expect(image).toHaveAttribute('src',avatarMotion.animatedAsset);
+    await expect(image).toHaveAttribute('src',avatarMotion.motionAsset);
     await expect(dialog.locator('.asc-fx').first()).toBeVisible();
     await page.emulateMedia({reducedMotion:'no-preference'});
     await closePreview(page);
@@ -115,7 +115,7 @@ test('Ascendant animated cosmetics preview safely, buy once, equip every slot an
     await expect(dialog.locator('img[data-cosmetic-gif$="/crest.gif"]')).toHaveCount(1);
     await closePreview(page);
     dialog=await preview(page,'Astral Ascendancy Arrival');
-    await expect(dialog.locator('img[data-cosmetic-gif$="/crest.gif"]')).toHaveAttribute('src','/assets/collection/ascendant/crest.gif');
+    await expect(dialog.locator('img[data-cosmetic-gif$="/crest.gif"]')).toHaveAttribute('src','/assets/collection/ascendant/crest.webp');
     await closePreview(page);
     dialog=await preview(page,'Astral Ascendancy Sigils');
     await expect(dialog.locator('.preview-board .preview-cell')).toHaveCount(9);

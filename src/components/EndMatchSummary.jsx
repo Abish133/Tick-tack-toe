@@ -122,7 +122,7 @@ export default function EndMatchSummary({
   const effect = portrait?.profile?.equippedEffect || profile?.equippedEffect;
   const asset =
     cosmeticAsset(skin) ||
-    `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[skin] || skin}.png`;
+    `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[skin] || skin}.webp`;
 
   useEffect(() => {
     if (!sounded.current) {

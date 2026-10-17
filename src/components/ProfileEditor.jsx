@@ -68,7 +68,7 @@ const cosmeticLabels = {
 };
 const avatarAsset = (id) =>
   cosmeticAsset(id) ||
-  `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[id] || id || "avatar-void"}.png`;
+  `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[id] || id || "avatar-void"}.webp`;
 const number = (value) => Number(value || 0).toLocaleString();
 const identity = (user) => ({
   name: user?.name || "",
