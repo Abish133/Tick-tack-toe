@@ -151,7 +151,7 @@ html:is(.quality-low, .quality-medium) [class*="environment"]::before { animatio
 .motion-off-notice { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
   margin: 0 0 10px; padding: 8px 12px; border-left: 3px solid var(--tac-accent); background: #0a0f18e6;
   box-shadow: inset 0 0 0 1px var(--tac-line); color: #ffe9a8; font-size: 13px; }
-.motion-off-notice .button { min-height: 36px; padding: 0 14px; font-size: 12px; }
+.motion-off-notice .button { min-height: 48px; padding: 0 16px; font-size: 12px; }
 
 /* Equipped title as a tag beside a player's name (battle HUD, versus intro). */
 .player-title-tag { display: inline-block; min-width: 0; max-width: 46%; flex: 0 1 auto; padding: 1px 6px; border-radius: 2px;
