@@ -340,3 +340,5 @@
   .modePlate > span:not(.connectionSignal) { order: 3; flex-basis: 100%; }
 }
 .connectionSignal::after{content:attr(data-ping);font-weight:800}
+/* Instant move: the tapped mark appears at once, slightly translucent until confirmed. */
+.pendingMark{opacity:.72!important}

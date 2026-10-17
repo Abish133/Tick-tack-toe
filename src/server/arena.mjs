@@ -162,8 +162,11 @@ export class ArenaService {
     // revision made every later pulse fail with STALE_ACTION forever.
     try{await serializableWrite(async tx=>{const changed=await tx.match.updateMany({where:{id:m.id,sequence:oldRevision,status:'active'},data:{state:next,sequence:next.revision,status:next.status,...(next.status==='finished'?{finishedAt:new Date()}: {})}});fail(changed.count===1,'STALE_ACTION','The match changed. Reconnect for its latest state.',409);await tx.matchAction.create({data:{matchId:m.id,sequence:next.revision,requestId:requestId||`server:${oldRevision}:${next.revision}`,actorId,action,event:next.lastEvent||{},state:next}});if(next.status==='finished')await this.settle(tx,m,next);});}
     catch(error){this.matches.delete(m.id);throw error;}
+    // An ordinary move keeps the match active and changes only its state, so the committed
+    // copy is built in memory. Finishing (results, participants) still reloads from MySQL.
     let fresh;
-    try{fresh=await db.match.findUnique({where:{id:m.id},include:hydrateInclude});}
+    if(next.status==='active')fresh={...m,state:next,sequence:next.revision,status:next.status};
+    else try{fresh=await db.match.findUnique({where:{id:m.id},include:hydrateInclude});}
     catch(error){this.matches.delete(m.id);throw error;}if(fresh.status==='active')this.matches.set(m.id,fresh);else this.matches.delete(m.id);
     await this.broadcast(fresh,next.status==='finished'?'match:finished':'match:actionApplied');if(next.lastEvent?.type==='power')await this.broadcast(fresh,'match:powerActivated');if(next.status==='finished'){await this.broadcast(fresh,'match:rewardSettled');await this.advanceTournament(fresh);}else this.scheduleAI(fresh);return fresh;
   }
@@ -177,7 +180,7 @@ export class ArenaService {
   }
   async surrender(userId,matchId,requestId){return serialize(`match:${matchId}`,()=>this.#actLocked(userId,matchId,{type:'surrender'},requestId||`surrender:${userId}`,true));}
   async runAI(matchId,engineId){return serialize(`match:${matchId}`,async()=>{const fresh=await this.getMatch(matchId);if(fresh.status!=='active'||fresh.state.currentPlayerId!==engineId)return;const action=chooseAIAction(fresh.state,fresh.difficulty);if(!action)return;const next=applyAction(fresh.state,engineId,action,Date.now());await this.persistTransition(fresh,next,{actorId:engineId,action,requestId:`ai:${fresh.sequence}`});});}
-  scheduleAI(m){if(this.closed||m.status!=='active')return;const current=m.participants.find(p=>p.engineId===m.state.currentPlayerId);if(!current?.isAI||this.aiTimers.has(m.id))return;const timer=setTimeout(async()=>{this.aiTimers.delete(m.id);try{if(!this.closed)await this.runAI(m.id,current.engineId);}catch(error){console.error('AI action failed:',error.message);}},700+randomInt(400));timer.unref();this.aiTimers.set(m.id,timer);}
+  scheduleAI(m){if(this.closed||m.status!=='active')return;const current=m.participants.find(p=>p.engineId===m.state.currentPlayerId);if(!current?.isAI||this.aiTimers.has(m.id))return;const timer=setTimeout(async()=>{this.aiTimers.delete(m.id);try{if(!this.closed)await this.runAI(m.id,current.engineId);}catch(error){console.error('AI action failed:',error.message);}},450+randomInt(300));timer.unref();this.aiTimers.set(m.id,timer);}
   async pulse(){await this.pairQueue();for(const q of this.queue.values())this.io?.to(`user:${q.userId}`).emit('queue:status',this.queueStatus(q.userId));for(const m of [...this.matches.values()]){if(m.status!=='active')continue;if(m.state.turnDeadline<=Date.now()){try{await serialize(`match:${m.id}`,async()=>{const fresh=await this.getMatch(m.id);const next=tick(fresh.state,Date.now());if(next.revision!==fresh.sequence)await this.persistTransition(fresh,next,{action:{type:'timeout'}});});}
       // Isolate each match; connection-level failures still abort the pulse so recovery can count them.
       catch(error){if(databaseUnavailable(error))throw error;console.error('Arena pulse:',m.id,error.message);}}else this.scheduleAI(m);}for(const[code,r]of this.rooms)if(Date.now()-r.createdAt>30*60000){this.rooms.delete(code);this.io?.to(`room:${code}`).emit('room:updated',{code,status:'expired'});}if(Date.now()-this.lastTournamentPulse>5000){this.lastTournamentPulse=Date.now();await this.resumeTournaments();}}

@@ -1,4 +1,6 @@
-const CACHE = 'elemental-arena-local-classic-v1';
+// v2: v1 served every site image cache-first forever, so updated art never showed until a
+// hard reload. Bumping the name deletes those stale copies on activation.
+const CACHE = 'elemental-arena-local-classic-v2';
 const PAGE = '/local-play';
 const allowedAsset = url => url.origin === self.location.origin && (url.pathname.startsWith('/_next/static/') || url.pathname.startsWith('/assets/') || url.pathname === '/favicon.svg');
 self.addEventListener('install', () => self.skipWaiting());
@@ -15,7 +17,7 @@ self.addEventListener('message', event => {
       if (!response.ok) throw new Error('Local page unavailable.');
       const html = await response.clone().text();
       const embedded = [...html.matchAll(/(?:src|href)="([^"\s]+)"/g)].map(match => match[1]);
-      const assets = [...new Set([...(event.data.resources || []), ...embedded, '/assets/arena.png', '/assets/avatar-void.png', '/favicon.svg'])].map(value => new URL(value, self.location.origin)).filter(allowedAsset).slice(0, 200);
+      const assets = [...new Set([...(event.data.resources || []), ...embedded, '/assets/arena.webp', '/assets/avatar-void.webp', '/favicon.svg'])].map(value => new URL(value, self.location.origin)).filter(allowedAsset).slice(0, 200);
       const results = await Promise.allSettled(assets.map(async url => { const result = await fetch(url.href, { cache: 'reload', credentials: 'omit' }); if (!result.ok) throw new Error('Asset unavailable.'); await cache.put(url.href, result); }));
       await cache.put(PAGE, response);
       const keys = await cache.keys();
@@ -31,6 +33,23 @@ self.addEventListener('fetch', event => {
   if (request.mode === 'navigate' && url.pathname === PAGE) {
     event.respondWith((async () => { const cache = await caches.open(CACHE); try { const response = await fetch(new Request(request, { credentials: 'omit' })); if (response.ok) await cache.put(PAGE, response.clone()); return response; } catch { return await cache.match(PAGE) || Response.error(); } })());
   } else if (allowedAsset(url)) {
-    event.respondWith((async () => { const cache = await caches.open(CACHE); const saved = await cache.match(request); if (saved) return saved; const response = await fetch(new Request(request, { credentials: 'omit' })); if (response.ok) await cache.put(request, response.clone()); return response; })());
+    // Network first (the browser's own HTTP cache still applies), so updated art always
+    // shows; the saved copy is only an offline fallback. Only Local Classic refreshes it.
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(request);
+        if (response.ok && event.clientId) {
+          const client = await self.clients.get(event.clientId);
+          if (client && new URL(client.url).pathname === PAGE) {
+            const cache = await caches.open(CACHE);
+            await cache.put(request, response.clone());
+          }
+        }
+        return response;
+      } catch {
+        const cache = await caches.open(CACHE);
+        return await cache.match(request) || Response.error();
+      }
+    })());
   }
 });

@@ -433,6 +433,7 @@ export default function BattleScreen({
   connected,
   connectionPhase = connected ? "connected" : "connecting",
   ping = null,
+  pendingCell = null,
   onReconnect,
   opponentDisconnected = false,
   difficulty,
@@ -531,11 +532,11 @@ export default function BattleScreen({
     const count = setInterval(() => {
       step += 1;
       setCountdown(["3", "2", "1", "FIGHT"][Math.min(step, 3)]);
-    }, 650);
+    }, 480);
     const finish = setTimeout(() => {
       clearInterval(count);
       setIntro(false);
-    }, 2900);
+    }, 2000);
     return () => {
       clearInterval(count);
       clearTimeout(finish);
@@ -826,7 +827,11 @@ export default function BattleScreen({
             }
           >
             {game.board.map((value, index) => {
-              const player = game.players.find((item) => item.id === value);
+              // A just-tapped empty cell shows the player's own mark until the server confirms.
+              const pending = !value && pendingCell === index;
+              const player =
+                game.players.find((item) => item.id === value) ||
+                (pending ? game.players.find((item) => item.id === playerId) : undefined);
               const effect = effectAt(index);
               const markSkin =
                 player?.profile?.equippedMark ||
@@ -846,14 +851,14 @@ export default function BattleScreen({
                   </span>
                   {player && (
                     <motion.span
-                      key={`${value}-${index}`}
+                      key={`${player.id}-${index}`}
                       initial={
                         settings.reducedMotion
                           ? false
                           : { scale: 0.6, opacity: 0 }
                       }
                       animate={{ scale: 1, opacity: 1 }}
-                      className={`mark ${player.mark.toLowerCase()} ${styles.mark} ${cosmeticTheme(markSkin) ? "collection-marks" : ""}`}
+                      className={`mark ${player.mark.toLowerCase()} ${styles.mark} ${cosmeticTheme(markSkin) ? "collection-marks" : ""} ${pending ? styles.pendingMark : ""}`}
                       style={cosmeticStyle(markSkin)}
                     >
                       <CosmeticMark mark={player.mark} cosmeticId={markSkin} />

@@ -920,7 +920,7 @@ test("local classic reloads and plays with the browser network offline", async (
     { timeout: 30_000 },
   );
   const cachedPaths = await page.evaluate(async () =>
-    (await (await caches.open("elemental-arena-local-classic-v1")).keys()).map(
+    (await (await caches.open("elemental-arena-local-classic-v2")).keys()).map(
       (request) => new URL(request.url).pathname,
     ),
   );

@@ -319,12 +319,10 @@ export default function GameShell({
                 : { opacity: 0, scale: 0.97, y: 14 }
             }
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={
-              reduced || settings?.reducedMotion
-                ? { opacity: 0 }
-                : { opacity: 0, scale: 1.02 }
-            }
-            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            // The old screen must leave before the next mounts, so its exit stays
+            // very short: every tap that changes screens waits on it.
+            exit={{ opacity: 0, transition: { duration: 0.08 } }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           >
             {children}
           </motion.div>

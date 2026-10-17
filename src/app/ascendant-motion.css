@@ -225,8 +225,9 @@ html.reduce-motion .asc-fx { display: none; }
 .asc-fx[data-offscreen], .asc-fx[data-offscreen] * { animation-play-state: paused !important; }
 .asc-fx[data-offscreen] { visibility: hidden; }
 /* Medium quality (the default on lower-power phones): stars only, no dust or beam, still edge. */
-html.quality-medium .asc-fx-dust, html.quality-medium .asc-fx-sweep { display: none; }
-html.quality-medium .asc-fx-edge { animation: none; opacity: 0.8; }
+/* Medium is the default on most phones, so it keeps the edge light and sweep running
+   (both compositor-only); stopping them made effects freeze once settings loaded. */
+html.quality-medium .asc-fx-dust { display: none; }
 html.quality-medium .asc-fx-star:nth-child(n + 9) { display: none; }
 html.quality-low .asc-fx { display: none; }
 /* Grid cards (shop, inventory) show a lighter version; the large preview and equipped items keep the full show. */

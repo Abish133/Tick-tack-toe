@@ -823,6 +823,7 @@ export default function ArenaApp() {
   }, [user?.id, refresh, router]);
   // Round-trip latency to the game server, measured every 3s during a match.
   const [ping, setPing] = useState(null);
+  const [pendingCell, setPendingCell] = useState(null);
   useEffect(() => {
     if (pathname !== "/battle" || !connected) {
       setPing(null);
@@ -1095,7 +1096,15 @@ export default function ArenaApp() {
             : item.cell === i,
         ),
       );
-    } else await action("match:move", { cell: i });
+    } else {
+      // Show the mark at once; the server's confirmation replaces it, a rejection clears it.
+      setPendingCell(i);
+      try {
+        await action("match:move", { cell: i });
+      } finally {
+        setPendingCell(null);
+      }
+    }
   }
   async function saveLoadout() {
     if (!(await ensureUser(() => navigate("/powers")))) return;
@@ -1419,6 +1428,7 @@ export default function ArenaApp() {
               {pathname === "/battle" && (
                 <BattleScreen
                   ping={ping}
+                  pendingCell={pendingCell}
                   match={match}
                   user={user}
                   playerId={playerId}
