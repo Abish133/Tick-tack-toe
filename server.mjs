@@ -22,7 +22,7 @@ export async function startServer({bootstrap,exitOnShutdown=false}={}) {
   const port=Number(process.env.PORT||3000);
   const host=process.env.HOST||'0.0.0.0';
   secret();
-  let ready=false,stopping=false,services,lifecycle,bootWork,shutdownWork;
+  let ready=false,stopping=false,services,lifecycle,bootWork,shutdownWork,shutdownReason=null;
   const app=next({dev,hostname:host,port});
   const handle=app.getRequestHandler();
   const lock=new CoordinatorLock({databaseUrl:process.env.DATABASE_URL,
@@ -33,7 +33,11 @@ export async function startServer({bootstrap,exitOnShutdown=false}={}) {
       ready=false;stopping=true;lifecycle?.stop();delete globalThis.__elementalArena;
       io.disconnectSockets(true);server.close();server.closeAllConnections();
       log('coordinator_lost',{reason,...runtimeErrorDetails(error)});
-      if (exitOnShutdown) process.exit(TRANSIENT_RUNTIME_EXIT);
+      // A server that is handing over to a newer deployment is finished, even if its
+      // drain overran: exiting as a failure made the supervisor and Railway restart it,
+      // and the restarted server immediately asked for ownership back, so two
+      // deployments passed it back and forth and the new one never became healthy.
+      if (exitOnShutdown) process.exit(shutdownReason==='coordinator_handoff'?0:TRANSIENT_RUNTIME_EXIT);
       else void db.$disconnect();
     },
   });
@@ -61,6 +65,7 @@ export async function startServer({bootstrap,exitOnShutdown=false}={}) {
 
   async function shutdown(reason='signal',exitCode=reason==='startup_failed'?1:0) {
     if (shutdownWork) return shutdownWork;
+    shutdownReason=reason;
     stopping=true;ready=false;lifecycle?.stop();
     shutdownWork=(async()=>{
       log('arena_draining',{reason});
@@ -68,7 +73,7 @@ export async function startServer({bootstrap,exitOnShutdown=false}={}) {
         // Never voluntarily release ownership with unfinished writes. Exiting
         // closes every database session and rolls back open transactions.
         log('arena_drain_timeout');server.closeAllConnections();lock.lose('drain_timeout');
-        if (exitOnShutdown) process.exit(1);
+        if (exitOnShutdown) process.exit(reason==='coordinator_handoff'?0:1);
       },30000);
       force.unref();
       try {
