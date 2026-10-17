@@ -432,6 +432,7 @@ export default function BattleScreen({
   busy,
   connected,
   connectionPhase = connected ? "connected" : "connecting",
+  ping = null,
   onReconnect,
   opponentDisconnected = false,
   difficulty,
@@ -695,14 +696,27 @@ export default function BattleScreen({
         <div className={styles.modePlate}>
           <span
             className={`connection ${styles.connectionSignal}`}
-            title={connectionReady ? "Arena connected" : "Connecting"}
+            data-quality={
+              !connectionReady ? "offline" : ping === null ? "measuring" : ping < 80 ? "good" : ping < 150 ? "fair" : "poor"
+            }
+            title={connectionReady ? "Ping to the arena server" : "Connecting"}
+            role="status"
+            aria-label={
+              connectionReady
+                ? ping === null
+                  ? "Arena connected, measuring ping"
+                  : `Arena connected, ping ${ping} milliseconds`
+                : "Connecting"
+            }
           >
             {connectionReady ? (
-              <Wifi size={14} aria-hidden="true" />
+              <Wifi size={13} aria-hidden="true" />
             ) : (
-              <WifiOff size={14} aria-hidden="true" />
+              <WifiOff size={13} aria-hidden="true" />
             )}
-            <span>{connectionReady ? "Arena connected" : "Connecting"}</span>
+            <b aria-hidden="true">
+              {!connectionReady ? "Offline" : ping === null ? "-- ms" : `${ping} ms`}
+            </b>
           </span>
           <strong>{mode}</strong>
           <span>

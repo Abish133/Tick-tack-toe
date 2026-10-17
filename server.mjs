@@ -112,6 +112,8 @@ export async function startServer({bootstrap,exitOnShutdown=false}={}) {
       if (bootstrap) await bootstrap();
       await db.$connect();if (stopping) return;
       services=new ArenaService();lifecycle=manageArenaLifecycle(services,lock);
+      // Persistent database loss: give up ownership so the supervisor restarts with a fresh pool.
+      services.onDatabaseLost=error=>lock.lose('database_unreachable',error);
       await services.initialize();
     })();
     await bootWork;if (stopping) throw new Error('Startup interrupted.');

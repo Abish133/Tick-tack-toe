@@ -821,6 +821,25 @@ export default function ArenaApp() {
       if (recoverRef.current === recover) recoverRef.current = null;
     };
   }, [user?.id, refresh, router]);
+  // Round-trip latency to the game server, measured every 3s during a match.
+  const [ping, setPing] = useState(null);
+  useEffect(() => {
+    if (pathname !== "/battle" || !connected) {
+      setPing(null);
+      return;
+    }
+    const probe = () => {
+      const socket = socketRef.current;
+      if (!socket?.connected) return setPing(null);
+      const sent = performance.now();
+      socket.timeout(3000).emit("net:ping", (error) =>
+        setPing(error ? null : Math.round(performance.now() - sent)),
+      );
+    };
+    probe();
+    const id = setInterval(probe, 3000);
+    return () => clearInterval(id);
+  }, [pathname, connected]);
   const emit = useCallback(
     async (event, data = {}) => {
       if (connectionRef.current !== "connected") throw new Error("Restoring your connection. Wait for the latest battle state before trying again.");
@@ -1399,6 +1418,7 @@ export default function ArenaApp() {
 
               {pathname === "/battle" && (
                 <BattleScreen
+                  ping={ping}
                   match={match}
                   user={user}
                   playerId={playerId}
