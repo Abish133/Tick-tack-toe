@@ -121,5 +121,5 @@ export async function handleAPI(request,context={}){
       if(path==='admin/season'&&method==='POST'){const id=cleanText(body.id,3,80),name=cleanText(body.name,3,80),startsAt=new Date(body.startsAt),endsAt=new Date(body.endsAt);fail(id&&name&&!Number.isNaN(startsAt.getTime())&&endsAt>startsAt,'VALIDATION','Provide a valid season and date range.');await db.$transaction([db.season.updateMany({where:{active:true},data:{active:false}}),db.season.upsert({where:{id},create:{id,name,startsAt,endsAt,active:true},update:{name,startsAt,endsAt,active:true}}),db.auditLog.create({data:{userId:user.id,action:'season_configuration',details:{id,name}}})]);return json({ok:true});}
     }
     return json({error:{code:'NOT_FOUND',message:'This API endpoint does not exist.'}},404);
-  }catch(error){const problem=safeError(error);return json({error:problem},error.status|| (['P2002','P2034'].includes(error.code)?409:error.code==='P2025'?404:error.code&&!/^P\d{4}$/.test(String(error.code))?400:500));}
+  }catch(error){const problem=safeError(error);return json({error:problem},error.status|| (problem.code==='SERVER_BUSY'?503:['P2002','P2034'].includes(error.code)?409:error.code==='P2025'?404:error.code&&!/^P\d{4}$/.test(String(error.code))?400:500));}
 }

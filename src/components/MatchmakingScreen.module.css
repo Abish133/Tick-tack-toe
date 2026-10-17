@@ -14,8 +14,9 @@
   text-align: center;
 }
 .embers {
-  position: absolute;
-  inset: -40px -20vw;
+  /* Fixed so the drifting embers fill the view without ever adding scrollbars. */
+  position: fixed;
+  inset: 0 0 -420px;
   z-index: -1;
   pointer-events: none;
   background-image:
@@ -52,8 +53,10 @@
 /* The summoning circle. */
 .portal {
   position: relative;
-  width: min(62vw, 34dvh, 250px) !important;
-  height: min(62vw, 34dvh, 250px) !important;
+  width: min(62vw, 30dvh, 250px) !important;
+  height: min(62vw, 30dvh, 250px) !important;
+  /* A squeezed column must never squash the circle into an oval. */
+  flex-shrink: 0;
   display: grid;
   place-items: center;
 }
@@ -71,12 +74,23 @@
   width: 100%;
   height: 100%;
   overflow: visible;
-  filter: drop-shadow(0 0 8px #f2c86b66);
 }
-.rings circle { fill: none; transform-origin: 100px 100px; }
-.ringOuter { stroke: #f2c86b; stroke-width: 1.5; stroke-dasharray: 3 7; animation: spin 18s linear infinite; }
-.ringMid { stroke: #a483ff; stroke-width: 2; stroke-dasharray: 60 22; animation: spin 7s linear infinite reverse; }
-.ringInner { stroke: #76ddf4; stroke-width: 1.5; stroke-dasharray: 2 5; animation: spin 11s linear infinite; }
+.ringLayer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  will-change: transform;
+  filter: drop-shadow(0 0 6px #f2c86b55);
+}
+.ringLayer circle { fill: none; }
+.ringOuter { animation: spin 18s linear infinite; }
+.ringOuter circle { stroke: #f2c86b; stroke-width: 1.5; stroke-dasharray: 3 7; }
+.ringMid { animation: spin 7s linear infinite reverse; }
+.ringMid circle { stroke: #a483ff; stroke-width: 2; stroke-dasharray: 60 22; }
+.ringInner { animation: spin 11s linear infinite; }
+.ringInner circle { stroke: #76ddf4; stroke-width: 1.5; stroke-dasharray: 2 5; }
 .rune {
   fill: #ffe7a6;
   font-size: 11px;
@@ -191,18 +205,24 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes rise { to { transform: translateY(-420px); } }
 @keyframes dot { 0%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
-@keyframes runeGlow { 50% { opacity: 1; fill: #fff6d6; } }
-@keyframes corePulse { 50% { box-shadow: 0 0 0 10px #f2c86b10, 0 0 60px #a483ff88, inset 0 0 30px #f2c86b55; } }
+@keyframes runeGlow { 50% { opacity: 1; } }
+@keyframes corePulse { 50% { scale: 1.04; } }
 @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(0.95); } }
 @keyframes flicker { 50% { opacity: 0.35; } }
 @keyframes statusIn { from { opacity: 0; transform: translateY(6px); } }
 @keyframes vsPulse { 50% { transform: scale(1.12); } }
 
+@media (max-height: 760px) {
+  .tip { display: none; }
+  .screen { gap: 8px; padding-block: 0; }
+  .portal { width: min(62vw, 27dvh, 250px) !important; height: min(62vw, 27dvh, 250px) !important; }
+  .heading { font-size: clamp(20px, 4dvh, 28px) !important; line-height: 1.1 !important; }
+}
 @media (max-height: 640px) {
   .tip, .mode { display: none; }
   .avatar { width: 48px; height: 48px; }
 }
-:global(html.reduce-motion) .embers, :global(html.reduce-motion) .radar, :global(html.reduce-motion) .rings circle, :global(html.reduce-motion) .rune, :global(html.reduce-motion) .core, :global(html.reduce-motion) .vs, :global(html.reduce-motion) .silhouette, :global(html.reduce-motion) .dots i { animation: none; }
+:global(html.reduce-motion) .embers, :global(html.reduce-motion) .radar, :global(html.reduce-motion) .ringLayer, :global(html.reduce-motion) .rune, :global(html.reduce-motion) .core, :global(html.reduce-motion) .vs, :global(html.reduce-motion) .silhouette, :global(html.reduce-motion) .dots i { animation: none; }
 :global(.reduce-motion) .embers, :global(.reduce-motion) .radar { animation: none; }
 /* Keep the core a true circle regardless of the legacy queue styles. */
 .portal { display: grid !important; }

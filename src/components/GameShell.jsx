@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { pingLabel, pingQuality } from "../lib/ping";
 import {
   ArrowLeft,
   Swords,
@@ -74,6 +75,7 @@ export default function GameShell({
   notificationCount = 0,
   pending = {},
   connectionNotice = null,
+  ping = null,
 }) {
   const tileCount = {
     "/missions": (pending.daily || 0) + (pending.missions || 0),
@@ -248,14 +250,19 @@ export default function GameShell({
           </div>
           <span
             className={`connection ${connected ? "online" : ""} ${styles.connection}`}
+            data-quality={pingQuality(ping, connected)}
+            data-ping={connected ? pingLabel(ping) : ""}
+            role="status"
             aria-label={
               connected
-                ? "Arena connected"
+                ? Number.isFinite(ping)
+                  ? `Arena connected, ping ${ping} milliseconds`
+                  : "Arena connected"
                 : user
                   ? "Connecting"
                   : "Welcome, challenger"
             }
-            title={connected ? "Arena connected" : "Connecting"}
+            title={connected ? "Ping to the arena server" : "Connecting"}
           >
             {connected ? <Wifi size={16} /> : <WifiOff size={16} />}
             <span className={styles.srOnly}>

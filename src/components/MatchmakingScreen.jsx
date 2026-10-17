@@ -46,10 +46,18 @@ export default function MatchmakingScreen({
       </h2>
       <div className={`queue-visual ${styles.portal}`} aria-hidden="true">
         <span className={styles.radar} />
+        {/* Each ring rotates as its own layer so the GPU spins it even while the
+            page is busy; rotating shapes inside one SVG runs on the main thread. */}
+        {[
+          [styles.ringOuter, 94],
+          [styles.ringMid, 78],
+          [styles.ringInner, 62],
+        ].map(([ring, r]) => (
+          <svg key={r} viewBox="0 0 200 200" className={`${styles.ringLayer} ${ring}`}>
+            <circle cx="100" cy="100" r={r} />
+          </svg>
+        ))}
         <svg viewBox="0 0 200 200" className={styles.rings}>
-          <circle cx="100" cy="100" r="94" className={styles.ringOuter} />
-          <circle cx="100" cy="100" r="78" className={styles.ringMid} />
-          <circle cx="100" cy="100" r="62" className={styles.ringInner} />
           {Array.from({ length: 12 }, (_, i) => (
             <text
               key={i}

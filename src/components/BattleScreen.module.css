@@ -325,6 +325,7 @@
 .connectionSignal>b{font-weight:800}
 .connectionSignal[data-quality=good]{color:#4ade80}
 .connectionSignal[data-quality=fair]{color:#facc15}
+.connectionSignal[data-quality=slow]{color:#fb923c}
 .connectionSignal[data-quality=poor],.connectionSignal[data-quality=offline]{color:#f87171}
 .connectionSignal[data-quality=measuring]{color:#aab4c4}
 /* Narrow headers (landscape phones): the ping badge sits on its own line under the mode. */

@@ -525,7 +525,7 @@ export default function ArenaApp() {
   // The clock re-renders the whole game, so it only ticks where something shows time:
   // fast for the battle turn timer and matchmaking, once a second for the hub countdown.
   const clockRate =
-    pathname === "/battle" || queue ? 250 : pathname === "/" ? 1000 : 0;
+    pathname === "/battle" ? 250 : queue ? 500 : pathname === "/" ? 1000 : 0;
   useEffect(() => {
     if (!clockRate) return;
     setNow(Date.now());
@@ -755,9 +755,16 @@ export default function ArenaApp() {
       socket.emit("match:join", { matchId: payload.matchId });
       setQueue(null);
     });
-    socket.on("queue:status", (payload) =>
-      setQueue((q) => (q ? { ...q, ...payload } : q)),
-    );
+    socket.on("queue:status", (payload) => {
+      setQueue((q) => (q ? { ...q, ...payload } : q));
+      // The search timer follows the server's own clock for this queue entry, so
+      // the bot countdown never runs ahead of when the server will pair.
+      if (payload?.queued && Number.isFinite(payload.waitingMs))
+        setQueueStarted((started) => {
+          const serverStart = Date.now() - payload.waitingMs;
+          return Math.abs(serverStart - started) > 1000 ? serverStart : started;
+        });
+    });
     socket.on("queue:cancelled", () => setQueue(null));
     socket.on("room:updated", (payload) => setRoom(payload.room || payload));
     socket.on("match:error", (payload) => {
@@ -821,26 +828,33 @@ export default function ArenaApp() {
       if (recoverRef.current === recover) recoverRef.current = null;
     };
   }, [user?.id, refresh, router]);
-  // Round-trip latency to the game server, measured every 3s during a match.
+  // Round-trip latency to the game server (header and battle): every 3s in a match,
+  // every 5s elsewhere, paused while the tab is hidden.
   const [ping, setPing] = useState(null);
   const [pendingCell, setPendingCell] = useState(null);
+  const inBattle = pathname === "/battle";
   useEffect(() => {
-    if (pathname !== "/battle" || !connected) {
+    if (!connected) {
       setPing(null);
       return;
     }
     const probe = () => {
       const socket = socketRef.current;
       if (!socket?.connected) return setPing(null);
+      if (document.hidden) return;
       const sent = performance.now();
       socket.timeout(3000).emit("net:ping", (error) =>
         setPing(error ? null : Math.round(performance.now() - sent)),
       );
     };
     probe();
-    const id = setInterval(probe, 3000);
-    return () => clearInterval(id);
-  }, [pathname, connected]);
+    const id = setInterval(probe, inBattle ? 3000 : 5000);
+    document.addEventListener("visibilitychange", probe);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", probe);
+    };
+  }, [inBattle, connected]);
   const emit = useCallback(
     async (event, data = {}) => {
       if (connectionRef.current !== "connected") throw new Error("Restoring your connection. Wait for the latest battle state before trying again.");
@@ -904,11 +918,13 @@ export default function ArenaApp() {
       setQueue({ mode, boardSize });
       setQueueStarted(Date.now());
       try {
-        await emit("queue:join", {
+        const joined = await emit("queue:join", {
           mode,
           boardSize,
           ruleset: mode === "classic" ? "classic" : "elemental",
         });
+        if (Number.isFinite(joined?.waitingMs))
+          setQueueStarted(Date.now() - joined.waitingMs);
       } catch (e) {
         setQueue(null);
         throw e;
@@ -1327,6 +1343,7 @@ export default function ArenaApp() {
           <GameShell
             user={user}
             connected={connected}
+            ping={ping}
             connectionNotice={user && connectionPhase !== "connected" && pathname !== "/battle" && pathname !== "/local-play" ? (
               <ArenaConnectionNotice phase={connectionPhase} onRetry={() => recoverRef.current?.()} />
             ) : null}
@@ -1531,10 +1548,16 @@ export default function ArenaApp() {
                     onPurchase={async (item) => {
                       if (!(await ensureUser(() => navigate("/shop")))) return;
                       await run(async () => {
-                        await api("/purchases", "POST", {
-                          cosmeticId: item.id,
-                          requestId: requestId(),
-                        });
+                        // One retry when the server is busy; the same request ID
+                        // means the server can never charge twice.
+                        const body = { cosmeticId: item.id, requestId: requestId() };
+                        try {
+                          await api("/purchases", "POST", body);
+                        } catch (error) {
+                          if (error.code !== "SERVER_BUSY") throw error;
+                          await new Promise((resolve) => setTimeout(resolve, 600));
+                          await api("/purchases", "POST", body);
+                        }
                         await refresh();
                         setNotice(
                           item.name +

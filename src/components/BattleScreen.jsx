@@ -49,6 +49,7 @@ import { boardSizeOf } from "../lib/game-engine/geometry";
 import { POWER_INFO } from "./PowerPresentation";
 import { ATTACKS, CastSequence, TurnSweep } from "./BattleJuice";
 import VersusIntro, { versusDetail } from "./VersusIntro";
+import { pingLabel, pingQuality } from "../lib/ping";
 import AscendantFx, { fxTheme } from "./AscendantFx";
 import PowerEffects from "./PowerEffects";
 import PowerTargetControls, {
@@ -697,10 +698,8 @@ export default function BattleScreen({
         <div className={styles.modePlate}>
           <span
             className={`connection ${styles.connectionSignal}`}
-            data-quality={
-              !connectionReady ? "offline" : ping === null ? "measuring" : ping < 80 ? "good" : ping < 150 ? "fair" : "poor"
-            }
-            data-ping={!connectionReady ? "Offline" : ping === null ? "-- ms" : `${ping} ms`}
+            data-quality={pingQuality(ping, connectionReady)}
+            data-ping={pingLabel(ping, connectionReady)}
             title={connectionReady ? "Ping to the arena server" : "Connecting"}
             role="status"
             aria-label={
