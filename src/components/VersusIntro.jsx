@@ -7,12 +7,13 @@ import { useCosmeticAnimation } from "./AnimatedCosmeticImage";
 import styles from "./VersusIntro.module.css";
 import AscendantFx, { fxTheme } from "./AscendantFx";
 import PlayerTitle from "./PlayerTitle";
+import BannerBackdrop from "./BannerBackdrop";
 
 const art = (skin = "avatar-void") =>
   cosmeticAsset(skin) ||
   `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[skin] || skin}.webp`;
 
-function Side({ side, name, title, detail, skin, reduced }) {
+function Side({ side, name, title, banner, detail, skin, reduced }) {
   const from = side === "left" ? -1 : 1;
   const media = useCosmeticAnimation(skin, art(skin));
   return (
@@ -32,7 +33,8 @@ function Side({ side, name, title, detail, skin, reduced }) {
         transition={{ duration: 0.7, delay: side === "left" ? 0.15 : 0.28 }}
       />
       {!reduced && fxTheme(skin) && <AscendantFx theme={fxTheme(skin)} stars={10} glow />}
-      <div className={styles.plate}>
+      <div className={`${styles.plate} ${banner ? styles.bannerPlate : ""}`}>
+        <BannerBackdrop bannerId={banner} className="versus-banner" />
         <strong data-ellipsis>{name}</strong>
         <PlayerTitle title={title} />
         <span>{detail}</span>

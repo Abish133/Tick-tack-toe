@@ -166,3 +166,28 @@ html:is(.quality-low, .quality-medium) [class*="environment"]::before { animatio
 .app-shell:has(> [class*="fullBackdrop"]) > :not([class*="fullBackdrop"]) :is(*, *::before, *::after) {
   animation-play-state: paused !important;
 }
+
+/* ---------- Equipped profile banner as a backdrop (profile card, battle panels, versus) ---------- */
+.banner-backdrop { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; border-radius: inherit;
+  background: var(--cosmetic-ink, #0d1424); }
+.banner-backdrop > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
+/* A shade keeps names and numbers readable over any art. */
+.banner-backdrop::after { content: ""; position: absolute; inset: 0;
+  background: var(--banner-shade, linear-gradient(90deg, #070b14e6, #070b1499 55%, #070b14cc)); }
+.banner-backdrop.cosmetic-banner-solar { background: radial-gradient(ellipse at 70% 20%, #eac88366, transparent 65%), linear-gradient(135deg, #584e72, #9e7440); }
+.banner-backdrop.cosmetic-banner-convergence { background: radial-gradient(ellipse at 15% 0, #f4784e66, transparent 55%), radial-gradient(ellipse at 85% 10%, #5addf377, transparent 55%), linear-gradient(135deg, #1d3550, #3a2a63); }
+
+/* Profile card: the banner is a clear strip across the top, fading into the card under the portrait. */
+.profile-banner-strip { inset: 0 0 auto; height: 176px; border-radius: inherit;
+  --banner-shade: linear-gradient(180deg, #0a0f1800 0%, #0a0f1833 60%, #0a0f1866 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent);
+  mask-image: linear-gradient(180deg, #000 55%, transparent); }
+.collection-profile-identity:has(> .profile-banner-strip)::before { display: none; }
+
+/* Battle panels: each player's own banner, shaded toward the name side. */
+.battle-player { isolation: isolate; }
+.hud-banner > img { opacity: .85; }
+.hud-banner { --banner-shade: linear-gradient(90deg, #0b1220f2 0%, #0b1220c4 42%, #0b122080 100%); }
+
+/* Versus intro: the name plate becomes a player card on the banner. */
+.versus-banner { --banner-shade: linear-gradient(180deg, #05080e33, #05080e99); }

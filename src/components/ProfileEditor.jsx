@@ -1,5 +1,6 @@
 "use client";
 
+import BannerBackdrop from "./BannerBackdrop";
 import AscendantFx, { fxTheme } from "./AscendantFx";
 import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useEffect, useState } from "react";
@@ -207,6 +208,7 @@ function PlayerCard({ player, children, publicView = false }) {
       className={`${styles.identity} ${cosmeticTheme(player.profile?.equippedBanner) ? "collection-profile-identity" : ""} ${player.profile?.equippedBanner || ""} ${player.profile?.equippedEffect || ""}`}
       style={cosmeticStyle(player.profile?.equippedBanner)}
     >
+      <BannerBackdrop bannerId={player.profile?.equippedBanner} className="profile-banner-strip" />
       {fxTheme(player.profile?.equippedBanner) && (
         <AscendantFx theme={fxTheme(player.profile?.equippedBanner)} edge stars={8} />
       )}

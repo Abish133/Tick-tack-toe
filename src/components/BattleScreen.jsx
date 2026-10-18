@@ -52,6 +52,7 @@ import VersusIntro, { versusDetail } from "./VersusIntro";
 import { pingLabel, pingQuality } from "../lib/ping";
 import AscendantFx, { fxTheme } from "./AscendantFx";
 import PlayerTitle from "./PlayerTitle";
+import BannerBackdrop from "./BannerBackdrop";
 import { useClock } from "../lib/use-clock";
 import PowerEffects from "./PowerEffects";
 import PowerTargetControls, {
@@ -223,9 +224,13 @@ function PlayerHUD({
       variant="banner"
       className={`battle-player ${self ? "self" : "opponent"} ${styles.playerHUD} ${self ? styles.selfHUD : ""} ${active ? styles.activeHUD : ""}`}
     >
-      {fxTheme(player?.profile?.equippedBanner || profile?.equippedBanner) && (
+      <BannerBackdrop
+        bannerId={player?.profile?.equippedBanner || (self ? profile?.equippedBanner : null)}
+        className={`hud-banner ${self ? "" : "hud-banner-opponent"}`}
+      />
+      {fxTheme(player?.profile?.equippedBanner || (self ? profile?.equippedBanner : null)) && (
         <AscendantFx
-          theme={fxTheme(player?.profile?.equippedBanner || profile?.equippedBanner)}
+          theme={fxTheme(player?.profile?.equippedBanner || (self ? profile?.equippedBanner : null))}
           edge
           stars={4}
           className="asc-fx-small asc-fx-thin"
@@ -1311,12 +1316,14 @@ export default function BattleScreen({
               name: displayName(me?.name),
               skin: me?.profile?.avatar || user?.profile?.avatar,
               title: me?.profile?.title || user?.profile?.title,
+              banner: me?.profile?.equippedBanner || user?.profile?.equippedBanner,
               detail: versusDetail(match, me, difficulty, rank, pretty, true),
             }}
             opponent={{
               name: displayName(opponent?.name) || "Opponent",
               skin: opponent?.profile?.avatar,
               title: opponent?.profile?.title,
+              banner: opponent?.profile?.equippedBanner,
               detail: versusDetail(match, opponent, difficulty, rank, pretty, false),
             }}
           />

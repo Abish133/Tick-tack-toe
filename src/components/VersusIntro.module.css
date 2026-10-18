@@ -169,3 +169,5 @@
 :global(html.reduce-motion) .glow, :global(html.reduce-motion) .seam, :global(html.reduce-motion) .bolt { animation: none; }
 .right .art { scale: -1 1; }
 .art{-webkit-mask-image:linear-gradient(#000 78%,transparent);mask-image:linear-gradient(#000 78%,transparent)}
+/* With a banner equipped the plate is a wider player card showing the banner art. */
+.bannerPlate { isolation: isolate; overflow: hidden; min-width: min(78%, 320px); padding: 16px 22px; }
