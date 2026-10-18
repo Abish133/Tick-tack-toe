@@ -1,5 +1,6 @@
 "use client";
 
+import { useClock } from "../lib/use-clock";
 import { useEffect, useState } from "react";
 import { Swords, Shield, X } from "lucide-react";
 import styles from "./MatchmakingScreen.module.css";
@@ -19,7 +20,7 @@ const TIPS = [
 
 /** Presentation only: the queue itself lives in ArenaApp and the server. */
 export default function MatchmakingScreen({
-  seconds = 0,
+  startedAt = Date.now(),
   ranked = false,
   boardSize = 3,
   fallbackSeconds = 25,
@@ -29,6 +30,9 @@ export default function MatchmakingScreen({
   avatar,
   onCancel,
 }) {
+  // The search timer ticks here only, not across the whole app.
+  const now = useClock(500);
+  const seconds = Math.max(0, Math.floor((now - startedAt) / 1000));
   const [tick, setTick] = useState(0);
   useEffect(() => {
     const timer = setInterval(() => setTick((value) => value + 1), 2200);
@@ -104,7 +108,7 @@ export default function MatchmakingScreen({
             aria-valuemax={fallbackSeconds}
             aria-valuenow={Math.min(seconds, fallbackSeconds)}
           >
-            <i style={{ width: `${Math.min(100, (seconds / fallbackSeconds) * 100)}%` }} />
+            <i style={{ transform: `scaleX(${Math.min(1, seconds / fallbackSeconds)})` }} />
           </div>
           <p className="queue-bot-policy">
             {remaining > 0

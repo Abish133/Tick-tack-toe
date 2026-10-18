@@ -40,6 +40,10 @@ async function serializableWrite(work){
 const hydrateInclude={participants:true,result:true};
 const aiDifficulty=['beginner','easy','medium','hard','expert','extreme','nightmare'];
 
+// The active season changes a few times a year; caching it for a minute saves a database
+// round trip on every match created. It is re-read once its end has passed.
+let seasonCache={at:0,season:null};
+async function activeSeason(){const now=Date.now();if(now-seasonCache.at<60000&&(!seasonCache.season||seasonCache.season.endsAt>new Date(now)))return seasonCache.season;const season=await db.season.findFirst({where:{active:true,startsAt:{lte:new Date(now)},endsAt:{gt:new Date(now)}},orderBy:{startsAt:'desc'}});seasonCache={at:now,season};return season;}
 export class ArenaService {
   constructor(){this.io=null;this.matches=new Map();this.queue=new Map();this.queueClaims=new Map();this.queueEpochs=new Map();this.rooms=new Map();this.aiTimers=new Map();this.rematches=new Map();this.presence=new Map();this.timer=null;this.pairing=false;this.lastTournamentPulse=0;this.resumingTournaments=false;this.closed=false;}
   async initialize(){const active=await db.match.findMany({where:{status:'active'},include:hydrateInclude,take:500});for(const m of active)this.matches.set(m.id,m);this.pulseFailures=0;this.timer=setInterval(()=>this.pulse().then(()=>{this.pulseFailures=0;},e=>{console.error('Arena pulse:',e.message);
@@ -61,7 +65,7 @@ export class ArenaService {
     const state=createGame({mode:ruleset,boardSize,players:identities.map(({id,name,loadout})=>({id,name,loadout})),turnSeconds:20,rounds:boardSize>3||ruleset==='classic'?1:3,now:Date.now()});
     if(rankedBot)state.rankedBot=rankedBotPolicy(humans[0].cups);
     for(const player of state.players){const identity=identities.find(p=>p.id===player.id);player.profile=identity?.profile?Object.fromEntries(['avatar','title','equippedBoard','equippedMark','equippedEffect','equippedFrame','equippedBanner','equippedArena','equippedEmote'].map(key=>[key,identity.profile[key]])):null;}
-    const season=await db.season.findFirst({where:{active:true,startsAt:{lte:new Date()},endsAt:{gt:new Date()}},orderBy:{startsAt:'desc'}});
+    const season=await activeSeason();
     const assertClaim=()=>{if(queueClaim)fail(!this.closed&&!queueClaim.cancelled&&queueClaim.entries.every(entry=>this.queue.get(entry.userId)===entry),'QUEUE_CANCELLED','Matchmaking was cancelled.',409);};
     const m=await serializableWrite(async tx=>{assertClaim();const match=await tx.match.create({data:{mode,ruleset,state,initialState:state,sequence:state.revision,status:'active',difficulty,roomCode,allowSpectators:Boolean(allowSpectators&&humans.every(u=>u.settings?.allowSpectators)),seasonId:season?.id,participants:{create:identities.map((p,i)=>({engineId:p.id,userId:p.userId,name:p.name,mark:state.players.find(q=>q.id===p.id)?.mark||(i?'O':'X'),isAI:p.isAI,initialCups:p.cups}))}},include:hydrateInclude});
       // The database owns player occupancy across every match entry path.
@@ -160,7 +164,7 @@ export class ArenaService {
     const oldRevision=m.sequence;
     // A failed write or reload must never leave this cached copy behind: a stale cached
     // revision made every later pulse fail with STALE_ACTION forever.
-    try{await serializableWrite(async tx=>{const changed=await tx.match.updateMany({where:{id:m.id,sequence:oldRevision,status:'active'},data:{state:next,sequence:next.revision,status:next.status,...(next.status==='finished'?{finishedAt:new Date()}: {})}});fail(changed.count===1,'STALE_ACTION','The match changed. Reconnect for its latest state.',409);await tx.matchAction.create({data:{matchId:m.id,sequence:next.revision,requestId:requestId||`server:${oldRevision}:${next.revision}`,actorId,action,event:next.lastEvent||{},state:next}});if(next.status==='finished')await this.settle(tx,m,next);});}
+    try{await serializableWrite(async tx=>{const changed=await tx.match.updateMany({where:{id:m.id,sequence:oldRevision,status:'active'},data:{state:next,sequence:next.revision,status:next.status,...(next.status==='finished'?{finishedAt:new Date()}: {})}});fail(changed.count===1,'STALE_ACTION','The match changed. Reconnect for its latest state.',409);await tx.matchAction.createMany({data:[{matchId:m.id,sequence:next.revision,requestId:requestId||`server:${oldRevision}:${next.revision}`,actorId,action,event:next.lastEvent||{},state:next}]});if(next.status==='finished')await this.settle(tx,m,next);});}
     catch(error){this.matches.delete(m.id);throw error;}
     // An ordinary move keeps the match active and changes only its state, so the committed
     // copy is built in memory. Finishing (results, participants) still reloads from MySQL.

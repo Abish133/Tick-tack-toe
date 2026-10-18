@@ -1,12 +1,13 @@
 import {db} from './db.mjs';
-import {randomBytes} from 'node:crypto';
+import {randomBytes,randomUUID} from 'node:crypto';
 import {RANKED_POWER_IDS,DEFAULT_LOADOUT} from '../lib/game-engine/powers.js';
 import {fail,cleanText,passwordHash,verifyPassword,AppError,dateKey} from './security.mjs';
 import {premiumTiers,passCoinPrice,checkoutConfigured} from './commerce-policy.mjs';
 
 export const starterPowers=[...RANKED_POWER_IDS];
 export const defaultLoadout=[...DEFAULT_LOADOUT];
-const include={profile:true,settings:true,stats:true,rating:true,wallet:true,loadout:{include:{slots:{orderBy:{position:'asc'}}}}};
+export const playerInclude={profile:true,settings:true,stats:true,rating:true,wallet:true,loadout:{include:{slots:{orderBy:{position:'asc'}}}}};
+const include=playerInclude;
 export function publicPlayer(user){if(!user)return null;return {id:user.id,name:user.name,email:user.email,guest:user.guest,role:user.role,cups:user.rating?.cups||0,rating:user.rating?{cups:user.rating.cups,peakCups:user.rating.peakCups,rankedWins:user.rating.rankedWins,rankedLosses:user.rating.rankedLosses,rankedDraws:user.rating.rankedDraws}:null,coins:user.wallet?.coins||0,level:user.profile?.level||1,xp:user.profile?.xp||0,loadout:user.loadout?.slots.map(s=>s.powerId)||defaultLoadout,profile:user.profile,settings:user.settings,stats:user.stats,createdAt:user.createdAt};}
 export async function getPlayer(id){return publicPlayer(await db.user.findUnique({where:{id},include}));}
 export async function createPlayer({email,password,name,guest=false}){
@@ -43,16 +44,19 @@ export async function updateSettings(userId,body){const data={};for(const key of
 export async function updateLoadout(userId,powers){fail(Array.isArray(powers)&&powers.length===3&&new Set(powers).size===3&&powers.every(p=>typeof p==='string'),'VALIDATION','Equip exactly three different powers.');const owned=await db.playerPower.findMany({where:{userId,powerId:{in:powers},power:{enabled:true}}});fail(owned.length===3,'LOCKED_POWER','One of those powers is locked or not yet released.');await db.$transaction(async tx=>{const loadout=await tx.powerLoadout.findUnique({where:{userId}});await tx.powerLoadoutSlot.deleteMany({where:{loadoutId:loadout.id}});await tx.powerLoadoutSlot.createMany({data:powers.map((powerId,position)=>({loadoutId:loadout.id,powerId,position}))});});return getPlayer(userId);}
 export async function walletCredit(tx,userId,amount,reason,reference){fail(Number.isInteger(amount)&&amount>=0,'ECONOMY','Invalid reward amount.');const wallet=await tx.currencyWallet.update({where:{userId},data:{coins:{increment:amount}}});await tx.currencyTransaction.create({data:{userId,amount,balanceAfter:wallet.coins,reason,reference}});return wallet;}
 export async function purchaseCosmetic(userId,cosmeticId,requestId){fail(cleanText(cosmeticId,1,80)&&cleanText(requestId,8,80),'VALIDATION','A cosmetic ID and unique request ID are required.');return db.$transaction(async tx=>{
-  await tx.$queryRaw`SELECT userId FROM CurrencyWallet WHERE userId=${userId} FOR UPDATE`;
+  const [locked]=await tx.$queryRaw`SELECT coins FROM CurrencyWallet WHERE userId=${userId} FOR UPDATE`;
   const previous=await tx.shopPurchase.findUnique({where:{userId_requestId:{userId,requestId}}});if(previous){fail(previous.cosmeticId===cosmeticId,'REQUEST_CONFLICT','This request ID was used for a different item.');return {purchase:previous,wallet:await tx.currencyWallet.findUnique({where:{userId}}),duplicate:true};}
   const cosmetic=await tx.cosmeticItem.findUnique({where:{id:cosmeticId}});fail(cosmetic?.enabled,'NOT_FOUND','This cosmetic is unavailable.',404);
   fail(!premiumTiers.some(tier=>tier.cosmeticId===cosmeticId),'SEASON_EXCLUSIVE','This cosmetic is an exclusive season-pass reward. Claim its premium journey tier.');
   fail(!await tx.playerInventory.findUnique({where:{userId_cosmeticId:{userId,cosmeticId}}}),'ALREADY_OWNED','You already own this cosmetic.');
   const changed=await tx.currencyWallet.updateMany({where:{userId,coins:{gte:cosmetic.price}},data:{coins:{decrement:cosmetic.price}}});fail(changed.count===1,'INSUFFICIENT_COINS','You need more coins for this cosmetic.');
-  const wallet=await tx.currencyWallet.findUnique({where:{userId}});
-  const purchase=await tx.shopPurchase.create({data:{userId,cosmeticId,requestId,coins:cosmetic.price}});
-  await tx.playerInventory.create({data:{userId,cosmeticId}});
-  await tx.currencyTransaction.create({data:{userId,amount:-cosmetic.price,balanceAfter:wallet.coins,reason:'cosmetic_purchase',reference:`purchase:${purchase.id}`}});return {purchase,wallet};
+  // The wallet row is locked above, so its balance is known without reading it again, and
+  // createMany skips the read-back that create adds: each statement is a database round trip.
+  const now=new Date(),wallet={userId,coins:Number(locked.coins)-cosmetic.price,updatedAt:now};
+  const purchase={id:randomUUID(),userId,cosmeticId,requestId,coins:cosmetic.price,createdAt:now};
+  await tx.shopPurchase.createMany({data:[purchase]});
+  await tx.playerInventory.createMany({data:[{userId,cosmeticId}]});
+  await tx.currencyTransaction.createMany({data:[{userId,amount:-cosmetic.price,balanceAfter:wallet.coins,reason:'cosmetic_purchase',reference:`purchase:${purchase.id}`}]});return {purchase,wallet};
 },{isolationLevel:'ReadCommitted'});}
 export async function claimDaily(userId){const key=dateKey();return db.$transaction(async tx=>{const past=await tx.rewardClaim.count({where:{userId,kind:'daily'}});const rewards=[40,50,60,70,80,90,120];const coins=rewards[past%7];await tx.rewardClaim.create({data:{userId,kind:'daily',key,coins}});const wallet=await walletCredit(tx,userId,coins,'daily_login',`daily:${userId}:${key}`);return {coins,day:past%7+1,wallet};});}
 export function periodKey(period='daily',now=new Date()){const date=new Date(now);if(period==='weekly')date.setUTCDate(date.getUTCDate()-((date.getUTCDay()+6)%7));return date.toISOString().slice(0,10);}

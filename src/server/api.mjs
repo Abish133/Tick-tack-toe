@@ -1,7 +1,8 @@
 import {randomBytes,createHash} from 'node:crypto';
+import {gzipSync} from 'node:zlib';
 import {db} from './db.mjs';
 import {AppError,fail,cleanText,requireUser,authenticate,createSession,sessionCookie,parseCookies,hashToken,passwordHash,checkOrigin,allowedOrigins,rateLimit,safeError,dateKey} from './security.mjs';
-import {createPlayer,loginPlayer,upgradeGuest,equipCosmetic,getPlayer,publicPlayer,updateProfile,updateSettings,updateLoadout,purchaseCosmetic,claimDaily,missions,claimMission,seasonJourney,claimJourney,leaderboard,matchHistory} from './players.mjs';
+import {playerInclude,createPlayer,loginPlayer,upgradeGuest,equipCosmetic,getPlayer,publicPlayer,updateProfile,updateSettings,updateLoadout,purchaseCosmetic,claimDaily,missions,claimMission,seasonJourney,claimJourney,leaderboard,matchHistory} from './players.mjs';
 import {arena,serialize} from './arena.mjs';
 import {operationsMetrics,configureMission,announce} from './operations.mjs';
 import {leaderboardPage} from './leaderboards.mjs';
@@ -21,7 +22,17 @@ async function readProviderBody(request){const limit=262144;fail(Number(request.
 async function tokenEmail(user,purpose){const token=randomBytes(32).toString('base64url');await db.verificationToken.create({data:{userId:user.id,tokenHash:hashToken(token),purpose,expiresAt:new Date(Date.now()+3600000)}});const page=purpose==='reset'?'reset-password':'verify-email';const url=`${allowedOrigins()[0]}/${page}?token=${encodeURIComponent(token)}`;await sendEmail(user.email,purpose==='reset'?'Reset your Elemental Arena password':'Verify your Elemental Arena email',`${purpose==='reset'?'Reset your password':'Verify your email'} using this link within one hour: ${url}`);}
 export async function createGooglePlayer(google){const base=String(google.name||'Google Player').trim().slice(0,20)||'Google Player';for(let attempt=0;attempt<8;attempt++){const name=attempt?base.slice(0,15)+' '+randomBytes(2).toString('hex'):base.length>=2?base:'Google Player';try{return await createPlayer({email:google.email,name,password:randomBytes(32).toString('base64url')});}catch(error){if(error.code!=='P2002'||!String(error.meta?.target||'').includes('name'))throw error;}}throw new AppError('USERNAME_TAKEN','A unique Google player name could not be assigned. Please try again.',409);}
 
+// JSON over 1KB is gzipped when the browser accepts it: the catalog alone is ~33KB, and
+// every byte crosses the ocean for players far from the server.
 export async function handleAPI(request,context={}){
+  const response=await routeAPI(request,context);
+  if(!/\bgzip\b/.test(request.headers.get('accept-encoding')||'')||!response.headers.get('content-type')?.startsWith('application/json')||response.headers.has('content-encoding'))return response;
+  const body=Buffer.from(await response.arrayBuffer());
+  if(body.length<1024)return new Response(body,{status:response.status,headers:response.headers});
+  const headers=new Headers(response.headers);headers.set('content-encoding','gzip');headers.append('vary','Accept-Encoding');headers.delete('content-length');
+  return new Response(gzipSync(body,{level:6}),{status:response.status,headers});
+}
+async function routeAPI(request,context={}){
   try{
     const url=new URL(request.url),method=request.method;const path=url.pathname.replace(/^\/api\/?/,'').replace(/\/$/,'');
     rateLimit(`http:${request.headers.get('x-arena-ip')||'unknown'}`,600,60000);
@@ -33,9 +44,9 @@ export async function handleAPI(request,context={}){
     if(path==='health'&&method==='GET'){await db.$queryRaw`SELECT 1`;return json({ok:true,database:'mysql',features:features()});}
     if(path==='features'&&method==='GET')return json({features:features()});
     if(path==='commerce/products'&&method==='GET'){const viewer=await authenticate(cookie);return json({...await listCommerceProducts(viewer?.id),checkoutEnabled:checkoutConfigured(),passCoinPrice,nativeAdsAvailable:admobConfigured()});}
-    if(path==='auth/session'&&method==='GET'){const user=await authenticate(cookie);return json({user:user?await getPlayer(user.id):null,features:features()});}
+    if(path==='auth/session'&&method==='GET'){const user=await authenticate(cookie,playerInclude);return json({user:publicPlayer(user),features:features()});}
     if(['auth/register','auth/login','auth/guest'].includes(path)&&method==='POST'){
-      rateLimit(`auth:${request.headers.get('x-arena-ip')||'unknown'}`,12,60000);const current=path==='auth/register'?await authenticate(cookie):null;const user=path==='auth/login'?await loginPlayer(body.email,body.password):path==='auth/register'&&current?.guest?await upgradeGuest(current.id,body):await createPlayer({...body,guest:path==='auth/guest'});const token=await createSession(user.id);return json({user:await getPlayer(user.id),features:features()},path==='auth/login'?200:201,{'set-cookie':sessionCookie(token)});
+      rateLimit(`auth:${request.headers.get('x-arena-ip')||'unknown'}`,12,60000);const current=path==='auth/register'?await authenticate(cookie):null;const user=path==='auth/login'?await loginPlayer(body.email,body.password):path==='auth/register'&&current?.guest?await upgradeGuest(current.id,body):await createPlayer({...body,guest:path==='auth/guest'});const token=await createSession(user.id);return json({user:user.profile&&user.wallet?publicPlayer(user):await getPlayer(user.id),features:features()},path==='auth/login'?200:201,{'set-cookie':sessionCookie(token)});
     }
     if(path==='auth/logout'&&method==='POST'){const current=await authenticate(cookie);const token=parseCookies(cookie).ea_session;if(token)await db.session.deleteMany({where:{tokenHash:hashToken(token)}});if(current)globalThis.__elementalArena?.io?.in(`user:${current.id}`).disconnectSockets(true);return json({ok:true},200,{'set-cookie':sessionCookie('',0)});}
     if(['auth/reset/request','auth/forgot-password'].includes(path)&&method==='POST'){fail(features().email,'EMAIL_UNAVAILABLE','Password reset email is not configured on this installation.',503);rateLimit(`reset:${request.headers.get('x-arena-ip')||'unknown'}`,4,60000);const email=String(body.email||'').toLowerCase().trim();const user=await db.user.findUnique({where:{email}});if(user&&!user.guest)await tokenEmail(user,'reset');return json({ok:true,message:'If this email belongs to an account, a reset link has been sent.'});}
@@ -49,7 +60,7 @@ export async function handleAPI(request,context={}){
     }
     if(path==='leaderboard'&&method==='GET'){const viewer=await authenticate(cookie);const page=await leaderboardPage({category:url.searchParams.get('category')||'cups',scope:url.searchParams.get('scope')||undefined,region:url.searchParams.get('region'),season:url.searchParams.get('season'),offset:url.searchParams.get('offset'),limit:url.searchParams.get('limit'),userId:viewer?.id});return json({...page,divisions:await db.rankDivision.findMany({orderBy:{minCups:'asc'}})});}
     if(/^players\/[^/]+$/.test(path)&&method==='GET'&&path!=='players/search'){const viewer=await authenticate(cookie);return json(await publicProfile(path.split('/')[1],viewer?.id));}
-    if(path==='catalog'&&method==='GET'){const [powers,cosmetics]=await Promise.all([db.powerDefinition.findMany({orderBy:{sortOrder:'asc'}}),db.cosmeticItem.findMany({where:{enabled:true,id:{notIn:premiumTiers.map(t=>t.cosmeticId)}},orderBy:{price:'asc'}})]);return json({powers,cosmetics,features:features()});}
+    if(path==='catalog'&&method==='GET'){const [powers,cosmetics]=await Promise.all([db.powerDefinition.findMany({orderBy:{sortOrder:'asc'}}),db.cosmeticItem.findMany({where:{enabled:true,id:{notIn:premiumTiers.map(t=>t.cosmeticId)}},orderBy:{price:'asc'}})]);return json({powers,cosmetics,features:features()},200,{'cache-control':'public, max-age=60, stale-while-revalidate=3600'});}
     if(path==='tournaments'&&method==='GET'){const tournaments=await db.tournament.findMany({orderBy:{startsAt:'desc'},take:50,include:{_count:{select:{participants:true}}}});return json({tournaments:tournaments.map(t=>({...t,capacity:t.maxPlayers}))});}
     if(path.startsWith('tournaments/')&&method==='GET'){const id=path.split('/')[1];const tournament=await db.tournament.findUnique({where:{id},include:{participants:{include:{user:{select:{id:true,name:true}}}},rounds:{orderBy:{number:'asc'},include:{matches:{orderBy:{position:'asc'},include:{match:{select:{id:true,status:true,result:true}}}}}}}});fail(tournament,'NOT_FOUND','Tournament not found.',404);return json({tournament});}
 

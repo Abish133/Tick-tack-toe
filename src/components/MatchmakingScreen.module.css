@@ -95,9 +95,10 @@
   fill: #ffe7a6;
   font-size: 11px;
   text-anchor: middle;
-  opacity: 0.55;
-  animation: runeGlow 2.4s ease-in-out infinite;
 }
+/* The runes glow together as one GPU layer; twelve separately animated SVG texts
+   recalculated styles every frame. */
+.rings { opacity: 0.55; will-change: opacity; animation: runeGlow 2.4s ease-in-out infinite; }
 .rings g, .rings text { transform-box: view-box; }
 .core {
   position: relative;
@@ -194,7 +195,10 @@
   height: 100%;
   background: linear-gradient(90deg, #a483ff, #f2c86b);
   box-shadow: 0 0 10px #f2c86b;
-  transition: width 0.9s linear;
+  /* Grows by scaling (GPU) rather than width, which re-laid out the page every frame. */
+  width: 100%;
+  transform-origin: left center;
+  transition: transform 0.9s linear;
 }
 .fallback :global(.queue-bot-policy) { margin: 0; font-size: 12px !important; color: #e8d5a5; }
 .disclosure { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0; font-size: 12px; color: #b9c9dc; line-height: 1.4; }
@@ -222,7 +226,7 @@
   .tip, .mode { display: none; }
   .avatar { width: 48px; height: 48px; }
 }
-:global(html.reduce-motion) .embers, :global(html.reduce-motion) .radar, :global(html.reduce-motion) .ringLayer, :global(html.reduce-motion) .rune, :global(html.reduce-motion) .core, :global(html.reduce-motion) .vs, :global(html.reduce-motion) .silhouette, :global(html.reduce-motion) .dots i { animation: none; }
+:global(html.reduce-motion) .embers, :global(html.reduce-motion) .radar, :global(html.reduce-motion) .ringLayer, :global(html.reduce-motion) .rings, :global(html.reduce-motion) .core, :global(html.reduce-motion) .vs, :global(html.reduce-motion) .silhouette, :global(html.reduce-motion) .dots i { animation: none; }
 :global(.reduce-motion) .embers, :global(.reduce-motion) .radar { animation: none; }
 /* Keep the core a true circle regardless of the legacy queue styles. */
 .portal { display: grid !important; }

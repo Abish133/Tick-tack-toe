@@ -33,6 +33,7 @@ import {
 } from "./ui";
 import { readyMissionCount, readySeasonTiers } from "./usePendingCounts";
 import { countdownTo, nextUtcMidnight } from "../lib/time-format";
+import { useClock } from "../lib/use-clock";
 import { displayName } from "../lib/display-name";
 import BoardSizePicker from "./BoardSizePicker";
 import { COSMETIC_THEMES, cosmeticAsset } from "../lib/cosmetic-collection";
@@ -195,7 +196,6 @@ export function ModeSelect({
 }
 
 export default function BattleHub({
-  now = Date.now(),
   user,
   boardSize,
   setBoardSize,
@@ -214,6 +214,8 @@ export default function BattleHub({
   pending = {},
   onClaimDaily,
 }) {
+  // The daily countdown ticks here only, not across the whole app.
+  const now = useClock(1000);
   const [mode, setMode] = useState("ranked"),
     [selector, setSelector] = useState(false),
     [policy, setPolicy] = useState(false),

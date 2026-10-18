@@ -49,9 +49,12 @@ export async function startServer({bootstrap,exitOnShutdown=false}={}) {
     const pathname=new URL(req.url||'/',`http://localhost:${port}`).pathname;
     if (['/api/health','/api/ready'].includes(pathname)) {
       if (!ready || stopping || !lock.owned) return json(res,503,unavailable);
-      try {await lock.checkOwnership();await db.$queryRaw`SELECT 1`;
+      try {await lock.checkOwnership();const queryStarted=performance.now();await db.$queryRaw`SELECT 1`;
+        // One query's round trip: every player action costs a few of these, so a high value
+        // means the database is far from (or not on the private network of) this server.
+        const databaseLatencyMs=Math.round((performance.now()-queryStarted)*10)/10;
         if (!ready || stopping) return json(res,503,unavailable);
-        return json(res,200,{ok:true,database:'mysql',coordinator:'active',release:process.env.RAILWAY_GIT_COMMIT_SHA||process.env.RELEASE_SHA||null});
+        return json(res,200,{ok:true,database:'mysql',databaseLatencyMs,region:process.env.RAILWAY_REPLICA_REGION||null,coordinator:'active',release:process.env.RAILWAY_GIT_COMMIT_SHA||process.env.RELEASE_SHA||null});
       }catch {return json(res,503,unavailable);}
     }
     if (pathname==='/health/live') return json(res,stopping?503:200,{ok:!stopping});

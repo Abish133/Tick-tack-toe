@@ -353,7 +353,6 @@ export default function ArenaApp() {
     [ruleset, setRuleset] = useState("elemental");
   const [selectedPower, setSelectedPower] = useState(null),
     [source, setSource] = useState(null),
-    [now, setNow] = useState(Date.now()),
     [emote, setEmote] = useState(""),
     [emoteSignal, setEmoteSignal] = useState(null),
     [surrender, setSurrender] = useState(false);
@@ -459,6 +458,21 @@ export default function ArenaApp() {
       live = false;
     };
   }, [api, user?.id, pathname]);
+  // Sign-in responses already carry the player, so they apply it directly instead of
+  // paying another round trip for /auth/session.
+  const applySession = useCallback((data) => {
+      setUser(data.user);
+      setFeatures(data.features || {});
+      if (data.user) {
+        setLoadout(data.user.loadout || ["fire", "shield", "portal"]);
+        setProfileName(data.user.name);
+        if (data.user.settings && settingsOwner.current !== data.user.id) {
+          settingsOwner.current = data.user.id;
+          setSettings((s) => ({ ...s, ...data.user.settings }));
+        }
+      }
+      return data.user;
+  }, []);
   const refresh = useCallback(async () => {
     try {
       const data = await api("/auth/session");
@@ -523,16 +537,8 @@ export default function ArenaApp() {
     window.addEventListener("online", online);
     return () => window.removeEventListener("online", online);
   }, [refresh, api]);
-  // The clock re-renders the whole game, so it only ticks where something shows time:
-  // fast for the battle turn timer and matchmaking, once a second for the hub countdown.
-  const clockRate =
-    pathname === "/battle" ? 250 : queue ? 500 : pathname === "/" ? 1000 : 0;
-  useEffect(() => {
-    if (!clockRate) return;
-    setNow(Date.now());
-    const id = setInterval(() => setNow(Date.now()), clockRate);
-    return () => clearInterval(id);
-  }, [clockRate]);
+  // No app-wide clock: the battle, hub and matchmaking screens each tick their own
+  // timers, so the rest of the game never re-renders on a timer.
   useEffect(() => {
     if (!error && !notice) return;
     const id = setTimeout(
@@ -757,7 +763,16 @@ export default function ArenaApp() {
       setQueue(null);
     });
     socket.on("queue:status", (payload) => {
-      setQueue((q) => (q ? { ...q, ...payload } : q));
+      // Sent every pulse; only a change beyond the wait time re-renders the game.
+      setQueue((q) => {
+        if (!q) return q;
+        const changed = Object.keys(payload).some(
+          (key) =>
+            !["waitingMs", "estimatedWaitSeconds"].includes(key) &&
+            JSON.stringify(q[key]) !== JSON.stringify(payload[key]),
+        );
+        return changed ? { ...q, ...payload } : q;
+      });
       // The search timer follows the server's own clock for this queue entry, so
       // the bot countdown never runs ahead of when the server will pair.
       if (payload?.queued && Number.isFinite(payload.waitingMs))
@@ -906,18 +921,26 @@ export default function ArenaApp() {
     const fd = new FormData(e.currentTarget),
       body = Object.fromEntries(fd);
     try {
-      await api(
+      const data = await api(
         `/auth/${auth === "register" ? "register" : auth === "login" ? "login" : "guest"}`,
         "POST",
         body,
       );
-      const u = await refresh();
+      const u = data.user ? applySession(data) : await refresh();
+      setSessionReady(true);
       if (u) {
         setAuth(null);
         if (pendingIntent.current) {
           const intent = pendingIntent.current;
           pendingIntent.current = null;
-          setTimeout(() => intent(), 500);
+          // Continue what the player tapped as soon as the arena connection is up
+          // (at most 3s), instead of a fixed pause.
+          const started = Date.now();
+          const resume = () =>
+            connectionRef.current === "connected" || Date.now() - started > 3000
+              ? intent()
+              : setTimeout(resume, 50);
+          resume();
         }
       }
     } catch (e) {
@@ -1025,16 +1048,6 @@ export default function ArenaApp() {
       : game?.players?.find((p) => p.id !== playerId);
   const myTurn =
     game?.currentPlayerId === playerId && game?.status === "active";
-  function bankSeconds(id) {
-    const elapsed =
-      game?.status === "active" && game.currentPlayerId === id
-        ? Math.max(0, now + clockOffset.current - game.turnStartedAt)
-        : 0;
-    return Math.max(
-      0,
-      Math.ceil(((game?.remainingMs?.[id] || 0) - elapsed) / 1000),
-    );
-  }
   function effectAt(i) {
     return game?.effects?.[i] || {};
   }
@@ -1429,7 +1442,6 @@ export default function ArenaApp() {
               {["/", "/login", "/register"].includes(pathname) && (
                 <BattleHub
                   api={api}
-                  now={now}
                   user={user}
                   boardSize={boardSize}
                   setBoardSize={setBoardSize}
@@ -1505,7 +1517,6 @@ export default function ArenaApp() {
                   opponentDisconnected={disconnectedPlayers.includes(opponent?.id)}
                   difficulty={difficulty}
                   settings={settings}
-                  now={now}
                   clockOffset={clockOffset.current}
                   me={me}
                   opponent={opponent}
@@ -1516,7 +1527,6 @@ export default function ArenaApp() {
                   muteEmotes={muteEmotes}
                   availableActions={availableActions}
                   selectedActions={selectedActions}
-                  bankSeconds={bankSeconds}
                   effectAt={effectAt}
                   canTarget={canTarget}
                   clickCell={clickCell}
@@ -1600,14 +1610,20 @@ export default function ArenaApp() {
                         // One retry when the server is busy; the same request ID
                         // means the server can never charge twice.
                         const body = { cosmeticId: item.id, requestId: requestId() };
+                        let result;
                         try {
-                          await api("/purchases", "POST", body);
+                          result = await api("/purchases", "POST", body);
                         } catch (error) {
                           if (error.code !== "SERVER_BUSY") throw error;
                           await new Promise((resolve) => setTimeout(resolve, 600));
-                          await api("/purchases", "POST", body);
+                          result = await api("/purchases", "POST", body);
                         }
-                        await refresh();
+                        // The response already has the new balance: show it and the owned
+                        // item at once, and resync the full profile in the background.
+                        if (Number.isFinite(result?.wallet?.coins))
+                          setUser((u) => (u ? { ...u, coins: result.wallet.coins } : u));
+                        setOwnedIds((ids) => (ids.includes(item.id) ? ids : [...ids, item.id]));
+                        void refresh();
                         setNotice(
                           item.name +
                             " added to your collection. Equip it from Inventory.",
@@ -2527,7 +2543,7 @@ export default function ArenaApp() {
             }
           >
             <MatchmakingScreen
-              seconds={Math.max(0, Math.floor((now - queueStarted) / 1000))}
+              startedAt={queueStarted}
               ranked={queue.mode === "ranked"}
               boardSize={queue.boardSize || boardSize}
               fallbackSeconds={queue.rankedBot?.fallbackSeconds || 25}

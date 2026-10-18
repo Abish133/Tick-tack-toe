@@ -52,6 +52,7 @@ import VersusIntro, { versusDetail } from "./VersusIntro";
 import { pingLabel, pingQuality } from "../lib/ping";
 import AscendantFx, { fxTheme } from "./AscendantFx";
 import PlayerTitle from "./PlayerTitle";
+import { useClock } from "../lib/use-clock";
 import PowerEffects from "./PowerEffects";
 import PowerTargetControls, {
   CellStatuses,
@@ -441,7 +442,6 @@ export default function BattleScreen({
   opponentDisconnected = false,
   difficulty,
   settings,
-  now,
   clockOffset = 0,
   me,
   opponent,
@@ -452,7 +452,6 @@ export default function BattleScreen({
   muteEmotes,
   availableActions,
   selectedActions,
-  bankSeconds,
   effectAt,
   canTarget,
   clickCell,
@@ -477,6 +476,15 @@ export default function BattleScreen({
   const [intro, setIntro] = useState(match?.state?.status === "active");
   const [countdown, setCountdown] = useState("3");
   const game = match?.state;
+  // The battle keeps its own clock: only this screen re-renders for the timers.
+  const now = useClock(500, game?.status === "active");
+  const bankSeconds = (id) => {
+    const elapsed =
+      game?.status === "active" && game.currentPlayerId === id
+        ? Math.max(0, now + clockOffset - game.turnStartedAt)
+        : 0;
+    return Math.max(0, Math.ceil(((game?.remainingMs?.[id] || 0) - elapsed) / 1000));
+  };
   const connectionReady = connected && connectionPhase === "connected";
   const previousRound = useRef(game?.round);
   const progressAtStart = useRef(null);

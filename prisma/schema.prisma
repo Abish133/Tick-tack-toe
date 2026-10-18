@@ -1,5 +1,8 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  // One SQL query per read with includes (LATERAL JOINs) instead of one per relation:
+  // every query is a network round trip to the database in production.
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {

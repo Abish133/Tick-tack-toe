@@ -160,3 +160,9 @@ html:is(.quality-low, .quality-medium) [class*="environment"]::before { animatio
 .player-title-tag.collection-profile-title { box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 45%, transparent); }
 /* Phones keep the name readable; titles show in the versus intro before every match. */
 @media (max-width: 480px) { .battle-player .player-title-tag { display: none; } }
+
+/* A full-screen window (matchmaking) covers the game: everything behind it pauses, so the
+   device spends its frames on what the player sees. */
+.app-shell:has(> [class*="fullBackdrop"]) > :not([class*="fullBackdrop"]) :is(*, *::before, *::after) {
+  animation-play-state: paused !important;
+}
