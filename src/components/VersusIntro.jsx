@@ -31,7 +31,7 @@ function Side({ side, name, title, detail, skin, reduced }) {
         animate={{ scale: 1, filter: "brightness(1) blur(0px)" }}
         transition={{ duration: 0.7, delay: side === "left" ? 0.15 : 0.28 }}
       />
-      {!reduced && fxTheme(skin) && <AscendantFx theme={fxTheme(skin)} stars={10} sweep glow />}
+      {!reduced && fxTheme(skin) && <AscendantFx theme={fxTheme(skin)} stars={10} glow />}
       <div className={styles.plate}>
         <strong data-ellipsis>{name}</strong>
         <PlayerTitle title={title} />

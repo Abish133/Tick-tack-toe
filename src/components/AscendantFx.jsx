@@ -39,7 +39,7 @@ export const fxTheme = (id) => cosmeticTheme(id)?.id || null;
 
 /**
  * Live collection light over any host: particles in the collection's colours, a light
- * that runs around the host's edge, a diagonal shine and a breathing glow. Ascendant
+ * that runs around the host's edge and a breathing glow. Ascendant
  * gets the full show; other collections a lighter one. Presentation only; it never
  * takes clicks, and in-game reduced motion or low quality hide it.
  */
@@ -47,7 +47,6 @@ export default function AscendantFx({
   theme = "ascendant",
   edge = false,
   stars = 6,
-  sweep = false,
   glow = false,
   className = "",
 }) {
@@ -79,7 +78,6 @@ export default function AscendantFx({
       aria-hidden="true"
     >
       {glow && <span className="asc-fx-glow" />}
-      {sweep && <span className="asc-fx-sweep" />}
       {count > 0 && full && <span className="asc-fx-dust" />}
       {edge && <span className="asc-fx-edge" />}
       {STARS.slice(0, count).map(([x, y, delay, size], index) => (

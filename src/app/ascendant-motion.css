@@ -25,13 +25,8 @@ img[data-cosmetic-gif$="/avatar.gif"]:not(#_) {
 .collection-theme-ascendant.collection-landscape-art { overflow: hidden; }
 .collection-theme-ascendant.collection-landscape-art > img { animation: ascDrift 12s ease-in-out infinite alternate; }
 
-/* Board: tiles breathe with light and a shine sweeps across (shop, preview and battle). */
+/* Board: tiles breathe with light (shop, preview and battle). */
 .collection-board[data-cosmetic-theme="ascendant"] { position: relative; overflow: hidden; }
-.collection-board[data-cosmetic-theme="ascendant"]::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3;
-  background: linear-gradient(115deg, transparent 38%, #fff1c266 48%, #a4f7ff55 52%, transparent 62%);
-  width: 260%; animation: ascShineMove 3.6s ease-in-out infinite; will-change: transform;
-}
 .collection-board[data-cosmetic-theme="ascendant"] > .game-cell { position: relative; }
 .collection-board[data-cosmetic-theme="ascendant"] > :is(.collection-board-cell, .preview-cell, .game-cell)::before {
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
@@ -44,13 +39,12 @@ img[data-cosmetic-gif$="/avatar.gif"]:not(#_) {
 /* The animated crest behind marks, emotes and the title is clearly visible. */
 .collection-ascendant-ambient { opacity: 0.5 !important; animation: ascBreathe 3s ease-in-out infinite; }
 
-/* Banner: flowing iridescence and a shine. */
+/* Banner: a soft iridescent tint (no sliding shine). */
 .collection-theme-ascendant.collection-banner-art { position: relative; overflow: hidden; }
 .collection-theme-ascendant.collection-banner-art::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(115deg, transparent 40%, #ffffff77 50%, transparent 60%), linear-gradient(100deg, #a4f7ff22, #fff1c240, #d7c3ff30, #a4f7ff22);
-  width: 250%; mix-blend-mode: screen;
-  animation: ascShineMove 3.4s ease-in-out infinite; will-change: transform;
+  background: linear-gradient(100deg, #a4f7ff22, #fff1c240, #d7c3ff30, #a4f7ff22);
+  mix-blend-mode: screen;
 }
 .collection-theme-ascendant .collection-banner-crest > svg { animation: ascSpinSlow 10s linear infinite; }
 
@@ -80,7 +74,6 @@ button:nth-child(odd) > .emote-signal-ascendant > svg { animation-delay: 0.9s; }
 @keyframes ascFloat { 50% { transform: translateY(-6px) scale(1.02); } }
 @keyframes ascBreathe { 50% { opacity: 0.85; transform: scale(1.08); } }
 @keyframes ascDrift { from { transform: scale(1.05) translateX(-2%); } to { transform: scale(1.15) translateX(2%); } }
-@keyframes ascShineMove { 0%, 35% { transform: translateX(0); } 100% { transform: translateX(-62%); } }
 @keyframes ascTileGlow { 50% { opacity: 1; } }
 @keyframes ascSpinSlow { to { rotate: 360deg; } }
 @keyframes ascBob { 50% { transform: translateY(-6px) scale(1.08); } }
@@ -142,14 +135,6 @@ html.reduce-motion [class*="collection-theme-ascendant"],
 }
 @keyframes ascEdgePulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 
-/* A diagonal beam of light sweeps across the art. */
-.asc-fx-sweep { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; }
-.asc-fx-sweep::before {
-  content: ""; position: absolute; inset: -20% auto -20% -60%; width: 45%; rotate: 18deg;
-  background: linear-gradient(90deg, transparent, #fff1c240 35%, #ffffff8c 50%, #a4f7ff40 65%, transparent);
-  mix-blend-mode: screen; animation: ascBeam 4.2s ease-in-out infinite;
-}
-@keyframes ascBeam { 0%, 30% { translate: 0 0; } 75%, 100% { translate: 420% 0; } }
 
 /* A soft halo that breathes behind the hero. */
 .asc-fx-glow {
@@ -188,7 +173,6 @@ html.reduce-motion .asc-fx { display: none; }
 .asc-fx-lite .asc-fx-edge::before {
   background: conic-gradient(from 20deg, color-mix(in srgb, var(--fx-a) 30%, transparent) 0 30%, var(--fx-a) 42%, #fff 48%, var(--fx-b) 54%, color-mix(in srgb, var(--fx-b) 30%, transparent) 66% 100%);
 }
-.asc-fx-lite .asc-fx-sweep::before { background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--fx-a) 30%, transparent) 35%, #ffffff66 50%, color-mix(in srgb, var(--fx-b) 30%, transparent) 65%, transparent); }
 .asc-fx-lite .asc-fx-glow { background: radial-gradient(closest-side, color-mix(in srgb, var(--fx-a) 35%, transparent), color-mix(in srgb, var(--fx-b) 18%, transparent) 50%, transparent); }
 
 /* Storm: quick electric flickers instead of slow blooms. */
@@ -224,12 +208,11 @@ html.reduce-motion .asc-fx { display: none; }
 /* ===== Performance: effects pause off screen and scale with Animation quality ===== */
 .asc-fx[data-offscreen], .asc-fx[data-offscreen] * { animation-play-state: paused !important; }
 .asc-fx[data-offscreen] { visibility: hidden; }
-/* Medium quality (the default on lower-power phones): stars only, no dust or beam, still edge. */
-/* Medium is the default on most phones, so it keeps the edge light and sweep running
-   (both compositor-only); stopping them made effects freeze once settings loaded. */
+/* Medium is the default on most phones, so it keeps the edge light running
+   (compositor-only); stopping them made effects freeze once settings loaded. */
 html.quality-medium .asc-fx-dust { display: none; }
 html.quality-medium .asc-fx-star:nth-child(n + 9) { display: none; }
 html.quality-low .asc-fx { display: none; }
 /* Grid cards (shop, inventory) show a lighter version; the large preview and equipped items keep the full show. */
-.shop-card .asc-fx-dust, .shop-card .asc-fx-sweep { display: none; }
+.shop-card .asc-fx-dust { display: none; }
 .shop-card .asc-fx-star:nth-child(n + 6) { display: none; }

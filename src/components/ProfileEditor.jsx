@@ -208,7 +208,7 @@ function PlayerCard({ player, children, publicView = false }) {
       style={cosmeticStyle(player.profile?.equippedBanner)}
     >
       {fxTheme(player.profile?.equippedBanner) && (
-        <AscendantFx theme={fxTheme(player.profile?.equippedBanner)} edge stars={8} sweep />
+        <AscendantFx theme={fxTheme(player.profile?.equippedBanner)} edge stars={8} />
       )}
       <ProfilePortrait
         profile={player.profile}

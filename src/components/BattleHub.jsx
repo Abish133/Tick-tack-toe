@@ -310,7 +310,7 @@ export default function BattleHub({
             alt={`${user?.name || "Your"} equipped arena guardian`}
           />
           {fxTheme(user?.profile?.avatar) && (
-            <AscendantFx theme={fxTheme(user?.profile?.avatar)} stars={10} sweep glow />
+            <AscendantFx theme={fxTheme(user?.profile?.avatar)} stars={10} glow />
           )}
           <span className={styles.pedestal} />
           <div
