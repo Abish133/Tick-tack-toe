@@ -35,7 +35,7 @@ function Side({ side, name, title, banner, detail, skin, reduced }) {
       {!reduced && fxTheme(skin) && <AscendantFx theme={fxTheme(skin)} stars={10} glow />}
       <div className={`${styles.plate} ${banner ? styles.bannerPlate : ""}`}>
         <BannerBackdrop bannerId={banner} className="versus-banner" />
-        <strong data-ellipsis>{name}</strong>
+        <strong>{name}</strong>
         <PlayerTitle title={title} />
         <span>{detail}</span>
       </div>
@@ -71,15 +71,18 @@ export default function VersusIntro({ me, opponent, countdown, onSkip, reduced =
         <Zap className={styles.bolt} aria-hidden="true" />
         <span>VS</span>
       </motion.div>
-      <motion.strong
-        key={countdown}
-        className={`${styles.count} ${fight ? styles.fight : ""}`}
-        initial={reduced ? { opacity: 0 } : { scale: 2.2, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 320, damping: 16 }}
-      >
-        {fight ? "FIGHT!" : countdown}
-      </motion.strong>
+      <div className={`${styles.countdown} ${fight ? styles.fight : ""}`} role="timer" aria-live="assertive">
+        <small>{fight ? "Battle begins" : "Match starts in"}</small>
+        <motion.strong
+          key={countdown}
+          className={styles.count}
+          initial={reduced ? { opacity: 0 } : { scale: 1.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.22, ease: "easeOut" }}
+        >
+          {fight ? "FIGHT!" : countdown}
+        </motion.strong>
+      </div>
     </motion.div>
   );
 }

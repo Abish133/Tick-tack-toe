@@ -42,6 +42,9 @@ const aiDifficulty=['beginner','easy','medium','hard','expert','extreme','nightm
 
 // The active season changes a few times a year; caching it for a minute saves a database
 // round trip on every match created. It is re-read once its end has passed.
+// Every match opens on the 5-second versus countdown; the first turn's clock (and an AI's
+// first move) starts once it ends, so nobody loses turn time behind the intro.
+export const MATCH_INTRO_MS=6000;
 let seasonCache={at:0,season:null};
 async function activeSeason(){const now=Date.now();if(now-seasonCache.at<60000&&(!seasonCache.season||seasonCache.season.endsAt>new Date(now)))return seasonCache.season;const season=await db.season.findFirst({where:{active:true,startsAt:{lte:new Date(now)},endsAt:{gt:new Date(now)}},orderBy:{startsAt:'desc'}});seasonCache={at:now,season};return season;}
 export class ArenaService {
@@ -62,7 +65,7 @@ export class ArenaService {
     const identities=humans.map(u=>({id:u.id,name:u.name,loadout:u.loadout,cups:u.cups,userId:u.id,isAI:false,profile:u.profile}));
     if(mode==='ai'||rankedBot){difficulty=rankedBot?rankedBotDifficulty(humans[0].cups):difficulty;fail(aiDifficulty.includes(difficulty),'VALIDATION','Choose one of the seven AI difficulties.');identities.push({id:`ai-${randomBytes(6).toString('hex')}`,name:`${difficulty[0].toUpperCase()+difficulty.slice(1)} ${rankedBot?'Competitive Bot':'AI'}`,loadout:defaultLoadout,cups:rankedBot?humans[0].cups:0,userId:null,isAI:true});}
     fail(identities.length===2,'VALIDATION','Two players are required.');if(randomInt(2))identities.reverse();
-    const state=createGame({mode:ruleset,boardSize,players:identities.map(({id,name,loadout})=>({id,name,loadout})),turnSeconds:20,rounds:boardSize>3||ruleset==='classic'?1:3,now:Date.now()});
+    const state=createGame({mode:ruleset,boardSize,players:identities.map(({id,name,loadout})=>({id,name,loadout})),turnSeconds:20,rounds:boardSize>3||ruleset==='classic'?1:3,now:Date.now()+MATCH_INTRO_MS});
     if(rankedBot)state.rankedBot=rankedBotPolicy(humans[0].cups);
     for(const player of state.players){const identity=identities.find(p=>p.id===player.id);player.profile=identity?.profile?Object.fromEntries(['avatar','title','equippedBoard','equippedMark','equippedEffect','equippedFrame','equippedBanner','equippedArena','equippedEmote'].map(key=>[key,identity.profile[key]])):null;}
     const season=await activeSeason();
@@ -180,11 +183,11 @@ export class ArenaService {
     // Surrender is an authenticated server intent, independent of the board
     // revision. Materialize it only after queued moves and timeouts settle.
     const canonical=canonicalSurrender?{type:'surrender',revision:m.state.revision}:action;
-    const next=applyAction(m.state,userId,canonical,Date.now());m=await this.persistTransition(m,next,{actorId:userId,action:canonical,requestId});return this.snapshot(m,userId);
+    const next=applyAction(m.state,userId,canonical,Math.max(Date.now(),m.state.turnStartedAt));m=await this.persistTransition(m,next,{actorId:userId,action:canonical,requestId});return this.snapshot(m,userId);
   }
   async surrender(userId,matchId,requestId){return serialize(`match:${matchId}`,()=>this.#actLocked(userId,matchId,{type:'surrender'},requestId||`surrender:${userId}`,true));}
-  async runAI(matchId,engineId){return serialize(`match:${matchId}`,async()=>{const fresh=await this.getMatch(matchId);if(fresh.status!=='active'||fresh.state.currentPlayerId!==engineId)return;const action=chooseAIAction(fresh.state,fresh.difficulty);if(!action)return;const next=applyAction(fresh.state,engineId,action,Date.now());await this.persistTransition(fresh,next,{actorId:engineId,action,requestId:`ai:${fresh.sequence}`});});}
-  scheduleAI(m){if(this.closed||m.status!=='active')return;const current=m.participants.find(p=>p.engineId===m.state.currentPlayerId);if(!current?.isAI||this.aiTimers.has(m.id))return;const timer=setTimeout(async()=>{this.aiTimers.delete(m.id);try{if(!this.closed)await this.runAI(m.id,current.engineId);}catch(error){console.error('AI action failed:',error.message);}},450+randomInt(300));timer.unref();this.aiTimers.set(m.id,timer);}
+  async runAI(matchId,engineId){return serialize(`match:${matchId}`,async()=>{const fresh=await this.getMatch(matchId);if(fresh.status!=='active'||fresh.state.currentPlayerId!==engineId)return;const action=chooseAIAction(fresh.state,fresh.difficulty);if(!action)return;const next=applyAction(fresh.state,engineId,action,Math.max(Date.now(),fresh.state.turnStartedAt));await this.persistTransition(fresh,next,{actorId:engineId,action,requestId:`ai:${fresh.sequence}`});});}
+  scheduleAI(m){if(this.closed||m.status!=='active')return;const current=m.participants.find(p=>p.engineId===m.state.currentPlayerId);if(!current?.isAI||this.aiTimers.has(m.id))return;const timer=setTimeout(async()=>{this.aiTimers.delete(m.id);try{if(!this.closed)await this.runAI(m.id,current.engineId);}catch(error){console.error('AI action failed:',error.message);}},450+randomInt(300)+Math.max(0,(m.state.turnStartedAt||0)-Date.now()));timer.unref();this.aiTimers.set(m.id,timer);}
   async pulse(){await this.pairQueue();for(const q of this.queue.values())this.io?.to(`user:${q.userId}`).emit('queue:status',this.queueStatus(q.userId));for(const m of [...this.matches.values()]){if(m.status!=='active')continue;if(m.state.turnDeadline<=Date.now()){try{await serialize(`match:${m.id}`,async()=>{const fresh=await this.getMatch(m.id);const next=tick(fresh.state,Date.now());if(next.revision!==fresh.sequence)await this.persistTransition(fresh,next,{action:{type:'timeout'}});});}
       // Isolate each match; connection-level failures still abort the pulse so recovery can count them.
       catch(error){if(databaseUnavailable(error))throw error;console.error('Arena pulse:',m.id,error.message);}}else this.scheduleAI(m);}for(const[code,r]of this.rooms)if(Date.now()-r.createdAt>30*60000){this.rooms.delete(code);this.io?.to(`room:${code}`).emit('room:updated',{code,status:'expired'});}if(Date.now()-this.lastTournamentPulse>5000){this.lastTournamentPulse=Date.now();await this.resumeTournaments();}}

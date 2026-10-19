@@ -479,7 +479,7 @@ export default function BattleScreen({
   const [drawer, setDrawer] = useState(null);
   const [roundBanner, setRoundBanner] = useState(null);
   const [intro, setIntro] = useState(match?.state?.status === "active");
-  const [countdown, setCountdown] = useState("3");
+  const [countdown, setCountdown] = useState("5");
   const game = match?.state;
   // The battle keeps its own clock: only this screen re-renders for the timers.
   const now = useClock(500, game?.status === "active");
@@ -530,34 +530,49 @@ export default function BattleScreen({
       };
     }
   }, [match?.matchId, game?.status, user?.id, playerId, spectator]);
+  // The versus screen counts 5 → 1, then FIGHT!, ending when the server starts the first
+  // turn (its clock waits for the intro). The end time is remembered per match, so a
+  // re-render or reload resumes the same countdown instead of restarting or skipping it.
   useEffect(() => {
     if (!match?.matchId || game?.status !== "active") {
       setIntro(false);
       return;
     }
+    const key = `ea:battle-intro:${match.matchId}`;
+    let endAt = 0;
     try {
-      const key = `ea:battle-intro:${match.matchId}`;
-      if (sessionStorage.getItem(key) === "1") {
-        setIntro(false);
-        return;
-      }
-      sessionStorage.setItem(key, "1");
+      endAt = Number(sessionStorage.getItem(key)) || 0;
     } catch {}
-    setIntro(true);
-    setCountdown("3");
-    let step = 0;
-    const count = setInterval(() => {
-      step += 1;
-      setCountdown(["3", "2", "1", "FIGHT"][Math.min(step, 3)]);
-    }, 480);
-    const finish = setTimeout(() => {
-      clearInterval(count);
+    const started = Date.now();
+    if (!endAt) {
+      const firstTurn = (game.turnStartedAt || 0) - clockOffset;
+      endAt =
+        game.turnNumber <= 1 && firstTurn > started + 1500 && firstTurn < started + 7000
+          ? firstTurn
+          : started + 5700;
+      try {
+        sessionStorage.setItem(key, String(endAt));
+      } catch {}
+    }
+    if (endAt <= started) {
       setIntro(false);
-    }, 2000);
-    return () => {
-      clearInterval(count);
-      clearTimeout(finish);
+      return;
+    }
+    setIntro(true);
+    const tick = () => {
+      const left = endAt - Date.now();
+      if (left <= 0) {
+        setIntro(false);
+        return false;
+      }
+      setCountdown(left <= 700 ? "FIGHT" : String(Math.min(5, Math.ceil((left - 700) / 1000))));
+      return true;
     };
+    tick();
+    const id = setInterval(() => {
+      if (!tick()) clearInterval(id);
+    }, 100);
+    return () => clearInterval(id);
   }, [match?.matchId]);
   const powerCast = POWER_INFO.find(
     (power) =>
@@ -1306,12 +1321,17 @@ export default function BattleScreen({
         </Modal>
       )}
       <AnimatePresence>
-        {intro && connectionReady && (
+        {intro && (
           <VersusIntro
             key="versus"
             reduced={reduced}
             countdown={countdown}
-            onSkip={() => setIntro(false)}
+            onSkip={() => {
+              try {
+                sessionStorage.setItem(`ea:battle-intro:${match.matchId}`, "1");
+              } catch {}
+              setIntro(false);
+            }}
             me={{
               name: displayName(me?.name),
               skin: me?.profile?.avatar || user?.profile?.avatar,
