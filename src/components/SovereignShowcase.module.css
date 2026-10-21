@@ -154,7 +154,7 @@
   .copy .tagline { max-width: 62%; font-size: 13px; }
   .perks { gap: 4px 10px; margin-top: 10px; }
   .perks > li { font-size: 12px; }
-  .seal { font-size: 10px; padding: 5px 14px; }
+  .seal { font-size: 11px; letter-spacing: .1em; padding: 5px 14px; }
   .buy { gap: 10px 16px; margin-top: 14px; }
   .buy :global(.sovereign-button) { flex: 1 1 100%; font-size: 14px !important; }
   .shade { background: linear-gradient(90deg, #0b0716f5, #0e0920d9 55%, #120b2077), linear-gradient(0deg, #0c0817f0, transparent 60%); }
