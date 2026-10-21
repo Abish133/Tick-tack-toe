@@ -44,7 +44,14 @@
 .mark.dominion>path:last-child{stroke:var(--cosmetic-primary);fill:var(--cosmetic-primary);fill-opacity:.14}
 .frame.dominion{inset:-18%;color:var(--cosmetic-primary);filter:drop-shadow(0 1px 1px #000) drop-shadow(0 0 4px #d3b87566)}
 .frame.dominion>svg{overflow:visible}
-.dominionGlint{stroke-dasharray:9 30;animation:dominion-frame-glint 5s linear infinite}
+.dominionGlint{transform-box:view-box;transform-origin:50px 52px;animation:sov-spin 8s linear infinite}
+.dominionRunes{transform-box:view-box;transform-origin:50px 52px;opacity:.7;animation:sov-spin 40s linear infinite reverse}
+.dominionJewel{transform-box:fill-box;transform-origin:center;filter:drop-shadow(0 0 3px #ffdc93);animation:sov-jewel 2.6s ease-in-out infinite}
+/* Sigils are forged on arrival: the strokes draw in, then the crown gem pulses and the inner ring turns. */
+.mark.dominion>path,.mark.dominion>circle{stroke-dasharray:170;animation:sov-forge .9s cubic-bezier(.3,.7,.3,1) both}
+.mark.dominion>path:nth-child(1){animation:sov-fill .9s ease-out both}
+.mark.dominion[data-mark="X"]>path:nth-child(3){transform-box:fill-box;transform-origin:center;animation:sov-forge .9s ease-out both,sov-jewel 2.4s ease-in-out .9s infinite}
+.mark.dominion>circle:nth-child(2){stroke-dasharray:1.6 3.2;transform-box:fill-box;transform-origin:center;animation:sov-spin 14s linear infinite}
 .arrival.dominion{isolation:isolate}
 .arrival.dominion:not(.compact){width:168px;height:168px}
 .dominionPortal{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.65;pointer-events:none;animation:dominion-portal-light 5s ease-in-out infinite}
@@ -60,7 +67,10 @@
 .arrival.dominion.compact .dominionOrbit{inset:9%;opacity:.6}
 .arrival.dominion.compact .particle{opacity:.6;width:8%;height:8%;left:46%;top:46%}
 @keyframes dominion-mark-light{0%,100%{filter:drop-shadow(0 0 3px currentColor)}50%{filter:drop-shadow(0 0 6px currentColor)}}
-@keyframes dominion-frame-glint{to{stroke-dashoffset:-78}}
+@keyframes sov-spin{to{rotate:360deg}}
+@keyframes sov-jewel{0%,100%{opacity:.7;scale:.85}50%{opacity:1;scale:1.15}}
+@keyframes sov-forge{from{stroke-dashoffset:170}to{stroke-dashoffset:0}}
+@keyframes sov-fill{from{fill-opacity:0}}
 @keyframes dominion-portal-light{0%,100%{opacity:.5}50%{opacity:.8}}
 @keyframes dominion-arrival-ring{0%{opacity:.1;scale:.85}35%{opacity:.85}100%{opacity:0;scale:1.2}}
 @keyframes dominion-orbit-light{0%,100%{opacity:.45}50%{opacity:.9}}
@@ -68,3 +78,6 @@
 :global(.reduce-motion) .mark.dominion,:global(.reduce-motion) .dominionGlint,:global(.reduce-motion) .arrival.dominion .arrivalRing,:global(.reduce-motion) .dominionPortal,:global(.reduce-motion) .dominionOrbit,:global(.reduce-motion) .dominionGate,:global(.reduce-motion) .arrival.dominion .particle,:global(.quality-low) .mark.dominion,:global(.quality-low) .dominionGlint,:global(.quality-low) .arrival.dominion *{animation:none!important}
 :global(.reduce-motion) .arrival.dominion .arrivalRing{opacity:.7;scale:1}
 :global(.high-contrast) .mark.dominion,:global(.high-contrast) .frame.dominion{filter:none}
+
+:global(.reduce-motion) .mark.dominion>*,:global(.reduce-motion) .dominionRunes,:global(.reduce-motion) .dominionJewel,:global(.quality-low) .mark.dominion>*,:global(.quality-low) .dominionRunes,:global(.quality-low) .dominionGlint{animation:none!important}
+@media(prefers-reduced-motion:reduce){.mark.dominion>*,.dominionRunes,.dominionGlint,.dominionJewel{animation:none!important}}

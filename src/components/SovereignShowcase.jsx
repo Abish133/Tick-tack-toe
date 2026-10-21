@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { Crown, ShieldCheck, Sparkles, Swords } from "lucide-react";
 import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import CosmeticArt from "./CosmeticArt";
+import AscendantFx from "./AscendantFx";
 import { cosmeticById } from "../lib/cosmetic-collection";
 import styles from "./SovereignShowcase.module.css";
 
@@ -79,6 +80,7 @@ export default function SovereignShowcase({
           {action}
         </div>
       </div>
+      <AscendantFx theme="dominion" edge stars={0} />
       <div className={styles.art} aria-hidden="true">
         <span className={styles.eclipse} />
         <span className={styles.orbit} />

@@ -213,6 +213,153 @@
 
 .sovereign-button:disabled { opacity: .72; filter: saturate(.75); }
 
+/* ---------- The Sovereign tier: Dominion's live light, above every other collection ----------
+   Gold and violet stars, star dust, a turning eclipse corona, an orbiting jewel and pulsing
+   crown gems. Everything turns, orbits, twinkles or breathes in place; nothing slides across. */
+.sov-fx .asc-fx-star { filter: drop-shadow(0 0 6px #ffdc93); }
+.sov-fx .asc-fx-star::before,
+.sov-fx .asc-fx-star::after { background: radial-gradient(closest-side, #fff 30%, #ffe8b1 58%, #ffdc93); }
+.sov-fx .asc-fx-star.sov-fx-violet { filter: drop-shadow(0 0 6px #a98bff); }
+.sov-fx .asc-fx-star.sov-fx-violet::before,
+.sov-fx .asc-fx-star.sov-fx-violet::after { background: radial-gradient(closest-side, #fff 28%, #d9c8ff 58%, #a98bff); }
+.sov-fx .asc-fx-dust,
+.sov-fx .asc-fx-dust::after {
+  background:
+    radial-gradient(1.6px 1.6px at 8% 22%, #fff3cf, transparent), radial-gradient(1.4px 1.4px at 24% 64%, #d9c8ff, transparent),
+    radial-gradient(2px 2px at 38% 12%, #ffdc93, transparent), radial-gradient(1.4px 1.4px at 47% 52%, #fff, transparent),
+    radial-gradient(1.8px 1.8px at 61% 28%, #a98bff, transparent), radial-gradient(1.4px 1.4px at 72% 74%, #fff3cf, transparent),
+    radial-gradient(2px 2px at 86% 34%, #ffdc93, transparent), radial-gradient(1.4px 1.4px at 93% 84%, #d9c8ff, transparent),
+    radial-gradient(1.6px 1.6px at 18% 90%, #fff, transparent), radial-gradient(1.6px 1.6px at 56% 94%, #ffdc93, transparent);
+}
+/* Dominion's edge is a neon light that runs around the rim: two gold-and-violet runners. */
+@property --sov-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.sov-fx .asc-fx-edge { filter: drop-shadow(0 0 4px #ffdc93) drop-shadow(0 0 10px #a98bffaa); opacity: 1; animation: none; }
+.sov-fx .asc-fx-edge::before {
+  background: conic-gradient(from var(--sov-angle),
+    #ffdc9322 0deg, #ffdc9322 110deg, #a98bff 140deg, #fff3cf 162deg, #ffdc93 172deg, #ffdc9300 180deg,
+    #ffdc9322 200deg, #ffdc9322 290deg, #a98bff 320deg, #fff3cf 342deg, #ffdc93 352deg, #ffdc9322 360deg);
+  animation: sov-neon-run 3.6s linear infinite;
+}
+@keyframes sov-neon-run { to { --sov-angle: 360deg; } }
+html.reduce-motion .sov-fx .asc-fx-edge::before { animation: none; }
+.sov-fx .asc-fx-glow { background: radial-gradient(closest-side, #ffdc934d, #a98bff3d 45%, #a98bff14 70%, transparent); }
+.sov-fx-corona {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  height: 104%;
+  max-width: 130%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: repeating-conic-gradient(#ffdc9300 0deg 8deg, #ffdc9340 10deg, #ffdc9300 12deg 20deg);
+  -webkit-mask: radial-gradient(circle, transparent 34%, #000 46%, #000 58%, transparent 70%);
+  mask: radial-gradient(circle, transparent 34%, #000 46%, #000 58%, transparent 70%);
+  mix-blend-mode: screen;
+  animation: sov-turn 36s linear infinite, sov-breathe 5s ease-in-out infinite;
+}
+.sov-fx-orbit { position: absolute; inset: 6% 4%; }
+.sov-fx-orbit > i {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 20%, #ffdc93 55%, #ffdc9300 72%);
+  box-shadow: 0 0 10px 2px #ffdc93aa;
+  offset-path: ellipse(48% 15% at 50% 52%);
+  offset-rotate: 0deg;
+  animation: sov-orbit 6.5s linear infinite;
+}
+.sov-fx-gem {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  translate: -50% -50%;
+  rotate: 45deg;
+  background: linear-gradient(135deg, #fff3cf, #ffdc93 50%, #a98bff);
+  box-shadow: 0 0 8px #ffdc93cc;
+  animation: sov-gem 2.8s ease-in-out var(--asc-delay, 0s) infinite;
+}
+.asc-fx-small.sov-fx .sov-fx-gem { width: 5px; height: 5px; }
+/* Shop cards trim the lighter collections' light; the Sovereign tier keeps its full show. */
+.shop-card .sov-fx .asc-fx-dust { display: block; }
+.shop-card .sov-fx .asc-fx-star:nth-child(n + 6) { display: block; }
+
+/* ---------- Each piece's own signature ---------- */
+/* Eclipse Dragon: the portrait breathes between violet and gold light. */
+.collection-theme-dominion .collection-portrait {
+  animation: dominion-portrait 6s ease-in-out infinite, sov-portrait-light 4s ease-in-out infinite;
+}
+/* Citadel of Eternity: the eclipse above the citadel glows and fades. */
+.collection-theme-dominion.collection-landscape-art::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  width: 46%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffdc9300 30%, #ffdc9350 44%, #a98bff33 56%, transparent 70%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: sov-breathe 4.5s ease-in-out infinite;
+}
+/* Board: gold channels breathe, and empty preview tiles hold a faint crown gem. */
+.collection-board[data-cosmetic-theme="dominion"] { animation: sov-board-light 4.5s ease-in-out infinite; }
+.collection-board[data-cosmetic-theme="dominion"] > .collection-board-cell:empty::before {
+  content: "";
+  width: 18%;
+  aspect-ratio: 1;
+  rotate: 45deg;
+  background: linear-gradient(135deg, #fff3cf, #ffdc93 50%, #a98bff);
+  box-shadow: 0 0 6px #ffdc9399;
+  animation: sov-gem 3.2s ease-in-out infinite;
+}
+.collection-board[data-cosmetic-theme="dominion"] > .collection-board-cell:nth-child(3n + 2):empty::before { animation-delay: -1s; }
+.collection-board[data-cosmetic-theme="dominion"] > .collection-board-cell:nth-child(3n):empty::before { animation-delay: -2s; }
+.collection-board[data-cosmetic-theme="dominion"] > .collection-board-cell { display: grid; place-items: center; }
+/* Horizon banner and crest: the crest glows like a seal. */
+.collection-theme-dominion .collection-banner-crest > svg { animation: sov-seal 3.6s ease-in-out infinite; }
+/* Signals: the crown rises and gleams; the eclipse's rays turn. */
+.collection-theme-dominion.collection-emote-art > span:nth-of-type(1) > svg,
+.emote-signal-dominion > svg:has(circle[r="2"]) { animation: sov-crown 2.6s ease-in-out infinite; }
+.collection-theme-dominion.collection-emote-art > span:nth-of-type(2) > svg > path:nth-child(3),
+.emote-signal-dominion > svg > path:nth-child(3) {
+  transform-box: view-box;
+  transform-origin: 24px 24px;
+  animation: sov-turn 9s linear infinite;
+}
+.emote-signal-dominion > svg { color: #ffdc93; filter: drop-shadow(0 0 6px #ffdc93aa); }
+/* Title: the crest crowns the title and the gems between flourishes pulse. */
+.collection-theme-dominion.collection-title-art > svg { animation: sov-crown 3s ease-in-out infinite; }
+.collection-theme-dominion .collection-title-flourish { color: #ffdc93; animation: sov-flourish 2.8s ease-in-out infinite; }
+.player-title-crown { display: inline-block; width: 1em; height: 1em; margin-right: .3em; vertical-align: -.12em; color: #ffdc93; filter: drop-shadow(0 0 4px #ffdc93aa); animation: sov-gem-soft 2.8s ease-in-out infinite; }
+
+@keyframes sov-turn { to { rotate: 360deg; } }
+@keyframes sov-breathe { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+@keyframes sov-orbit { to { offset-distance: 100%; } }
+@keyframes sov-gem { 0%, 100% { opacity: .35; scale: .7; } 50% { opacity: 1; scale: 1.15; } }
+@keyframes sov-gem-soft { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
+@keyframes sov-portrait-light { 0%, 100% { filter: drop-shadow(0 3px 2px #0009) drop-shadow(0 0 10px #a98bff40); } 50% { filter: drop-shadow(0 3px 2px #0009) drop-shadow(0 0 16px #ffdc9355); } }
+@keyframes sov-board-light { 0%, 100% { box-shadow: inset 0 0 0 2px #bba4ff30, inset 0 0 24px #ffdc9320, 0 8px 24px #0008; } 50% { box-shadow: inset 0 0 0 2px #bba4ff55, inset 0 0 30px #ffdc9338, 0 8px 24px #0008, 0 0 22px #ffdc9330; } }
+@keyframes sov-seal { 0%, 100% { filter: drop-shadow(0 0 3px #ffdc9355); } 50% { filter: drop-shadow(0 0 10px #ffdc93cc); } }
+@keyframes sov-crown { 0%, 100% { translate: 0 1px; filter: drop-shadow(0 0 3px #ffdc9366); } 50% { translate: 0 -2px; filter: drop-shadow(0 0 10px #ffdc93); } }
+@keyframes sov-flourish { 0%, 100% { opacity: .6; text-shadow: none; } 50% { opacity: 1; text-shadow: 0 0 8px #ffdc93; } }
+
+.reduce-motion .sov-fx,
+.quality-low .sov-fx,
+html.reduce-motion .player-title-crown,
+html.reduce-motion .emote-signal-dominion > svg,
+html.reduce-motion .emote-signal-dominion > svg > path,
+html.reduce-motion .collection-board[data-cosmetic-theme="dominion"],
+html.reduce-motion .collection-board[data-cosmetic-theme="dominion"] > .collection-board-cell::before,
+html.quality-low .collection-board[data-cosmetic-theme="dominion"] > .collection-board-cell::before { animation: none !important; }
+html.quality-medium .sov-fx-corona { animation: sov-breathe 5s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .sov-fx-corona, .sov-fx-orbit > i, .sov-fx-gem { animation: none; }
+}
+
 @keyframes dominion-aura { 0%,100% { opacity: .65; scale: .96; } 50% { opacity: 1; scale: 1.04; } }
 @keyframes dominion-portrait { 0%,100% { translate: 0 0; } 50% { translate: 0 -3px; } }
 @keyframes dominion-landscape { from { scale: 1.03; } to { scale: 1.09; } }

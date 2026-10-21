@@ -63,6 +63,41 @@ export default function AscendantFx({
     return () => observer.disconnect();
   }, []);
   const info = cosmeticTheme(`avatar-collection-${theme}`);
+  // Eternal Dominion is the top tier: everything Ascendant has, in gold and violet,
+  // plus a turning eclipse corona, an orbiting jewel and pulsing crown gems.
+  if (theme === "dominion")
+    return (
+      <span
+        ref={ref}
+        className={`asc-fx sov-fx ${className}`}
+        data-fx-motion="twinkle"
+        aria-hidden="true"
+      >
+        {glow && <span className="sov-fx-corona" />}
+        {glow && <span className="asc-fx-glow" />}
+        {stars > 0 && <span className="asc-fx-dust" />}
+        {edge && <span className="asc-fx-edge" />}
+        {glow && (
+          <span className="sov-fx-orbit">
+            <i />
+          </span>
+        )}
+        {STARS.slice(0, stars).map(([x, y, delay, size], index) => (
+          <span
+            key={index}
+            className={`asc-fx-star ${index % 3 === 2 ? "sov-fx-violet" : ""}`}
+            style={{ left: `${x}%`, top: `${y}%`, "--asc-delay": `${delay}s`, "--asc-size": size }}
+          />
+        ))}
+        {[[50, 4], [6, 50], [94, 50]].slice(0, glow ? 3 : 0).map(([x, y], index) => (
+          <span
+            key={`gem-${index}`}
+            className="sov-fx-gem"
+            style={{ left: `${x}%`, top: `${y}%`, "--asc-delay": `${index * 0.9}s` }}
+          />
+        ))}
+      </span>
+    );
   const full = theme === "ascendant";
   const count = full ? stars : Math.min(stars, 6);
   return (

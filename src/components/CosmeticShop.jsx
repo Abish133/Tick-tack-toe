@@ -523,6 +523,9 @@ export default function CosmeticShop({
                       {item.rarity === "ascendant" && (
                         <AscendantFx edge stars={0} className="asc-fx-thin" />
                       )}
+                      {item.rarity === "sovereign" && (
+                        <AscendantFx theme="dominion" edge stars={0} className="asc-fx-thin" />
+                      )}
                       <button
                         className={`shop-art ${styles.art}`}
                         onClick={() => setPreview(item)}

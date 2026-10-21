@@ -1276,7 +1276,6 @@
   border: 1px solid #e9c27a !important;
   background: linear-gradient(#1c1229, #0c0817) !important;
   box-shadow: inset 0 0 0 2px #0c0817, inset 0 0 0 3px #a98bff40, 0 0 0 1px #3b2913, 0 8px 18px #0008, 0 0 22px #ffdc931c !important;
-  animation: sovereign-card-glow 5s ease-in-out infinite;
 }
 .card[data-rarity="sovereign"]::after {
   content: "";
@@ -1340,7 +1339,6 @@
 .sovereignDialog .previewStage { border-color: #e9c27a !important; background: radial-gradient(circle at 50% 50%, #a98bff33, #ffdc9310 45%, transparent 70%), linear-gradient(#21153a, #0f0a1d) !important; }
 .sovereignDialog .themeName { font-family: var(--font-display); color: var(--sov-gold); }
 
-@keyframes sovereign-card-glow { 0%, 100% { box-shadow: inset 0 0 0 2px #0c0817, inset 0 0 0 3px #a98bff40, 0 0 0 1px #3b2913, 0 8px 18px #0008, 0 0 16px #ffdc9314; } 50% { box-shadow: inset 0 0 0 2px #0c0817, inset 0 0 0 3px #a98bff70, 0 0 0 1px #3b2913, 0 8px 18px #0008, 0 0 28px #ffdc9333; } }
 :global(html.reduce-motion) .card[data-rarity="sovereign"],
 :global(html.quality-low) .card[data-rarity="sovereign"] { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { .card[data-rarity="sovereign"] { animation: none !important; } }

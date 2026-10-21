@@ -26,7 +26,6 @@
   border-radius: 16px;
   background: var(--sov-obsidian);
   box-shadow: inset 0 0 0 3px #0c0817, inset 0 0 0 4px #bba4ff4d, 0 0 0 1px #3b2913, 0 12px 30px #000a, 0 0 40px #8f6cff2b;
-  animation: sovereign-breathe 5s ease-in-out infinite;
 }
 .root::before {
   content: "";
@@ -152,7 +151,6 @@
 .art :global(.collection-avatar-aura) { display: none; }
 .art :global(.collection-portrait-art .collection-portrait) { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 12px 18px #000c) drop-shadow(0 0 18px #a98bff40); }
 
-@keyframes sovereign-breathe { 0%, 100% { box-shadow: inset 0 0 0 3px #0c0817, inset 0 0 0 4px #bba4ff4d, 0 0 0 1px #3b2913, 0 12px 30px #000a, 0 0 32px #8f6cff22; } 50% { box-shadow: inset 0 0 0 3px #0c0817, inset 0 0 0 4px #bba4ff80, 0 0 0 1px #3b2913, 0 12px 30px #000a, 0 0 54px #ffdc9338; } }
 @keyframes sovereign-twinkle { 0%, 100% { opacity: .15; scale: .5; } 50% { opacity: 1; scale: 1.1; } }
 @keyframes sovereign-eclipse { 0%, 100% { opacity: .7; scale: .95; } 50% { opacity: 1; scale: 1.04; } }
 @keyframes sovereign-orbit { to { rotate: 360deg; } }

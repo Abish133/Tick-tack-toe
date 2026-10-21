@@ -1,5 +1,6 @@
 "use client";
 
+import { Crown } from "lucide-react";
 import { COSMETIC_THEMES } from "../lib/cosmetic-collection";
 
 /** An equipped title as a small themed tag, so opponents see it in battle too. */
@@ -12,6 +13,7 @@ export default function PlayerTitle({ title, className = "" }) {
       data-cosmetic-theme={theme?.id}
       title={title}
     >
+      {theme?.id === "dominion" && <Crown className="player-title-crown" aria-hidden="true" />}
       {title}
     </span>
   );
