@@ -93,13 +93,8 @@ function lightLayers(design, index) {
     front += star(x, y, w * (0.0035 + (j % 3) * 0.0015), 0.10 + twinkle * 0.72, j % 2 ? "#d7c7ff" : "#fff0c8");
   }
   const definitions = `<linearGradient id="orbit" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#bba4ff"/><stop offset=".48" stop-color="#fff0b4"/><stop offset="1" stop-color="#ffdc93"/></linearGradient><radialGradient id="spark"><stop stop-color="#fff9db" stop-opacity=".9"/><stop offset=".3" stop-color="#d6aaff" stop-opacity=".5"/><stop offset="1" stop-color="#a591ff" stop-opacity="0"/></radialGradient><linearGradient id="aurora"><stop stop-color="#9c73d5" stop-opacity="0"/><stop offset=".3" stop-color="#ffdc93"/><stop offset=".7" stop-color="#dc91ff"/><stop offset="1" stop-color="#fff1ba" stop-opacity="0"/></linearGradient><filter id="soft"><feGaussianBlur stdDeviation="${h * 0.018}"/></filter>`;
-  // The sin-driven highlight reverses gently at the edges, completing a true loop.
-  const sweep = w * (0.5 + Math.sin(phase - Math.PI / 2) * 0.75);
-  const shimmer = svg(w, h,
-    `<path d="M${number(sweep - w * 0.18)} 0 L${number(sweep + w * 0.02)} 0 L${number(sweep + w * 0.32)} ${h} L${number(sweep + w * 0.12)} ${h} Z" fill="url(#sheen)" opacity="${transparent ? 0.13 : 0.045}"/>`,
-    `<linearGradient id="sheen"><stop stop-color="#ffdc93" stop-opacity="0"/><stop offset=".5" stop-color="#fff9e8"/><stop offset="1" stop-color="#deb7ff" stop-opacity="0"/></linearGradient>`
-  );
-  return { back, front: svg(w, h, front, definitions), shimmer };
+  // No sweeping highlight band: the collection's light breathes and orbits, it never slides.
+  return { back, front: svg(w, h, front, definitions) };
 }
 
 function animatedInput(frames, width, height) {
@@ -144,11 +139,10 @@ async function build(design) {
   const frames = [], gifFrames = [], frameDigests = new Set();
   for (let i = 0; i < FRAME_COUNT; i++) {
     const layers = lightLayers(design, i);
-    // Icon art remains byte-identical between frames: avoiding a full-art colour
-    // sweep keeps intricate transparent edges sharp and permits delta encoding.
-    const sheen = transparent ? null : await sharp(layers.shimmer).composite([{ input: base, blend: "dest-in" }]).png().toBuffer();
+    // The art itself stays byte-identical between frames (sharp edges, delta encoding);
+    // only the light layers behind and in front of it move.
     const frame = await sharp({ create: { width, height, channels: 4, background: { r: 0, g: 0, b: 0, alpha: transparent ? 0 : 1 } } })
-      .composite([{ input: layers.back }, { input: base }, ...(sheen ? [{ input: sheen, blend: "screen" }] : []), { input: layers.front }]).ensureAlpha().raw().toBuffer();
+      .composite([{ input: layers.back }, { input: base }, { input: layers.front }]).ensureAlpha().raw().toBuffer();
     frames.push(frame);
     frameDigests.add(createHash("sha256").update(frame).digest("hex"));
     gifFrames.push(await sharp(frame, { raw: { width, height, channels: 4 } }).resize(gifWidth, gifHeight).raw().toBuffer());
@@ -176,7 +170,7 @@ await mkdir(outputDirectory, { recursive: true });
 const manifest = {
   formatVersion: 1, encoder: `sharp ${sharp.versions.sharp} / libvips ${sharp.versions.vips}`,
   frameCount: FRAME_COUNT, frameDelayMs: FRAME_DELAY, durationMs: DURATION, loop: "infinite",
-  artTreatment: "Original artwork stays still; decorative light, orbital stars, and shimmer loop above it.",
+  artTreatment: "Original artwork stays still; decorative light and orbital stars loop around it (no sliding sheen).",
   reducedMotion: "Use each -poster.webp when reduced motion is requested or user animation is disabled.",
   assets: [],
 };

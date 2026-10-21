@@ -5,7 +5,7 @@
   "frameDelayMs": 90,
   "durationMs": 2880,
   "loop": "infinite",
-  "artTreatment": "Original artwork stays still; decorative light, orbital stars, and shimmer loop above it.",
+  "artTreatment": "Original artwork stays still; decorative light and orbital stars loop around it (no sliding sheen).",
   "reducedMotion": "Use each -poster.webp when reduced motion is requested or user animation is disabled.",
   "assets": [
     {
@@ -35,8 +35,8 @@
           "durationMs": 2880,
           "loop": 0,
           "hasAlpha": true,
-          "bytes": 2577585,
-          "sha256": "d1c3730b136a5cf1a14b68baddee53640d157678c33c1f9a08e0d1e839e901a5",
+          "bytes": 2578273,
+          "sha256": "3a49447d81c14d432cb64de5561a51d1f973ec9c22702a89d7a6623b3d25ae82",
           "distinctDecodedSampleFrames": 4,
           "transparentCorners": true
         },
@@ -68,8 +68,8 @@
           "durationMs": 2880,
           "loop": 0,
           "hasAlpha": true,
-          "bytes": 450566,
-          "sha256": "e82d850cb736f7682cfcdf7a90f1ec6f2e130476c4edfb2e0a1a63ab9153a11b",
+          "bytes": 450536,
+          "sha256": "08820fd2d7e53b7a87b5b5c3e2b3e0743d4b2a152e48cc506a0c4661d82493f4",
           "distinctDecodedSampleFrames": 4
         },
         {
@@ -80,8 +80,8 @@
           "durationMs": 2880,
           "loop": 0,
           "hasAlpha": true,
-          "bytes": 455587,
-          "sha256": "1040f40c7c1afd417f95af3cf1adb3f5752742911dd16b3db660b91a2156e7ec",
+          "bytes": 455229,
+          "sha256": "260bffd5e7aad59dafc1a961fd5065d1614cb22665e06476af33c5473051d85e",
           "distinctDecodedSampleFrames": 4
         },
         {
@@ -124,8 +124,8 @@
           "durationMs": 2880,
           "loop": 0,
           "hasAlpha": true,
-          "bytes": 1678527,
-          "sha256": "8ba28e844db6a1698ee2ba9cfd90ed476da386ea10ed2888c181f19a16dec73d",
+          "bytes": 1678534,
+          "sha256": "eb76a0eda3517781c089e93372fd7295551aaabb711987eaa0bcb8ae3b796fbc",
           "distinctDecodedSampleFrames": 4,
           "transparentCorners": true
         },
@@ -157,8 +157,8 @@
           "durationMs": 2880,
           "loop": 0,
           "hasAlpha": true,
-          "bytes": 423296,
-          "sha256": "0a93787d33a6b4766a964e401ec31d3165e509ce30647d8f4678008de9145826",
+          "bytes": 422422,
+          "sha256": "3ffddf75d57a5aa5daf6136d054b0331522d9d1172f6ec927c4e4e92c9e27995",
           "distinctDecodedSampleFrames": 4
         },
         {
@@ -169,8 +169,8 @@
           "durationMs": 2880,
           "loop": 0,
           "hasAlpha": true,
-          "bytes": 526880,
-          "sha256": "7236669eb061acbf3e7cc8fd9a4922e04cf041c3723042708d52f5e74226ab9f",
+          "bytes": 526496,
+          "sha256": "5aff733d9fcb674807e8f0fc5888e165242cb4d883b5c33f104a0332216ebf7e",
           "distinctDecodedSampleFrames": 4
         },
         {

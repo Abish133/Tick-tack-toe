@@ -1,4 +1,5 @@
 "use client";
+import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useEffect, useRef, useState } from "react";
 import {
   Coins,
@@ -314,12 +315,25 @@ export default function CommercePanel({
           {focus === "premium" && premiumProduct && (
             <section className={styles.sovereignOffer} aria-label="Eternal Dominion premium set" data-bundle-id="bundle-dominion">
               <div className={styles.sovereignHero}>
-                <img className={styles.sovereignBackdrop} src="/assets/collection/dominion/arena-poster.webp" alt="" />
+                <AnimatedCosmeticImage
+                  className={styles.sovereignBackdrop}
+                  cosmeticId="arena-collection-dominion"
+                  src="/assets/collection/dominion/arena-poster.webp"
+                  alt=""
+                />
                 <div className={styles.sovereignCopy}>
                   <span className={styles.sovereignEyebrow}><Crown size={14} /> SOVEREIGN · PREMIUM EXCLUSIVE</span>
                   <h3>Eternal<br />Dominion</h3>
                   <p>Command the eclipse. Wear the crown.</p>
                   <span className={styles.moneyOnly}><CreditCard size={13} /> REAL MONEY ONLY</span>
+                  {/* The offer itself sits in the hero: price and purchase without scrolling. */}
+                  <div className={styles.sovereignHeroBuy}>
+                    <div className={styles.sovereignPrice}><span>COMPLETE NINE-STYLE SET</span><strong>{price(premiumProduct)}</strong><small>{premiumComplete ? "All nine styles owned" : `${premiumOwned} / ${premiumItems.length} styles owned · One-time purchase`}</small></div>
+                    <GameButton disabled={premiumComplete || !data.checkoutEnabled || Boolean(busy)} onClick={() => payment(premiumProduct)}>
+                      {busy === premiumProduct.id ? <LoaderCircle className="spin" size={18} /> : premiumComplete ? <Check size={18} /> : !data.checkoutEnabled ? <LockKeyhole size={18} /> : <Crown size={18} />}
+                      {premiumComplete ? "Collection owned" : !data.checkoutEnabled ? "Checkout unavailable" : "Buy Eternal Dominion"}
+                    </GameButton>
+                  </div>
                 </div>
                 {premiumAvatar && <span className={styles.sovereignPortrait} aria-hidden="true"><CosmeticArt item={premiumAvatar} /></span>}
               </div>
@@ -336,13 +350,6 @@ export default function CommercePanel({
                       {ownedIds.includes(item.id) ? <Check className={styles.slotOwned} size={14} aria-label="Owned" /> : <Eye className={styles.slotOwned} size={13} aria-hidden="true" />}
                     </button>
                   ))}
-                </div>
-                <div className={styles.sovereignCheckout}>
-                  <div className={styles.sovereignPrice}><span>COMPLETE NINE-STYLE SET</span><strong>{price(premiumProduct)}</strong><small>{premiumComplete ? "All nine styles owned" : `${premiumOwned} / ${premiumItems.length} styles owned · One-time purchase`}</small></div>
-                  <GameButton disabled={premiumComplete || !data.checkoutEnabled || Boolean(busy)} onClick={() => payment(premiumProduct)}>
-                    {busy === premiumProduct.id ? <LoaderCircle className="spin" size={18} /> : premiumComplete ? <Check size={18} /> : !data.checkoutEnabled ? <LockKeyhole size={18} /> : <CreditCard size={18} />}
-                    {premiumComplete ? "Collection owned" : !data.checkoutEnabled ? "Checkout unavailable" : "Buy Eternal Dominion"}
-                  </GameButton>
                 </div>
                 <p className={styles.sovereignTerms}><ShieldCheck size={16} /><span>Cosmetics only. Equal powers and gameplay for every player. This set cannot be purchased with coins or earned through rewards.</span></p>
                 {premiumOwned > 0 && !premiumComplete && <p className={styles.small}>The full set price applies. Owned styles are retained; duplicates do not grant coins.</p>}

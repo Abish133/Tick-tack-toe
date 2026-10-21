@@ -684,3 +684,15 @@
   .sovereignTerms { padding:9px; font-size:11px; }
 }
 @media(prefers-reduced-motion:reduce) { .sovereignContents>button { transition:none; } }
+
+/* Hero offer: the price and purchase sit beside the title, above the fold. */
+.sovereignHeroBuy { display:flex; align-items:center; flex-wrap:wrap; gap:14px; margin-top:18px; }
+.sovereignHeroBuy .sovereignPrice strong { font-size:clamp(30px,3.6vw,42px); text-shadow:0 0 18px #ffdc9355, 0 2px 6px #000a; }
+.sovereignHeroBuy > button { min-height:48px; }
+/* The portrait glows from within the hero instead of a clipped ring around it. */
+.sovereignPortrait :global(.collection-avatar-aura) { display:none; }
+.sovereignPortrait::before { content:""; position:absolute; inset:12% 8% 4%; z-index:-1; border-radius:50%;
+  background:radial-gradient(closest-side,#bba4ff40,#ffdc931f 55%,transparent); animation:sovereignGlow 4s ease-in-out infinite; }
+@keyframes sovereignGlow { 50% { opacity:.6; scale:.95; } }
+:global(html.reduce-motion) .sovereignPortrait::before { animation:none; }
+@media (max-width:600px) { .sovereignHeroBuy { gap:10px; margin-top:14px; } .sovereignHeroBuy > button { width:100%; } }
