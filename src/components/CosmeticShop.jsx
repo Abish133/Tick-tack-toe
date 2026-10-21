@@ -19,7 +19,8 @@ import {
 import AscendantFx from "./AscendantFx";
 import CosmeticArt from "./CosmeticArt";
 import { CosmeticMark } from "./CosmeticAppearance";
-import CommercePanel from "./CommercePanel";
+import SovereignShowcase from "./SovereignShowcase";
+import CommercePanel, { price as formatPrice } from "./CommercePanel";
 import { GameFrame, GameButton, Modal, RarityTile, StateBadge } from "./ui";
 import { markSeen, newIds } from "../lib/seen-cosmetics";
 import {
@@ -29,6 +30,7 @@ import {
   cosmeticTheme,
   cosmeticStyle,
   isCashOnlyCosmetic,
+  premiumBundleForCosmetic,
 } from "../lib/cosmetic-collection";
 import styles from "./CosmeticShop.module.css";
 
@@ -102,12 +104,13 @@ export function CosmeticPreview({
       title={item.name}
       onClose={onClose}
       closeLabel="Close preview"
-      className={styles.dialog}
+      className={`${styles.dialog} ${cashOnly ? styles.sovereignDialog : ""}`}
     >
       <span
         className={styles.previewRarity}
         data-rarity={item.rarity || "rare"}
       >
+        {cashOnly && <Crown size={13} aria-hidden="true" />}
         {item.rarity || "rare"} · {animated && "ANIMATED · "}COSMETIC PREVIEW
       </span>
       <div
@@ -156,7 +159,7 @@ export function CosmeticPreview({
       )}
       <div className={styles.previewActions}>
         <span>
-          <ShieldCheck size={16} /> Visual style only
+          <ShieldCheck size={16} /> {cashOnly ? "Part of the nine-style set" : "Visual style only"}
         </span>
         {owned && onEquip ? (
           <GameButton disabled={busy || equipped} onClick={() => onEquip(item)}>
@@ -170,14 +173,19 @@ export function CosmeticPreview({
             )}
           </GameButton>
         ) : (
-          <GameButton disabled={owned || busy} onClick={() => onPurchase(item)}>
+          <GameButton
+            variant={cashOnly && !owned ? "secondary" : undefined}
+            className={cashOnly && !owned ? "sovereign-button" : undefined}
+            disabled={owned || busy}
+            onClick={() => onPurchase(item)}
+          >
             {owned ? (
               <>
                 <Check size={18} />
                 Owned
               </>
             ) : cashOnly ? (
-              <><CreditCard size={18} /> View premium set</>
+              <><Crown size={18} /> View premium set</>
             ) : (
               <>
                 <Coins size={18} />
@@ -212,7 +220,21 @@ export default function CosmeticShop({
     [preview, setPreview] = useState(null),
     [picker, setPicker] = useState(null),
     [equipBusy, setEquipBusy] = useState(false),
-    [reveal, setReveal] = useState(null);
+    [reveal, setReveal] = useState(null),
+    // The live product (it can carry a configured amount); the catalog default until it loads.
+    [dominionBundle, setDominionBundle] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    api("/commerce/products")
+      .then((data) => {
+        const bundle = data?.products?.find((product) => product.id === "bundle-dominion");
+        if (alive && bundle) setDominionBundle(bundle);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [api]);
   const catalogRef = useRef(null),
     premiumTabRef = useRef(null),
     pendingPurchase = useRef(null),
@@ -344,7 +366,7 @@ export default function CosmeticShop({
     onCollection: viewCollection,
     onPreview: setPreview,
   };
-  const dominionAvatar = cosmeticById("avatar-collection-dominion");
+  const dominionPrice = formatPrice(dominionBundle || premiumBundleForCosmetic("avatar-collection-dominion"));
   return (
     <section className={styles.store} aria-label="Cosmetic collection">
       <div className={`${styles.categories} scroll-row`} aria-label="Cosmetic categories">
@@ -432,37 +454,21 @@ export default function CosmeticShop({
       )}
       <div ref={catalogRef} className={styles.catalogScroll}>
         {category === "all" && theme === "all" && !query && (
-          <GameFrame
-            variant="banner"
-            className={`${styles.hero} ${styles.dominionHero}`}
+          <SovereignShowcase
             aria-label="Eternal Dominion, exclusive premium cosmetic set"
-          >
-            <img
-              className={styles.heroBackground}
-              src="/assets/collection/dominion/arena-poster.webp"
-              alt=""
-            />
-            <div className={styles.heroShade} />
-            <div className={styles.heroCopy}>
-              <span className={styles.offerRibbon}>
-                <Crown size={16} />
-                SOVEREIGN · EXCLUSIVE
-              </span>
-              <h2>ETERNAL DOMINION</h2>
-              <p>Nine matching styles. One imperial identity.</p>
-              <span className={styles.heroCashLabel}>PREMIUM SET · REAL MONEY ONLY</span>
+            tagline="Nine animated styles. One imperial identity. Never sold for coins."
+            price={dominionPrice}
+            action={
               <GameButton
                 variant="secondary"
-                className={styles.heroAction}
+                className="sovereign-button"
                 onClick={openPremium}
               >
+                <Crown size={17} aria-hidden="true" />
                 EXPLORE PREMIUM SET
               </GameButton>
-            </div>
-            <div className={styles.heroArt} aria-hidden="true">
-              {dominionAvatar && <CosmeticArt item={dominionAvatar} />}
-            </div>
-          </GameFrame>
+            }
+          />
         )}
         {["collections", "coins", "premium"].includes(category) && (
           <CommercePanel
@@ -529,6 +535,7 @@ export default function CosmeticShop({
                             className={styles.rarity}
                             data-rarity={item.rarity}
                           >
+                            {item.rarity === "sovereign" && <Crown size={11} aria-hidden="true" />}
                             {item.rarity || "rare"}
                           </span>
                           {animated ? (
@@ -553,6 +560,11 @@ export default function CosmeticShop({
                         </span>
                       </button>
                       <div className={`shop-info ${styles.info}`}>
+                        {item.rarity === "sovereign" && (
+                          <span className={styles.sovereignCrest} aria-hidden="true">
+                            <Crown size={14} />
+                          </span>
+                        )}
                         <span className={styles.itemType}>
                           {categories.find(([id]) => id === item.type)?.[1] ||
                             item.type}
@@ -580,13 +592,16 @@ export default function CosmeticShop({
                         ) : isCashOnlyCosmetic(item.id) ? (
                           <>
                             <GameButton
-                              variant="primary"
+                              variant="secondary"
+                              className="sovereign-button"
                               disabled={busy}
                               onClick={openPremium}
                             >
-                              <CreditCard size={16} /> View premium set
+                              <Crown size={16} /> View premium set
                             </GameButton>
-                            <small className={styles.cashOnlyLabel}>Real money only · Full set</small>
+                            <small className={styles.cashOnlyLabel}>
+                              Full set <b>{dominionPrice}</b> · Real money only
+                            </small>
                           </>
                         ) : balance < Number(item.price ?? item.cost ?? 0) ? (
                           <>

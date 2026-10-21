@@ -1,0 +1,68 @@
+"use client";
+
+import { Crown, ShieldCheck, Sparkles } from "lucide-react";
+import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
+import CosmeticArt from "./CosmeticArt";
+import { cosmeticById } from "../lib/cosmetic-collection";
+import styles from "./SovereignShowcase.module.css";
+
+/**
+ * Eternal Dominion's stage: animated citadel, gilded title, the dragon inside an
+ * eclipse, the price and one crown button. The shop's featured offer and the premium
+ * set page both open with it, so the set reads the same wherever players meet it.
+ */
+export default function SovereignShowcase({
+  as: Tag = "section",
+  heading: Heading = "h2",
+  tagline,
+  price,
+  priceLabel = "COMPLETE SET",
+  priceNote,
+  action,
+  className = "",
+  ...props
+}) {
+  const avatar = cosmeticById("avatar-collection-dominion");
+  return (
+    <Tag className={`${styles.root} ${className}`} {...props}>
+      <AnimatedCosmeticImage
+        className={styles.backdrop}
+        cosmeticId="arena-collection-dominion"
+        src="/assets/collection/dominion/arena-poster.webp"
+        alt=""
+      />
+      <span className={styles.shade} aria-hidden="true" />
+      <span className={styles.motes} aria-hidden="true">
+        {Array.from({ length: 9 }, (_, index) => <i key={index} />)}
+      </span>
+      <div className={styles.copy}>
+        <span className={styles.seal}>
+          <Crown size={14} aria-hidden="true" />
+          SOVEREIGN · ULTRA PREMIUM
+        </span>
+        <Heading className={styles.title}>
+          Eternal <span>Dominion</span>
+        </Heading>
+        {tagline && <p className={styles.tagline}>{tagline}</p>}
+        <ul className={styles.perks}>
+          <li><Sparkles size={13} aria-hidden="true" /> Fully animated</li>
+          <li><Crown size={13} aria-hidden="true" /> Gold sovereign title</li>
+          <li><ShieldCheck size={13} aria-hidden="true" /> Real money only</li>
+        </ul>
+        <div className={styles.buy}>
+          <span className={styles.price}>
+            <small>{priceLabel}</small>
+            <strong>{price}</strong>
+            {priceNote && <em>{priceNote}</em>}
+          </span>
+          {action}
+        </div>
+      </div>
+      <div className={styles.art} aria-hidden="true">
+        <span className={styles.eclipse} />
+        <span className={styles.orbit} />
+        {avatar && <CosmeticArt item={avatar} />}
+      </div>
+    </Tag>
+  );
+}

@@ -1250,29 +1250,101 @@
 .premiumTab { color: #ffdc93 !important; border-color: #a87a44 !important; }
 .cashOnlyNote { display:flex; align-items:center; gap:8px; padding:10px 12px; margin:10px 0; border:1px solid #a4814a66; border-radius:9px; background:#22182bd9; font-size:13px; line-height:1.5; color:#ffdc93; }
 .cashOnlyNote>svg { flex:none; }
-.cashOnlyLabel { color:#ddc39d; font-size:11px; line-height:1.4; text-align:center; }
-.card[data-rarity="sovereign"] { border-color:#d7b36e !important; box-shadow:inset 0 0 0 1px #bba4ff33,0 0 18px #be8e3c15; }
-.rarity[data-rarity="sovereign"],.previewRarity[data-rarity="sovereign"] { color:#fff0cb; background:linear-gradient(120deg,#684a20,#322342); border-color:#e6c17e; }
-.previewRarity[data-rarity="sovereign"] { padding:3px 9px; border:1px solid #e6c17e; border-radius:3px; }
-.dominionHero { min-height:200px; border-color:#d8b271 !important; background:#110e1c !important; }
-.dominionHero .heroBackground { opacity:.8; }
-.dominionHero .heroCopy { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:8px 14px; width:78%; padding:18px 22px; }
-.dominionHero .heroShade { background:linear-gradient(90deg,#0f0b18f7 4%,#170f25b8 55%,#140b1a33); }
-.dominionHero .offerRibbon { grid-column:1; justify-self:start; color:#ffedc0; background:linear-gradient(110deg,#765323b8,#382042cc); border:1px solid #d6ae65a6; box-shadow:none; transform:none; border-radius:5px; padding:5px 8px; }
-.dominionHero h2 { grid-column:1; max-width:430px; font-size:clamp(20px,2.5vw,31px); letter-spacing:.03em; margin:0 !important; }
-.dominionHero .heroAction { grid-column:2; grid-row:1 / span 2; margin:0; font-size:12px !important; padding-inline:13px; }
-.dominionHero .heroCopy p,.dominionHero .heroCashLabel { display:none; }
-.dominionHero .heroArt { inset:-10% 0 -16% 49%; }
-.dominionHero .heroArt :global(.collection-portrait-art) { width:100%; height:100%; min-height:0; }
-.dominionHero .heroArt img { display:block; width:100%; height:100%; transform:none; animation:none; }
-.heroCashLabel { display:block; color:#e6c696; font-size:11px; font-family:var(--font-ui); letter-spacing:.08em; margin:9px 0; }
-@media(max-width:600px) {
-  .dominionHero { min-height:178px; }
-  .dominionHero .heroCopy { width:100%; padding:14px; }
-  .dominionHero h2 { font-size:25px; max-width:215px; margin-top:10px; }
-  .dominionHero .heroCopy p { max-width:190px; font-size:12px; }
-  .dominionHero .heroArt { inset:0 -27% -8% 49%; opacity:.65; }
-  .dominionHero .heroShade { background:linear-gradient(90deg,#0f0b18f7,#170f25df 45%,#140b1a44); }
-  .dominionHero .offerRibbon { font-size:10px; padding:4px 6px; }
-  .heroCashLabel { font-size:10px; margin:7px 0; }
+/* ---------- Eternal Dominion: one sovereign look across the showcase, cards and preview ----------
+   Obsidian and violet behind imperial gold, Cinzel lettering, corner filigree.
+   Light only breathes, glows and twinkles in place: nothing slides across. */
+.card[data-rarity="sovereign"],
+.sovereignDialog {
+  --sov-gold: #ffdc93;
+  --sov-gold-hi: #fff3cf;
+  --sov-gold-lo: #a7783a;
+  --sov-violet: #a98bff;
+  --sov-obsidian: #0c0817;
+  --sov-filigree:
+    linear-gradient(var(--sov-gold), var(--sov-gold)) top left / 20px 2px no-repeat,
+    linear-gradient(var(--sov-gold), var(--sov-gold)) top left / 2px 20px no-repeat,
+    linear-gradient(var(--sov-gold), var(--sov-gold)) top right / 20px 2px no-repeat,
+    linear-gradient(var(--sov-gold), var(--sov-gold)) top right / 2px 20px no-repeat,
+    linear-gradient(var(--sov-gold), var(--sov-gold)) bottom left / 20px 2px no-repeat,
+    linear-gradient(var(--sov-gold), var(--sov-gold)) bottom left / 2px 20px no-repeat,
+    linear-gradient(var(--sov-gold), var(--sov-gold)) bottom right / 20px 2px no-repeat,
+    linear-gradient(var(--sov-gold), var(--sov-gold)) bottom right / 2px 20px no-repeat;
+}
+
+/* Relic cards: obsidian bodies, double gold rim, a crown crest and Cinzel names. */
+.card[data-rarity="sovereign"] {
+  border: 1px solid #e9c27a !important;
+  background: linear-gradient(#1c1229, #0c0817) !important;
+  box-shadow: inset 0 0 0 2px #0c0817, inset 0 0 0 3px #a98bff40, 0 0 0 1px #3b2913, 0 8px 18px #0008, 0 0 22px #ffdc931c !important;
+  animation: sovereign-card-glow 5s ease-in-out infinite;
+}
+.card[data-rarity="sovereign"]::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: 8px;
+  background: var(--sov-filigree);
+  opacity: .9;
+}
+.card[data-rarity="sovereign"] .art {
+  background:
+    radial-gradient(circle at 50% 52%, #a98bff38, #ffdc9314 42%, transparent 66%),
+    linear-gradient(#21153a, #0f0a1d) !important;
+}
+.card[data-rarity="sovereign"] .artHalo { border-color: #ffdc9355; box-shadow: 0 0 22px #a98bff40, inset 0 0 14px #ffdc931c; transform: none; inset: 22px 16%; }
+.card[data-rarity="sovereign"] .info { background: linear-gradient(#1a1128, #0c0817); border-top: 1px solid #e9c27a80; }
+.card[data-rarity="sovereign"] .itemType { color: #b9a3f5; }
+.card[data-rarity="sovereign"] .info h3 { font-family: var(--font-display); font-size: 16px !important; font-weight: 700; letter-spacing: .02em; color: var(--sov-gold) !important; text-shadow: 0 0 12px #ffdc9330; }
+.card[data-rarity="sovereign"] .info { position: relative; }
+.sovereignCrest {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 22px;
+  translate: -50% 0;
+  color: #2a1a06;
+  background: linear-gradient(180deg, #fff3cf, #e8b965 60%, #a7783a);
+  clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%);
+  filter: drop-shadow(0 0 6px #ffdc9366);
+  pointer-events: none;
+}
+.card[data-rarity="sovereign"] .info :global(.sovereign-button) { font-size: 14px !important; letter-spacing: .04em; }
+.rarity[data-rarity="sovereign"],
+.previewRarity[data-rarity="sovereign"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #2a1a06 !important;
+  font-weight: 800;
+  background: linear-gradient(180deg, #fff3cf, #e8b965 60%, #b9853a) !important;
+  border-color: #fff3cf !important;
+}
+.previewRarity[data-rarity="sovereign"] { padding: 3px 10px; border: 1px solid #fff3cf; border-radius: 3px; }
+.cashOnlyLabel { color: #c7b4e8; font-size: 11px; line-height: 1.4; text-align: center; }
+.cashOnlyLabel > b { color: var(--sov-gold, #ffdc93); font-weight: 700; }
+
+/* The preview dialog joins the set's palette. */
+.sovereignDialog {
+  border-color: #e9c27a !important;
+  background:
+    radial-gradient(ellipse at 50% 0, #a98bff26, transparent 60%),
+    linear-gradient(#1a1128, #0c0817) !important;
+  box-shadow: inset 0 0 0 1px #0c0817, inset 0 0 0 2px #a98bff33, 0 20px 50px #000c, 0 0 50px #8f6cff26 !important;
+}
+.sovereignDialog .previewStage { border-color: #e9c27a !important; background: radial-gradient(circle at 50% 50%, #a98bff33, #ffdc9310 45%, transparent 70%), linear-gradient(#21153a, #0f0a1d) !important; }
+.sovereignDialog .themeName { font-family: var(--font-display); color: var(--sov-gold); }
+
+@keyframes sovereign-card-glow { 0%, 100% { box-shadow: inset 0 0 0 2px #0c0817, inset 0 0 0 3px #a98bff40, 0 0 0 1px #3b2913, 0 8px 18px #0008, 0 0 16px #ffdc9314; } 50% { box-shadow: inset 0 0 0 2px #0c0817, inset 0 0 0 3px #a98bff70, 0 0 0 1px #3b2913, 0 8px 18px #0008, 0 0 28px #ffdc9333; } }
+:global(html.reduce-motion) .card[data-rarity="sovereign"],
+:global(html.quality-low) .card[data-rarity="sovereign"] { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .card[data-rarity="sovereign"] { animation: none !important; } }
+@media (max-width: 600px) {
+  .card[data-rarity="sovereign"] .info h3 { font-size: 14px !important; }
+  .card[data-rarity="sovereign"]::after { inset: 4px; }
 }

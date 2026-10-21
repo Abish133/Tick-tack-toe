@@ -1,5 +1,4 @@
 "use client";
-import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useEffect, useRef, useState } from "react";
 import {
   Coins,
@@ -27,6 +26,7 @@ import {
 import styles from "./CommercePanel.module.css";
 import { GameFrame, GameButton, RarityTile } from "./ui";
 import CosmeticArt from "./CosmeticArt";
+import SovereignShowcase from "./SovereignShowcase";
 
 let checkoutScript;
 function loadCheckout() {
@@ -51,7 +51,7 @@ function loadCheckout() {
     });
   return checkoutScript;
 }
-const price = (p) =>
+export const price = (p) =>
   new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: p.currency,
@@ -278,8 +278,7 @@ export default function CommercePanel({
   const premiumProduct = bundles.find((product) => product.id === "bundle-dominion"),
     premiumItems = premiumProduct ? bundleIds(premiumProduct).map(cosmeticById).filter(Boolean) : [],
     premiumOwned = premiumItems.filter((item) => ownedIds.includes(item.id)).length,
-    premiumComplete = premiumItems.length > 0 && premiumOwned === premiumItems.length,
-    premiumAvatar = premiumItems.find((item) => item.type === "avatar");
+    premiumComplete = premiumItems.length > 0 && premiumOwned === premiumItems.length;
   const slotNames = { avatar: "Avatar", board: "Board", marks: "X / O marks", arena: "Arena", frame: "Frame", banner: "Banner", effect: "Arrival", emote: "Two emotes", title: "Title" };
   return (
     <GameFrame
@@ -314,29 +313,21 @@ export default function CommercePanel({
           )}
           {focus === "premium" && premiumProduct && (
             <section className={styles.sovereignOffer} aria-label="Eternal Dominion premium set" data-bundle-id="bundle-dominion">
-              <div className={styles.sovereignHero}>
-                <AnimatedCosmeticImage
-                  className={styles.sovereignBackdrop}
-                  cosmeticId="arena-collection-dominion"
-                  src="/assets/collection/dominion/arena-poster.webp"
-                  alt=""
-                />
-                <div className={styles.sovereignCopy}>
-                  <span className={styles.sovereignEyebrow}><Crown size={14} /> SOVEREIGN · PREMIUM EXCLUSIVE</span>
-                  <h3>Eternal<br />Dominion</h3>
-                  <p>Command the eclipse. Wear the crown.</p>
-                  <span className={styles.moneyOnly}><CreditCard size={13} /> REAL MONEY ONLY</span>
-                  {/* The offer itself sits in the hero: price and purchase without scrolling. */}
-                  <div className={styles.sovereignHeroBuy}>
-                    <div className={styles.sovereignPrice}><span>COMPLETE NINE-STYLE SET</span><strong>{price(premiumProduct)}</strong><small>{premiumComplete ? "All nine styles owned" : `${premiumOwned} / ${premiumItems.length} styles owned · One-time purchase`}</small></div>
-                    <GameButton disabled={premiumComplete || !data.checkoutEnabled || Boolean(busy)} onClick={() => payment(premiumProduct)}>
-                      {busy === premiumProduct.id ? <LoaderCircle className="spin" size={18} /> : premiumComplete ? <Check size={18} /> : !data.checkoutEnabled ? <LockKeyhole size={18} /> : <Crown size={18} />}
-                      {premiumComplete ? "Collection owned" : !data.checkoutEnabled ? "Checkout unavailable" : "Buy Eternal Dominion"}
-                    </GameButton>
-                  </div>
-                </div>
-                {premiumAvatar && <span className={styles.sovereignPortrait} aria-hidden="true"><CosmeticArt item={premiumAvatar} /></span>}
-              </div>
+              <SovereignShowcase
+                as="div"
+                heading="h3"
+                className={styles.sovereignStage}
+                tagline="Command the eclipse. Wear the crown."
+                priceLabel="COMPLETE NINE-STYLE SET"
+                price={price(premiumProduct)}
+                priceNote={premiumComplete ? "All nine styles owned" : `${premiumOwned} / ${premiumItems.length} styles owned · One-time purchase`}
+                action={
+                  <GameButton variant="secondary" className="sovereign-button" disabled={premiumComplete || !data.checkoutEnabled || Boolean(busy)} onClick={() => payment(premiumProduct)}>
+                    {busy === premiumProduct.id ? <LoaderCircle className="spin" size={18} /> : premiumComplete ? <Check size={18} /> : !data.checkoutEnabled ? <LockKeyhole size={18} /> : <Crown size={18} />}
+                    {premiumComplete ? "Collection owned" : !data.checkoutEnabled ? "Checkout unavailable" : "Buy Eternal Dominion"}
+                  </GameButton>
+                }
+              />
               <div className={styles.sovereignDetails}>
                 <div className={styles.sovereignIntro}>
                   <div><h4>Your complete imperial identity</h4><p>Nine coordinated styles, including two match emotes. Preview every piece.</p></div>
@@ -441,6 +432,8 @@ export default function CommercePanel({
                         </span>
                       </div>
                       <GameButton
+                        variant={sovereign ? "secondary" : undefined}
+                        className={sovereign ? "sovereign-button" : undefined}
                         disabled={
                           complete || !data.checkoutEnabled || Boolean(busy)
                         }

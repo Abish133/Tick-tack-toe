@@ -610,17 +610,6 @@
 :global(html.reduce-motion) .ascendantBundle:before { animation: none; }
 :global(.reduce-motion) .ascendantBundle:before { animation: none; }
 .sovereignOffer { border:1px solid #d5ad70a6; border-radius:15px; overflow:hidden; margin-top:14px; background:linear-gradient(140deg,#22182a,#100e1a 70%); box-shadow:inset 0 0 0 1px #fff0cc14,0 12px 32px #0005; }
-.sovereignHero { position:relative; min-height:258px; isolation:isolate; overflow:hidden; background:#110e1d; }
-.sovereignBackdrop { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-3; opacity:.85; }
-.sovereignHero::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,#0d0917f7,#130b2099 60%,#120c1811),linear-gradient(0deg,#130e1cf2,transparent 45%); z-index:-1; }
-.sovereignCopy { position:relative; z-index:2; padding:28px; width:66%; }
-.sovereignEyebrow { display:inline-flex; align-items:center; gap:6px; color:#f8d895; font-family:var(--font-ui); font-weight:700; letter-spacing:.1em; font-size:11px; }
-.sovereignCopy h3 { font-family:var(--font-display); font-size:clamp(34px,4.6vw,59px); line-height:1.03; letter-spacing:.025em; color:#fff0ca; margin:16px 0 10px; text-shadow:0 2px 8px #0009; }
-.sovereignCopy p { font-size:14px; color:#d4c7df; margin:0 0 14px; }
-.moneyOnly { display:inline-flex; align-items:center; gap:6px; padding:5px 8px; font-size:11px; font-family:var(--font-ui); letter-spacing:.08em; color:#ffe0a3; border:1px solid #dab07866; border-radius:5px; background:#281a2bc7; }
-.sovereignPortrait { position:absolute; right:0; bottom:-10%; height:115%; width:50%; z-index:0; }
-.sovereignPortrait :global(.collection-portrait-art) { width:100%; height:100%; min-height:0; }
-.sovereignPortrait :global(img) { width:100%; height:100%; object-fit:contain; }
 .sovereignDetails { padding:20px; }
 .sovereignIntro { display:flex; justify-content:space-between; align-items:center; gap:15px; margin-bottom:14px; }
 .sovereignIntro h4 { font-size:19px; color:#f4dfb2; margin:0 0 5px; }
@@ -647,12 +636,6 @@
 .sovereignItemArt :global(.collection-emote-art>span) { width:32px; height:32px; }
 .sovereignItemArt :global(.collection-emote-art svg) { width:23px; height:23px; }
 .slotOwned { position:absolute; top:5px; right:5px; color:#efdbad; background:#120d20cc; border-radius:3px; }
-.sovereignCheckout { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; padding:18px 0 15px; margin-top:16px; border-top:1px solid #bd985544; }
-.sovereignPrice { display:grid; gap:5px; }
-.sovereignPrice>span { color:#c4ad86; font-family:var(--font-ui); font-size:10px; letter-spacing:.1em; }
-.sovereignPrice strong { font-size:34px; line-height:1; font-family:var(--font-display); color:#ffe3a6; }
-.sovereignPrice small { color:#c7b9d1; font-size:12px; }
-.sovereignCheckout>button { min-width:235px; font-size:14px; }
 .sovereignTerms { display:flex; gap:8px; margin:0; padding:11px 12px; border:1px solid #9b865533; border-radius:8px; background:#100d1999; color:#cfc4db; font-size:12px; line-height:1.55; }
 .sovereignTerms>svg { flex:none; color:#cbb782; margin-top:1px; }
 .sovereignBundle { border-color:#d7b36e; box-shadow:inset 0 0 0 1px #bba4ff33,0 0 20px #bf923421; }
@@ -662,13 +645,6 @@
 @media(max-width:1100px) { .sovereignContents { grid-template-columns:repeat(5,minmax(0,1fr)); } }
 @media(max-width:600px) {
   .sovereignOffer { margin-top:10px; border-radius:11px; }
-  .sovereignHero { min-height:210px; }
-  .sovereignCopy { padding:17px 14px; width:76%; }
-  .sovereignCopy h3 { font-size:34px; margin:14px 0 9px; }
-  .sovereignEyebrow { font-size:9px; gap:4px; letter-spacing:.04em; }
-  .sovereignCopy p { font-size:12px; max-width:170px; line-height:1.5; }
-  .sovereignPortrait { right:-19%; bottom:-3%; width:78%; height:103%; opacity:.7; }
-  .moneyOnly { font-size:10px; padding:4px 6px; }
   .sovereignDetails { padding:12px; }
   .sovereignIntro { align-items:flex-start; gap:8px; }
   .sovereignIntro h4 { font-size:16px; }
@@ -678,21 +654,9 @@
   .sovereignItemArt { height:76px; }
   .sovereignContents>button { padding-bottom:8px; }
   .sovereignContents>button>span:last-of-type { font-size:12px; }
-  .sovereignCheckout { align-items:stretch; gap:12px; margin-top:12px; padding:14px 0; }
-  .sovereignPrice strong { font-size:31px; }
-  .sovereignCheckout>button { min-width:0; width:100%; min-height:44px; font-size:13px; }
   .sovereignTerms { padding:9px; font-size:11px; }
 }
 @media(prefers-reduced-motion:reduce) { .sovereignContents>button { transition:none; } }
 
-/* Hero offer: the price and purchase sit beside the title, above the fold. */
-.sovereignHeroBuy { display:flex; align-items:center; flex-wrap:wrap; gap:14px; margin-top:18px; }
-.sovereignHeroBuy .sovereignPrice strong { font-size:clamp(30px,3.6vw,42px); text-shadow:0 0 18px #ffdc9355, 0 2px 6px #000a; }
-.sovereignHeroBuy > button { min-height:48px; }
-/* The portrait glows from within the hero instead of a clipped ring around it. */
-.sovereignPortrait :global(.collection-avatar-aura) { display:none; }
-.sovereignPortrait::before { content:""; position:absolute; inset:12% 8% 4%; z-index:-1; border-radius:50%;
-  background:radial-gradient(closest-side,#bba4ff40,#ffdc931f 55%,transparent); animation:sovereignGlow 4s ease-in-out infinite; }
-@keyframes sovereignGlow { 50% { opacity:.6; scale:.95; } }
-:global(html.reduce-motion) .sovereignPortrait::before { animation:none; }
-@media (max-width:600px) { .sovereignHeroBuy { gap:10px; margin-top:14px; } .sovereignHeroBuy > button { width:100%; } }
+/* The showcase opens the offer; inside it the stage sits flush with the offer's rim. */
+.sovereignStage { margin: 0 !important; border-width: 0 0 1px !important; border-radius: 0 !important; }
