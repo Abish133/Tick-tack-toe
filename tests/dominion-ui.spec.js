@@ -93,6 +93,14 @@ test('premium set previews all nine slots on phones and never offers a coin purc
   await page.locator('[class*="catalogScroll"]').evaluate(element => element.scrollTop = 0);
   await capture(page, 'premium');
   await capture(page, 'premium-checkout');
+  // The trial board plays the owners' signatures before purchase.
+  const trial = offer.getByRole('region', { name: 'Try the Sovereign signatures', exact: true });
+  await expect(trial.getByText('Sovereign Strike', { exact: true })).toBeVisible();
+  await trial.getByRole('button', { name: 'Trial cell 5: empty', exact: true }).click();
+  await expect(trial.locator('[data-sovereign-strike="4"]')).toBeAttached();
+  await expect(trial.getByRole('button', { name: /^Trial cell \d: O$/ })).toHaveCount(1);
+  await trial.getByRole('button', { name: 'Play again', exact: true }).click();
+  await expect(trial.getByRole('button', { name: /: empty$/ })).toHaveCount(9);
   for (const item of items) {
     await offer.getByRole('button', { name: `Preview ${item.name}`, exact: true }).click();
     const preview = page.getByRole('dialog', { name: item.name, exact: true });
@@ -106,6 +114,25 @@ test('premium set previews all nine slots on phones and never offers a coin purc
   expect(state.coinPurchases).toEqual([]);
   expect(state.orders).toEqual([]);
   expect(errors).toEqual([]);
+});
+
+test('winning the trial unleashes the Eclipse Victory', async ({ page }) => {
+  await fixture(page);
+  // The rival never blocks and takes the last open cell, so X wins along the top row.
+  await page.addInitScript(() => { Math.random = () => 0.99; });
+  await page.goto('/shop');
+  await page.getByRole('button', { name: 'EXPLORE PREMIUM SET', exact: true }).click();
+  const trial = page.getByRole('region', { name: 'Try the Sovereign signatures', exact: true });
+  for (const cell of [1, 2, 3]) {
+    await trial.getByRole('button', { name: `Trial cell ${cell}: empty`, exact: true }).click();
+    if (cell < 3) await expect(trial.getByRole('button', { name: /: O$/ })).toHaveCount(cell);
+  }
+  const victory = trial.getByRole('button', { name: 'Sovereign victory. Tap to continue', exact: true });
+  await expect(victory).toBeVisible();
+  await expect(victory.getByText('SOVEREIGN VICTORY', { exact: true })).toBeVisible();
+  await victory.click();
+  await expect(victory).toHaveCount(0);
+  await expect(trial.getByText('Sovereign victory. This is how every win of yours will end.', { exact: true })).toBeVisible();
 });
 
 test('premium checkout buys only the complete bundle and refreshes its ownership', async ({ page }) => {

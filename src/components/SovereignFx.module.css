@@ -1,0 +1,207 @@
+/* Eternal Dominion signatures. Bursts and blooms radiate from their centre; nothing slides across. */
+
+/* ---------- Sovereign Strike: one burst per placed Dominion Sigil ---------- */
+.strike {
+  position: absolute;
+  z-index: 6;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+.wave {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  border: 3px solid #ffdc93;
+  box-shadow: 0 0 18px #ffdc93aa, inset 0 0 14px #a98bff88;
+  opacity: 0;
+  animation: strike-wave 760ms cubic-bezier(.2, .7, .3, 1) forwards;
+}
+.late {
+  border-width: 2px;
+  border-color: #cbb6ff;
+  animation-delay: 140ms;
+}
+.ray {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3px;
+  height: 34%;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: linear-gradient(#fff3cf, #ffdc9300);
+  transform-origin: 50% 0;
+  rotate: calc(var(--ray) * 45deg + 22.5deg);
+  opacity: 0;
+  animation: strike-ray 620ms ease-out 60ms forwards;
+}
+.strikeCrown {
+  position: absolute;
+  left: 50%;
+  top: 4%;
+  width: 34%;
+  height: 34%;
+  translate: -50% 0;
+  color: #ffdc93;
+  filter: drop-shadow(0 0 6px #ffdc93) drop-shadow(0 2px 2px #000a);
+  opacity: 0;
+  animation: strike-crown 900ms ease-out forwards;
+}
+@keyframes strike-wave {
+  0% { opacity: 1; scale: .35; }
+  70% { opacity: .9; }
+  100% { opacity: 0; scale: 1.45; }
+}
+@keyframes strike-ray {
+  0% { opacity: 1; scale: 1 .2; }
+  100% { opacity: 0; scale: 1 1.2; }
+}
+@keyframes strike-crown {
+  0% { opacity: 0; scale: .4; }
+  30% { opacity: 1; scale: 1.15; }
+  70% { opacity: 1; scale: 1; }
+  100% { opacity: 0; scale: .9; }
+}
+.strike.calm > * { animation: none; }
+.strike.calm .wave:not(.late) { opacity: 0; animation: strike-glow 700ms ease-out forwards; }
+
+/* ---------- Eclipse Victory: the Dominion Arrival finisher ---------- */
+.victory {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  animation: victory-out 3400ms ease-in forwards;
+}
+.contained { position: absolute; z-index: 10; border-radius: inherit; }
+.veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 44%, #1d1033e6, #07040ff5 70%);
+  animation: victory-veil 600ms ease-out both;
+}
+.corona,
+.eclipse {
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  translate: -50% -50%;
+}
+.corona {
+  width: min(78vmin, 560px);
+  background:
+    repeating-conic-gradient(from 0deg, #ffdc9300 0deg 7deg, #ffdc9340 9deg, #ffdc9300 11deg 18deg),
+    radial-gradient(circle, #ffdc9300 30%, #ffdc9366 45%, #a98bff40 56%, #ffdc9300 70%);
+  animation: victory-corona 3400ms ease-out both, victory-turn 24s linear infinite;
+}
+.eclipse {
+  width: min(40vmin, 290px);
+  background: radial-gradient(circle at 40% 36%, #2a1840, #07040f 68%);
+  box-shadow: 0 0 0 3px #ffdc93, 0 0 34px 8px #ffdc93aa, 0 0 90px 24px #a98bff66, inset 0 0 40px #a98bff55;
+  animation: victory-eclipse 900ms cubic-bezier(.2, .8, .25, 1.1) 150ms both;
+}
+.sparks { position: absolute; top: 44%; left: 50%; }
+.sparks > i {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  margin: -3px;
+  border-radius: 50%;
+  background: #fff3cf;
+  box-shadow: 0 0 10px #ffdc93;
+  rotate: calc(var(--spark) * 22.5deg);
+  opacity: 0;
+  animation: victory-spark 1100ms ease-out 450ms forwards;
+}
+.proclaim {
+  position: absolute;
+  z-index: 2;
+  top: calc(44% + min(20vmin, 145px) + 22px);
+  left: 0;
+  right: 0;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  text-align: center;
+}
+/* The crown descends into the heart of the eclipse. */
+.victoryCrown {
+  position: absolute;
+  z-index: 2;
+  top: 44%;
+  left: 50%;
+  width: min(17vmin, 110px);
+  height: min(17vmin, 110px);
+  translate: -50% -50%;
+  color: #ffdc93;
+  filter: drop-shadow(0 0 16px #ffdc93) drop-shadow(0 4px 4px #000c);
+  animation: victory-crown 1000ms cubic-bezier(.2, .8, .3, 1.2) 600ms both;
+}
+.proclaim strong {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 6vw, 58px);
+  font-weight: 900;
+  letter-spacing: .06em;
+  line-height: 1;
+  color: #fff3cf;
+  text-shadow: 0 3px 0 #2a1807, 0 0 26px #ffdc9388;
+  animation: victory-text 700ms ease-out 900ms both;
+}
+.proclaim small {
+  color: #d9c8ff;
+  font-family: var(--font-ui);
+  font-size: clamp(14px, 2.2vw, 19px);
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  animation: victory-text 700ms ease-out 1150ms both;
+}
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .proclaim strong {
+    background: linear-gradient(180deg, #fff9ea 15%, #ffdc93 55%, #c48f45 90%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 3px 0 #2a1807) drop-shadow(0 0 18px #ffdc9366);
+  }
+}
+.contained .corona { width: 120%; }
+.contained .eclipse { width: 46%; }
+.contained .eclipse, .contained .corona, .contained .victoryCrown, .contained .sparks { top: 38%; }
+.contained .proclaim { top: calc(38% + 23% + 10px); gap: 4px; }
+.contained .victoryCrown { width: 22%; height: 22%; }
+.contained .proclaim strong { font-size: clamp(20px, 5.4vw, 30px); }
+.contained .proclaim small { font-size: 12px; }
+
+@keyframes victory-out { 0%, 88% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+@keyframes victory-veil { from { opacity: 0; } }
+@keyframes victory-corona { 0% { opacity: 0; scale: .4; } 35% { opacity: 1; scale: 1.06; } 100% { opacity: .85; scale: 1; } }
+@keyframes victory-turn { to { rotate: 360deg; } }
+@keyframes victory-eclipse { 0% { opacity: 0; scale: .2; } 100% { opacity: 1; scale: 1; } }
+@keyframes victory-spark { 0% { opacity: 1; translate: 0 0; } 100% { opacity: 0; translate: 0 calc(-1 * min(38vmin, 260px)); } }
+@keyframes victory-crown { 0% { opacity: 0; translate: -50% -150%; scale: .6; } 100% { opacity: 1; translate: -50% -50%; scale: 1; } }
+@keyframes victory-text { from { opacity: 0; scale: .9; } }
+@keyframes strike-glow { 0% { opacity: .9; } 100% { opacity: 0; } }
+
+.victory.calm,
+.victory.calm * { animation-duration: 1ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; }
+.victory.calm { animation: victory-out 1600ms ease-in forwards !important; }
+.victory.calm .sparks { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .strike > * { animation: none !important; }
+  .victory .corona { animation: none; }
+  .victory .sparks { display: none; }
+}

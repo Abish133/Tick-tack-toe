@@ -99,7 +99,16 @@ test('all nine Dominion styles equip, render in profile and battle, and respect 
 
     const started = await api(page, '/matches', 'POST', { mode: 'ai', ruleset: 'classic', difficulty: 'beginner', boardSize: 4 });
     matchId = started.matchId;
+    // Sovereign signatures are brief, so record them as they appear.
+    await page.addInitScript(() => {
+      window.__sovereign = { strikes: 0, entrance: false };
+      new MutationObserver(() => {
+        if (document.querySelector('[data-sovereign-strike]')) window.__sovereign.strikes += 1;
+        if (document.querySelector('[data-sovereign]')) window.__sovereign.entrance = true;
+      }).observe(document, { childList: true, subtree: true });
+    });
     await page.goto('/battle');
+    await expect.poll(() => page.evaluate(() => window.__sovereign.entrance)).toBe(true);
     const board = page.getByRole('group', { name: '4 by 4 classic game board', exact: true });
     await expect(board).toHaveAttribute('data-cosmetic-theme', 'dominion');
     await expect(board.getByRole('button')).toHaveCount(16);
@@ -114,6 +123,7 @@ test('all nine Dominion styles equip, render in profile and battle, and respect 
     const mark = board.locator(`.mark.${ownMark}.collection-marks svg`).first();
     await expect(mark).toBeVisible();
     await expect(mark).toHaveCSS('animation-name', /dominion-mark-light/);
+    await expect.poll(() => page.evaluate(() => window.__sovereign.strikes)).toBeGreaterThan(0);
     expect(await mark.locator('path').count()).toBeGreaterThanOrEqual(3);
     await screenshot(page, 'battle-mobile');
     await page.getByRole('button', { name: 'Match emotes', exact: true }).click();

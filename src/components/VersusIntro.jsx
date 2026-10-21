@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Trophy, Zap } from "lucide-react";
+import { Crown, Trophy, Zap } from "lucide-react";
 import { cosmeticAsset } from "../lib/cosmetic-collection";
 import { useCosmeticAnimation } from "./AnimatedCosmeticImage";
 import styles from "./VersusIntro.module.css";
@@ -13,17 +13,19 @@ const art = (skin = "avatar-void") =>
   cosmeticAsset(skin) ||
   `/assets/${{ "avatar-ember": "avatar-fire", "avatar-frost": "avatar-ice" }[skin] || skin}.webp`;
 
-function Side({ side, name, title, banner, detail, skin, reduced }) {
+function Side({ side, name, title, banner, detail, skin, sovereign = false, reduced }) {
   const from = side === "left" ? -1 : 1;
   const media = useCosmeticAnimation(skin, art(skin));
   return (
     <motion.div
-      className={`${styles.side} ${styles[side]}`}
+      className={`${styles.side} ${styles[side]} ${sovereign ? styles.sovereign : ""}`}
+      data-sovereign={sovereign || undefined}
       initial={reduced ? { opacity: 0 } : { x: `${from * 110}%`, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 140, damping: 18, delay: side === "left" ? 0.05 : 0.18 }}
     >
       <span className={styles.glow} />
+      {sovereign && <span className={styles.sovereignEclipse} aria-hidden="true" />}
       <motion.img
         className={styles.art}
         src={media.src}
@@ -33,6 +35,11 @@ function Side({ side, name, title, banner, detail, skin, reduced }) {
         transition={{ duration: 0.7, delay: side === "left" ? 0.15 : 0.28 }}
       />
       {!reduced && fxTheme(skin) && <AscendantFx theme={fxTheme(skin)} stars={10} glow />}
+      {sovereign && (
+        <span className={styles.sovereignRibbon}>
+          <Crown size={14} aria-hidden="true" /> SOVEREIGN
+        </span>
+      )}
       <div className={`${styles.plate} ${banner ? styles.bannerPlate : ""}`}>
         <BannerBackdrop bannerId={banner} className="versus-banner" />
         <strong>{name}</strong>

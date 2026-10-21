@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 import { GameButton, GameFrame, Modal, ProgressBar } from "./ui";
 import { CosmeticArrival, CosmeticFrame } from "./CosmeticAppearance";
-import { cosmeticAsset, cosmeticStyle } from "../lib/cosmetic-collection";
+import { cosmeticAsset, cosmeticStyle, hasSovereignPresence } from "../lib/cosmetic-collection";
+import { EclipseVictory } from "./SovereignFx";
 import styles from "./BattleScreen.module.css";
 
 const RANKS = [
@@ -114,6 +115,25 @@ export default function EndMatchSummary({
   const levelUp = settled && hasBaseline && level > initialLevel;
   const [celebrate, setCelebrate] = useState(!reducedMotion);
   const [milestone, setMilestone] = useState(null);
+  // A Dominion Arrival winner opens the result with the Eclipse Victory, once per match.
+  const eclipseKey = `ea:eclipse:${match.matchId}`;
+  const [eclipse, setEclipse] = useState(() => {
+    const sovereign = hasSovereignPresence(
+      winner?.profile || (winner && winner.id === playerId ? profile : null),
+    );
+    if (!sovereign) return false;
+    try {
+      return !sessionStorage.getItem(eclipseKey);
+    } catch {
+      return true;
+    }
+  });
+  function endEclipse() {
+    try {
+      sessionStorage.setItem(eclipseKey, "1");
+    } catch {}
+    setEclipse(false);
+  }
   const presented = useRef(new Set());
   const sounded = useRef(false);
   const portrait = spectator ? winner || state.players[0] : ownPlayer;
@@ -150,6 +170,14 @@ export default function EndMatchSummary({
       className={`result-panel ${styles.resultScreen} ${won || (spectator && winner) ? styles.victory : draw ? styles.draw : styles.defeat} ${reducedMotion ? styles.reduced : ""}`}
       aria-label="Battle result"
     >
+      {eclipse && (
+        <EclipseVictory
+          name={winner?.name}
+          own={won}
+          reduced={reducedMotion}
+          onDone={endEclipse}
+        />
+      )}
       {celebrate && !reducedMotion && (
         <div className={styles.resultParticles} aria-hidden="true">
           {Array.from({ length: 20 }, (_, index) => (

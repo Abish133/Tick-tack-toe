@@ -27,6 +27,7 @@ import styles from "./CommercePanel.module.css";
 import { GameFrame, GameButton, RarityTile } from "./ui";
 import CosmeticArt from "./CosmeticArt";
 import SovereignShowcase from "./SovereignShowcase";
+import SovereignTrial from "./SovereignTrial";
 
 let checkoutScript;
 function loadCheckout() {
@@ -328,6 +329,7 @@ export default function CommercePanel({
                   </GameButton>
                 }
               />
+              <SovereignTrial />
               <div className={styles.sovereignDetails}>
                 <div className={styles.sovereignIntro}>
                   <div><h4>Your complete imperial identity</h4><p>Nine coordinated styles, including two match emotes. Preview every piece.</p></div>

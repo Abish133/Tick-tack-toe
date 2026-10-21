@@ -44,6 +44,8 @@ import {
   cosmeticEmotes,
   cosmeticStyle,
   cosmeticTheme,
+  hasSovereignPresence,
+  hasSovereignStrike,
 } from "../lib/cosmetic-collection";
 import { boardSizeOf } from "../lib/game-engine/geometry";
 import { POWER_INFO } from "./PowerPresentation";
@@ -61,6 +63,8 @@ import PowerTargetControls, {
   targetHint,
 } from "./PowerTargetControls";
 import EndMatchSummary from "./EndMatchSummary";
+import { SovereignStrike } from "./SovereignFx";
+import { isEffectCell } from "../lib/power-effect-layout";
 import styles from "./BattleScreen.module.css";
 import { displayName } from "../lib/display-name";
 
@@ -582,6 +586,13 @@ export default function BattleScreen({
       (game?.lastEvent?.powerId || game?.lastEvent?.action?.powerId),
   );
   const reduced = Boolean(settings.reducedMotion);
+  // A placed Dominion Sigil strikes gold, for both players to see.
+  const placement = game?.lastEvent?.action?.type === "place" ? game.lastEvent : null;
+  const placer = placement && game.players.find((item) => item.id === placement.playerId);
+  const sovereignStrike =
+    placement &&
+    isEffectCell(placement.action.cell, battleSize) &&
+    hasSovereignStrike(placer?.profile || (placer?.id === playerId ? user?.profile : null));
   // Each new cast plays once: flash, callout, impacts and outcome labels.
   const [castShown, setCastShown] = useState(null);
   const [shake, setShake] = useState(false);
@@ -936,6 +947,14 @@ export default function BattleScreen({
             )}
             {fxTheme(user?.profile?.equippedBoard) && (
               <AscendantFx theme={fxTheme(user?.profile?.equippedBoard)} edge stars={8} />
+            )}
+            {sovereignStrike && (
+              <SovereignStrike
+                key={`strike-${game.revision}`}
+                cell={game.lastEvent.action.cell}
+                size={battleSize}
+                reduced={reduced}
+              />
             )}
             <TurnSweep
               show={Boolean(turnSweep)}
@@ -1340,6 +1359,7 @@ export default function BattleScreen({
               skin: me?.profile?.avatar || user?.profile?.avatar,
               title: me?.profile?.title || user?.profile?.title,
               banner: me?.profile?.equippedBanner || user?.profile?.equippedBanner,
+              sovereign: hasSovereignPresence(me?.profile || user?.profile),
               detail: versusDetail(match, me, difficulty, rank, pretty, true),
             }}
             opponent={{
@@ -1347,6 +1367,7 @@ export default function BattleScreen({
               skin: opponent?.profile?.avatar,
               title: opponent?.profile?.title,
               banner: opponent?.profile?.equippedBanner,
+              sovereign: hasSovereignPresence(opponent?.profile),
               detail: versusDetail(match, opponent, difficulty, rank, pretty, false),
             }}
           />

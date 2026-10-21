@@ -42,3 +42,9 @@ export const COLLECTION_BUNDLES=Object.freeze(COSMETIC_THEMES.map(theme=>({id:`b
 export function isCashOnlyCosmetic(id){return cosmetics.has(id)&&cosmeticTheme(id)?.id==='dominion';}
 export function premiumBundleForCosmetic(id){return isCashOnlyCosmetic(id)?COLLECTION_BUNDLES.find(bundle=>bundle.id==='bundle-dominion')||null:null;}
 export function cosmeticPurchaseMetadata(id){return isCashOnlyCosmetic(id)?{purchaseMode:'real-money',bundleId:'bundle-dominion'}:{};}
+// Sovereign signatures: presentation that only Eternal Dominion owners carry into matches.
+// Equipped Dominion Sigils strike gold on every placement; the Dominion Arrival brings the
+// crowned versus entrance and the Eclipse Victory finisher. Gameplay never changes.
+export const SOVEREIGN_SIGILS='marks-collection-dominion',SOVEREIGN_ARRIVAL='effect-collection-dominion';
+export function hasSovereignStrike(profile){return profile?.equippedMark===SOVEREIGN_SIGILS;}
+export function hasSovereignPresence(profile){return profile?.equippedEffect===SOVEREIGN_ARRIVAL;}

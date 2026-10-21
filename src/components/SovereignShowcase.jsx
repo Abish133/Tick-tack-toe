@@ -1,6 +1,7 @@
 "use client";
 
-import { Crown, ShieldCheck, Sparkles } from "lucide-react";
+import { useRef } from "react";
+import { Crown, ShieldCheck, Sparkles, Swords } from "lucide-react";
 import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import CosmeticArt from "./CosmeticArt";
 import { cosmeticById } from "../lib/cosmetic-collection";
@@ -23,8 +24,27 @@ export default function SovereignShowcase({
   ...props
 }) {
   const avatar = cosmeticById("avatar-collection-dominion");
+  const root = useRef(null);
+  // The dragon turns toward the pointer: a tilt that follows the player, never an idle sweep.
+  function tilt(event) {
+    const element = root.current;
+    if (!element || event.pointerType === "touch" || element.closest(".reduce-motion")) return;
+    const box = element.getBoundingClientRect();
+    element.style.setProperty("--tilt-x", ((event.clientX - box.left) / box.width - 0.5).toFixed(3));
+    element.style.setProperty("--tilt-y", ((event.clientY - box.top) / box.height - 0.5).toFixed(3));
+  }
+  function settle() {
+    root.current?.style.setProperty("--tilt-x", "0");
+    root.current?.style.setProperty("--tilt-y", "0");
+  }
   return (
-    <Tag className={`${styles.root} ${className}`} {...props}>
+    <Tag
+      ref={root}
+      className={`${styles.root} ${className}`}
+      onPointerMove={tilt}
+      onPointerLeave={settle}
+      {...props}
+    >
       <AnimatedCosmeticImage
         className={styles.backdrop}
         cosmeticId="arena-collection-dominion"
@@ -45,8 +65,9 @@ export default function SovereignShowcase({
         </Heading>
         {tagline && <p className={styles.tagline}>{tagline}</p>}
         <ul className={styles.perks}>
-          <li><Sparkles size={13} aria-hidden="true" /> Fully animated</li>
-          <li><Crown size={13} aria-hidden="true" /> Gold sovereign title</li>
+          <li><Swords size={13} aria-hidden="true" /> Sovereign Strike</li>
+          <li><Crown size={13} aria-hidden="true" /> Eclipse Victory</li>
+          <li><Sparkles size={13} aria-hidden="true" /> Royal Entrance</li>
           <li><ShieldCheck size={13} aria-hidden="true" /> Real money only</li>
         </ul>
         <div className={styles.buy}>

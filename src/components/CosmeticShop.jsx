@@ -456,7 +456,7 @@ export default function CosmeticShop({
         {category === "all" && theme === "all" && !query && (
           <SovereignShowcase
             aria-label="Eternal Dominion, exclusive premium cosmetic set"
-            tagline="Nine animated styles. One imperial identity. Never sold for coins."
+            tagline="Nine animated styles and three in-match signatures no other collection has."
             price={dominionPrice}
             action={
               <GameButton
