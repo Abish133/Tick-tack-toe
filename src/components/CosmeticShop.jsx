@@ -14,6 +14,7 @@ import {
   ChevronDown,
   Box,
   Crown,
+  CreditCard,
 } from "lucide-react";
 import AscendantFx from "./AscendantFx";
 import CosmeticArt from "./CosmeticArt";
@@ -27,6 +28,7 @@ import {
   cosmeticMotion,
   cosmeticTheme,
   cosmeticStyle,
+  isCashOnlyCosmetic,
 } from "../lib/cosmetic-collection";
 import styles from "./CosmeticShop.module.css";
 
@@ -88,6 +90,7 @@ export function CosmeticPreview({
   user,
 }) {
   const theme = cosmeticTheme(item.id),
+    cashOnly = isCashOnlyCosmetic(item.id),
     animated = Boolean(cosmeticMotion(item.id)),
     isBoard = ["board", "marks"].includes(item.type),
     // A themed board previews with its own collection's marks, as on its card.
@@ -145,6 +148,12 @@ export function CosmeticPreview({
         </p>
       )}
       <p className={styles.previewDescription}>{item.description}</p>
+      {cashOnly && !owned && (
+        <p className={styles.cashOnlyNote}>
+          <CreditCard size={16} aria-hidden="true" />
+          Exclusive to the Eternal Dominion premium set. Real money only.
+        </p>
+      )}
       <div className={styles.previewActions}>
         <span>
           <ShieldCheck size={16} /> Visual style only
@@ -167,6 +176,8 @@ export function CosmeticPreview({
                 <Check size={18} />
                 Owned
               </>
+            ) : cashOnly ? (
+              <><CreditCard size={18} /> View premium set</>
             ) : (
               <>
                 <Coins size={18} />
@@ -203,6 +214,7 @@ export default function CosmeticShop({
     [equipBusy, setEquipBusy] = useState(false),
     [reveal, setReveal] = useState(null);
   const catalogRef = useRef(null),
+    premiumTabRef = useRef(null),
     pendingPurchase = useRef(null),
     owned = useMemo(() => new Set(ownedIds), [ownedIds]);
   const [fresh, setFresh] = useState(() => new Set());
@@ -243,9 +255,9 @@ export default function CosmeticShop({
       list.sort((a, b) => {
         const first = cosmeticTheme(a.id),
           second = cosmeticTheme(b.id);
-        const premium =
-          Number(second?.id === "ascendant") -
-          Number(first?.id === "ascendant");
+        const priority = (collection) =>
+          collection?.id === "dominion" ? 2 : collection?.id === "ascendant" ? 1 : 0;
+        const premium = priority(second) - priority(first);
         if (premium) return premium;
         if (!first || !second)
           return Number(Boolean(first)) - Number(Boolean(second));
@@ -259,9 +271,9 @@ export default function CosmeticShop({
         );
       });
     if (sort === "price-low")
-      list.sort((a, b) => (a.price ?? a.cost ?? 0) - (b.price ?? b.cost ?? 0));
+      list.sort((a, b) => Number(isCashOnlyCosmetic(a.id)) - Number(isCashOnlyCosmetic(b.id)) || (a.price ?? a.cost ?? 0) - (b.price ?? b.cost ?? 0));
     if (sort === "price-high")
-      list.sort((a, b) => (b.price ?? b.cost ?? 0) - (a.price ?? a.cost ?? 0));
+      list.sort((a, b) => Number(isCashOnlyCosmetic(a.id)) - Number(isCashOnlyCosmetic(b.id)) || (b.price ?? b.cost ?? 0) - (a.price ?? a.cost ?? 0));
     if (sort === "name") list.sort((a, b) => a.name.localeCompare(b.name));
     return list;
   }, [items, category, theme, query, sort]);
@@ -289,12 +301,22 @@ export default function CosmeticShop({
         : "smooth",
     });
   }
+  function openPremium() {
+    setPreview(null);
+    setCategory("premium");
+    catalogRef.current?.scrollTo({ top: 0, behavior: "instant" });
+    premiumTabRef.current?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
   function clear() {
     setCategory("all");
     setTheme("all");
     setQuery("");
   }
   function buy(item) {
+    if (isCashOnlyCosmetic(item.id)) {
+      openPremium();
+      return;
+    }
     pendingPurchase.current = item;
     onPurchase(item);
   }
@@ -320,8 +342,9 @@ export default function CosmeticShop({
     onRegister,
     ownedIds,
     onCollection: viewCollection,
+    onPreview: setPreview,
   };
-  const ascendantAvatar = cosmeticById("avatar-collection-ascendant");
+  const dominionAvatar = cosmeticById("avatar-collection-dominion");
   return (
     <section className={styles.store} aria-label="Cosmetic collection">
       <div className={`${styles.categories} scroll-row`} aria-label="Cosmetic categories">
@@ -345,6 +368,14 @@ export default function CosmeticShop({
           </button>
         ))}
         <button
+          ref={premiumTabRef}
+          className={`${styles.premiumTab} ${category === "premium" ? styles.selected : ""}`}
+          aria-pressed={category === "premium"}
+          onClick={openPremium}
+        >
+          <Crown size={18} /> Premium
+        </button>
+        <button
           className={category === "collections" ? styles.selected : ""}
           aria-pressed={category === "collections"}
           onClick={() => setCategory("collections")}
@@ -361,7 +392,7 @@ export default function CosmeticShop({
           Coins
         </button>
       </div>
-      {!["collections", "coins"].includes(category) && (
+      {!["collections", "coins", "premium"].includes(category) && (
         <div className={styles.tools}>
           <label className={styles.search}>
             <Search size={18} />
@@ -403,42 +434,43 @@ export default function CosmeticShop({
         {category === "all" && theme === "all" && !query && (
           <GameFrame
             variant="banner"
-            className={`${styles.hero} ${styles.ascendantHero}`}
-            aria-label="Astral Ascendancy, animated Ascendant collection"
+            className={`${styles.hero} ${styles.dominionHero}`}
+            aria-label="Eternal Dominion, exclusive premium cosmetic set"
           >
             <img
               className={styles.heroBackground}
-              src="/assets/collection/ascendant/arena-poster.webp"
+              src="/assets/collection/dominion/arena-poster.webp"
               alt=""
             />
             <div className={styles.heroShade} />
             <div className={styles.heroCopy}>
               <span className={styles.offerRibbon}>
-                <Sparkles size={16} />
-                ASCENDANT · ANIMATED
+                <Crown size={16} />
+                SOVEREIGN · EXCLUSIVE
               </span>
-              <h2>ASTRAL ASCENDANCY</h2>
-              <p>Nine animated styles · Beyond Legendary</p>
+              <h2>ETERNAL DOMINION</h2>
+              <p>Nine matching styles. One imperial identity.</p>
+              <span className={styles.heroCashLabel}>PREMIUM SET · REAL MONEY ONLY</span>
               <GameButton
                 variant="secondary"
                 className={styles.heroAction}
-                onClick={() => setCategory("collections")}
+                onClick={openPremium}
               >
-                VIEW COLLECTIONS
+                EXPLORE PREMIUM SET
               </GameButton>
             </div>
             <div className={styles.heroArt} aria-hidden="true">
-              {ascendantAvatar && <CosmeticArt item={ascendantAvatar} />}
+              {dominionAvatar && <CosmeticArt item={dominionAvatar} />}
             </div>
           </GameFrame>
         )}
-        {(category === "collections" || category === "coins") && (
+        {["collections", "coins", "premium"].includes(category) && (
           <CommercePanel
             {...commerceProps}
-            focus={category === "coins" ? "coins" : "featured"}
+            focus={category === "coins" ? "coins" : category === "premium" ? "premium" : "featured"}
           />
         )}
-        {!["collections", "coins"].includes(category) && (
+        {!["collections", "coins", "premium"].includes(category) && (
           <>
             <div className={styles.heading}>
               <h2>The collection</h2>
@@ -545,6 +577,17 @@ export default function CosmeticShop({
                             <Check size={18} />
                             Equip
                           </GameButton>
+                        ) : isCashOnlyCosmetic(item.id) ? (
+                          <>
+                            <GameButton
+                              variant="primary"
+                              disabled={busy}
+                              onClick={openPremium}
+                            >
+                              <CreditCard size={16} /> View premium set
+                            </GameButton>
+                            <small className={styles.cashOnlyLabel}>Real money only · Full set</small>
+                          </>
                         ) : balance < Number(item.price ?? item.cost ?? 0) ? (
                           <>
                             <GameButton
@@ -619,6 +662,7 @@ export default function CosmeticShop({
             <p className={styles.fairplay}>
               <ShieldCheck size={16} />
               Earn coins through daily rewards and genuine completed battles.
+              {theme === "dominion" && " Eternal Dominion is available only through its real-money premium set."}
             </p>
           </>
         )}

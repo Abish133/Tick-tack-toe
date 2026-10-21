@@ -18,7 +18,7 @@ test('Ascendant adds a complete nine-slot cosmetic collection without altering l
     assert.deepEqual(Object.keys(item).sort(),['asset','description','id','name','price','rarity','type']);
     const equivalent=cosmeticById(`${item.type}-collection-solar`);assert.ok(item.price>equivalent.price);
   }
-  const previous=COLLECTION_COSMETICS.filter(item=>item.rarity!=='ascendant');assert.equal(previous.length,90);
+  const previous=COLLECTION_COSMETICS.filter(item=>!['ascendant','sovereign'].includes(item.rarity));assert.equal(previous.length,90);
   assert.deepEqual(previous.filter(item=>item.type==='avatar').map(item=>item.price),Array(10).fill(500));
   assert.equal(cosmeticAsset('avatar-collection-solar'),'/assets/collection/avatar-solar.webp');
   assert.equal(cosmeticAsset('avatar-void'),'/assets/avatar-void.webp');
@@ -49,8 +49,8 @@ test('Ascendant bundle contains only the nine canonical styles and its two emote
   assert.equal(bundle.themeId,'ascendant');assert.equal(bundle.kind,'bundle');
   assert.deepEqual(bundle.cosmeticIds,COSMETIC_TYPES.map(type=>`${type}-collection-ascendant`));
   assert.ok(bundle.cosmeticIds.every(id=>cosmeticById(id)));
-  assert.equal(COLLECTION_BUNDLES.filter(item=>item.id!=='bundle-ascendant').length,10);
-  assert.ok(COLLECTION_BUNDLES.filter(item=>item.id!=='bundle-ascendant').every(item=>item.amount===14900));
+  assert.equal(COLLECTION_BUNDLES.filter(item=>!['bundle-ascendant','bundle-dominion'].includes(item.id)).length,10);
+  assert.ok(COLLECTION_BUNDLES.filter(item=>!['bundle-ascendant','bundle-dominion'].includes(item.id)).every(item=>item.amount===14900));
   assert.deepEqual(cosmeticEmotes('emote-collection-ascendant'),['supernova','infinity']);
   assert.deepEqual(cosmeticEmotes('unknown'),[]);
 });

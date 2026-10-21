@@ -1,0 +1,190 @@
+{
+  "formatVersion": 1,
+  "encoder": "sharp 0.35.5 / libvips 8.18.7",
+  "frameCount": 32,
+  "frameDelayMs": 90,
+  "durationMs": 2880,
+  "loop": "infinite",
+  "artTreatment": "Original artwork stays still; decorative light, orbital stars, and shimmer loop above it.",
+  "reducedMotion": "Use each -poster.webp when reduced motion is requested or user animation is disabled.",
+  "assets": [
+    {
+      "name": "avatar",
+      "source": "avatar.png",
+      "sourceSha256": "b14765c50a7d70cd91dd197eef3c15ebcdcf74f515843bb24073a7a7bfac776a",
+      "uniqueSourceFrames": 32,
+      "outputs": [
+        {
+          "file": "avatar.webp",
+          "width": 512,
+          "height": 512,
+          "frames": 32,
+          "durationMs": 2880,
+          "loop": 0,
+          "hasAlpha": true,
+          "bytes": 950222,
+          "sha256": "8a756f1f9cf7829fb2d552a5bba8f20c526333e5d652fc9b917bceeed36f5548",
+          "distinctDecodedSampleFrames": 4,
+          "transparentCorners": true
+        },
+        {
+          "file": "avatar.gif",
+          "width": 384,
+          "height": 384,
+          "frames": 32,
+          "durationMs": 2880,
+          "loop": 0,
+          "hasAlpha": true,
+          "bytes": 2577585,
+          "sha256": "d1c3730b136a5cf1a14b68baddee53640d157678c33c1f9a08e0d1e839e901a5",
+          "distinctDecodedSampleFrames": 4,
+          "transparentCorners": true
+        },
+        {
+          "file": "avatar-poster.webp",
+          "width": 512,
+          "height": 512,
+          "frames": 1,
+          "durationMs": 0,
+          "hasAlpha": true,
+          "bytes": 131582,
+          "sha256": "f47c00229c5928e2f3f768226aa5af0a329915bc7afce5f0744748c0358cf4c9",
+          "distinctDecodedSampleFrames": 1,
+          "transparentCorners": true
+        }
+      ]
+    },
+    {
+      "name": "arena",
+      "source": "arena.png",
+      "sourceSha256": "d48fed5bf795a7b8332e5a18dae84583f5fdbaf8b464cbda3433a9c80f3d46ea",
+      "uniqueSourceFrames": 32,
+      "outputs": [
+        {
+          "file": "arena.webp",
+          "width": 768,
+          "height": 432,
+          "frames": 32,
+          "durationMs": 2880,
+          "loop": 0,
+          "hasAlpha": true,
+          "bytes": 450566,
+          "sha256": "e82d850cb736f7682cfcdf7a90f1ec6f2e130476c4edfb2e0a1a63ab9153a11b",
+          "distinctDecodedSampleFrames": 4
+        },
+        {
+          "file": "arena.gif",
+          "width": 512,
+          "height": 288,
+          "frames": 32,
+          "durationMs": 2880,
+          "loop": 0,
+          "hasAlpha": true,
+          "bytes": 455587,
+          "sha256": "1040f40c7c1afd417f95af3cf1adb3f5752742911dd16b3db660b91a2156e7ec",
+          "distinctDecodedSampleFrames": 4
+        },
+        {
+          "file": "arena-poster.webp",
+          "width": 768,
+          "height": 432,
+          "frames": 1,
+          "durationMs": 0,
+          "hasAlpha": false,
+          "bytes": 126592,
+          "sha256": "2d9b56320a1346691902b4c6f79f07102840d5597e84e81ac4ca1e386c8dc41f",
+          "distinctDecodedSampleFrames": 1
+        }
+      ]
+    },
+    {
+      "name": "crest",
+      "source": "crest.png",
+      "sourceSha256": "3caf72d6f084e045ae33b23a6f5f9c58e5f0741d1f01fe12717f68f4aecacea7",
+      "uniqueSourceFrames": 32,
+      "outputs": [
+        {
+          "file": "crest.webp",
+          "width": 512,
+          "height": 512,
+          "frames": 32,
+          "durationMs": 2880,
+          "loop": 0,
+          "hasAlpha": true,
+          "bytes": 945336,
+          "sha256": "813a3ebeee418051cfbb29ae5efba8fb533013a12bad91736d76fc7c4279e296",
+          "distinctDecodedSampleFrames": 4,
+          "transparentCorners": true
+        },
+        {
+          "file": "crest.gif",
+          "width": 384,
+          "height": 384,
+          "frames": 32,
+          "durationMs": 2880,
+          "loop": 0,
+          "hasAlpha": true,
+          "bytes": 1678527,
+          "sha256": "8ba28e844db6a1698ee2ba9cfd90ed476da386ea10ed2888c181f19a16dec73d",
+          "distinctDecodedSampleFrames": 4,
+          "transparentCorners": true
+        },
+        {
+          "file": "crest-poster.webp",
+          "width": 512,
+          "height": 512,
+          "frames": 1,
+          "durationMs": 0,
+          "hasAlpha": true,
+          "bytes": 124800,
+          "sha256": "8be99e4d32a2c18d7cdfa2a867cec246d2f8468e2dd6d838a5c11ecf3e965f81",
+          "distinctDecodedSampleFrames": 1,
+          "transparentCorners": true
+        }
+      ]
+    },
+    {
+      "name": "banner",
+      "source": "banner.png",
+      "sourceSha256": "7efeb695be2a8a333fb8b9dca877edb545f07d4297eabe7a2e9d62f9753ada30",
+      "uniqueSourceFrames": 32,
+      "outputs": [
+        {
+          "file": "banner.webp",
+          "width": 960,
+          "height": 320,
+          "frames": 32,
+          "durationMs": 2880,
+          "loop": 0,
+          "hasAlpha": true,
+          "bytes": 423296,
+          "sha256": "0a93787d33a6b4766a964e401ec31d3165e509ce30647d8f4678008de9145826",
+          "distinctDecodedSampleFrames": 4
+        },
+        {
+          "file": "banner.gif",
+          "width": 720,
+          "height": 240,
+          "frames": 32,
+          "durationMs": 2880,
+          "loop": 0,
+          "hasAlpha": true,
+          "bytes": 526880,
+          "sha256": "7236669eb061acbf3e7cc8fd9a4922e04cf041c3723042708d52f5e74226ab9f",
+          "distinctDecodedSampleFrames": 4
+        },
+        {
+          "file": "banner-poster.webp",
+          "width": 960,
+          "height": 320,
+          "frames": 1,
+          "durationMs": 0,
+          "hasAlpha": false,
+          "bytes": 103620,
+          "sha256": "14daf05d09abf411c1114c9ebad89ebe173892a0fc3e0fe33024506c9b565880",
+          "distinctDecodedSampleFrames": 1
+        }
+      ]
+    }
+  ]
+}

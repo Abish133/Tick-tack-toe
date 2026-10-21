@@ -3,6 +3,7 @@ import {randomBytes,randomUUID} from 'node:crypto';
 import {RANKED_POWER_IDS,DEFAULT_LOADOUT} from '../lib/game-engine/powers.js';
 import {fail,cleanText,passwordHash,verifyPassword,AppError,dateKey} from './security.mjs';
 import {premiumTiers,passCoinPrice,checkoutConfigured} from './commerce-policy.mjs';
+import {isCashOnlyCosmetic} from '../lib/cosmetic-collection.js';
 
 export const starterPowers=[...RANKED_POWER_IDS];
 export const defaultLoadout=[...DEFAULT_LOADOUT];
@@ -43,10 +44,12 @@ export async function updateProfile(userId,body){const changes={};if('name'in bo
 export async function updateSettings(userId,body){const data={};for(const key of ['sound','music','reducedMotion','highContrast','allowSpectators','notifications','allowFriendRequests','showOnline'])if(key in body){fail(typeof body[key]==='boolean','VALIDATION',`${key} must be true or false.`);data[key]=body[key];}if('profileVisibility'in body){fail(['public','friends','private'].includes(body.profileVisibility),'VALIDATION','Choose public, friends or private profile visibility.');data.profileVisibility=body.profileVisibility;}await db.playerSettings.update({where:{userId},data});return getPlayer(userId);}
 export async function updateLoadout(userId,powers){fail(Array.isArray(powers)&&powers.length===3&&new Set(powers).size===3&&powers.every(p=>typeof p==='string'),'VALIDATION','Equip exactly three different powers.');const owned=await db.playerPower.findMany({where:{userId,powerId:{in:powers},power:{enabled:true}}});fail(owned.length===3,'LOCKED_POWER','One of those powers is locked or not yet released.');await db.$transaction(async tx=>{const loadout=await tx.powerLoadout.findUnique({where:{userId}});await tx.powerLoadoutSlot.deleteMany({where:{loadoutId:loadout.id}});await tx.powerLoadoutSlot.createMany({data:powers.map((powerId,position)=>({loadoutId:loadout.id,powerId,position}))});});return getPlayer(userId);}
 export async function walletCredit(tx,userId,amount,reason,reference){fail(Number.isInteger(amount)&&amount>=0,'ECONOMY','Invalid reward amount.');const wallet=await tx.currencyWallet.update({where:{userId},data:{coins:{increment:amount}}});await tx.currencyTransaction.create({data:{userId,amount,balanceAfter:wallet.coins,reason,reference}});return wallet;}
-export async function purchaseCosmetic(userId,cosmeticId,requestId){fail(cleanText(cosmeticId,1,80)&&cleanText(requestId,8,80),'VALIDATION','A cosmetic ID and unique request ID are required.');return db.$transaction(async tx=>{
+export async function purchaseCosmetic(userId,cosmeticId,requestId){fail(cleanText(cosmeticId,1,80)&&cleanText(requestId,8,80),'VALIDATION','A cosmetic ID and unique request ID are required.');fail(!isCashOnlyCosmetic(cosmeticId),'REAL_MONEY_ONLY','Eternal Dominion is available only through its real-money collection checkout.',403);return db.$transaction(async tx=>{
   const [locked]=await tx.$queryRaw`SELECT coins FROM CurrencyWallet WHERE userId=${userId} FOR UPDATE`;
   const previous=await tx.shopPurchase.findUnique({where:{userId_requestId:{userId,requestId}}});if(previous){fail(previous.cosmeticId===cosmeticId,'REQUEST_CONFLICT','This request ID was used for a different item.');return {purchase:previous,wallet:await tx.currencyWallet.findUnique({where:{userId}}),duplicate:true};}
   const cosmetic=await tx.cosmeticItem.findUnique({where:{id:cosmeticId}});fail(cosmetic?.enabled,'NOT_FOUND','This cosmetic is unavailable.',404);
+  // MySQL may match case/accent/padding variants; enforce the returned canonical ID too.
+  fail(!isCashOnlyCosmetic(cosmetic.id),'REAL_MONEY_ONLY','Eternal Dominion is available only through its real-money collection checkout.',403);
   fail(!premiumTiers.some(tier=>tier.cosmeticId===cosmeticId),'SEASON_EXCLUSIVE','This cosmetic is an exclusive season-pass reward. Claim its premium journey tier.');
   fail(!await tx.playerInventory.findUnique({where:{userId_cosmeticId:{userId,cosmeticId}}}),'ALREADY_OWNED','You already own this cosmetic.');
   const changed=await tx.currencyWallet.updateMany({where:{userId,coins:{gte:cosmetic.price}},data:{coins:{decrement:cosmetic.price}}});fail(changed.count===1,'INSUFFICIENT_COINS','You need more coins for this cosmetic.');
@@ -95,7 +98,7 @@ export async function claimJourney(userId,level,track='free'){
   await tx.rewardClaim.create({data:{userId,kind,key,coins:tier.coins}});
   if(track==='premium'){
    const cosmetic=await tx.cosmeticItem.findUnique({where:{id:tier.cosmeticId}});
-   fail(cosmetic,'REWARD_UNAVAILABLE','This season cosmetic reward is unavailable. Please try again later.',503);
+   fail(cosmetic&&!isCashOnlyCosmetic(tier.cosmeticId),'REWARD_UNAVAILABLE','This season cosmetic reward is unavailable. Please try again later.',503);
    await tx.playerInventory.upsert({where:{userId_cosmeticId:{userId,cosmeticId:tier.cosmeticId}},create:{userId,cosmeticId:tier.cosmeticId},update:{}});
   }
   const wallet=await walletCredit(tx,userId,tier.coins,track==='premium'?'premium_season_journey':'season_journey',`${track==='premium'?'premium_season':'season'}:${userId}:${key}`);

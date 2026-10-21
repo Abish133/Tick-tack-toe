@@ -1,0 +1,246 @@
+/* Eternal Dominion is cosmetic only: ornaments never intercept board input. */
+:root {
+  --rarity-sovereign: #ffdc93;
+  --dominion-rim: linear-gradient(115deg, #956a36, #ffe8b1 28%, #bba4ff 52%, #ffdc93 76%, #956a36);
+}
+
+.collection-theme-dominion {
+  isolation: isolate;
+  color: var(--cosmetic-primary, #ffdc93);
+}
+.dominion-match-emote > svg {
+  width: 25px;
+  height: 25px;
+  color: #ffdc93;
+  filter: drop-shadow(0 0 4px #bba4ff66);
+}
+.collection-dominion-ambient {
+  position: absolute;
+  inset: 2%;
+  width: 96%;
+  height: 96%;
+  object-fit: contain;
+  opacity: .2;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* The cutout portrait sits in front of an illuminated eclipse. */
+.collection-theme-dominion .collection-avatar-aura {
+  width: 78%;
+  height: auto;
+  aspect-ratio: 1;
+  border: 1px solid #ffe8b154;
+  background: radial-gradient(circle, #100c1c00 36%, #bba4ff35 56%, #ffdc9333 63%, #100c1c00 72%);
+  box-shadow: 0 0 28px #bba4ff16, inset 0 0 18px #ffdc9317;
+  animation: dominion-aura 6s ease-in-out infinite;
+}
+.collection-theme-dominion .collection-portrait {
+  filter: drop-shadow(0 3px 2px #0009) drop-shadow(0 0 12px #bba4ff38);
+  animation: dominion-portrait 6s ease-in-out infinite;
+}
+.collection-theme-dominion.collection-landscape-art {
+  overflow: hidden;
+}
+.collection-theme-dominion .collection-landscape {
+  animation: dominion-landscape 18s ease-in-out infinite alternate;
+}
+.collection-theme-dominion .collection-landscape-label {
+  color: #ffedc4;
+  background: linear-gradient(transparent, #100c1cf0);
+}
+
+/* Gold channels separate the board from its obsidian tiles on every board size. */
+.collection-board[data-cosmetic-theme="dominion"] {
+  --collection-cell-radius: 8px 2px;
+  position: relative;
+  isolation: isolate;
+  border: 2px solid #e5ba73;
+  border-top-color: #fff0c4;
+  border-radius: 14px 4px;
+  background:
+    linear-gradient(145deg, #100c1c88, #100c1cc7),
+    var(--cosmetic-motion-art, var(--cosmetic-art)) center / cover;
+  box-shadow: inset 0 0 0 2px #bba4ff30, inset 0 0 24px #ffdc9320, 0 8px 24px #0008;
+}
+.collection-board[data-cosmetic-theme="dominion"] > .collection-board-cell,
+.collection-board[data-cosmetic-theme="dominion"] > .preview-cell {
+  border: 1px solid #d5aa695f;
+  border-top-color: #ffedbd8c;
+  border-radius: var(--collection-cell-radius);
+  background: linear-gradient(145deg, #32243bed, #100c1cf5 65%);
+  box-shadow: inset 0 1px 0 #fff4, inset 0 -2px 0 #0009;
+}
+.battle-arena .game-board.collection-board[data-cosmetic-theme="dominion"] {
+  border-color: #e5ba73 !important;
+  border-top-color: #fff0c4 !important;
+  background:
+    linear-gradient(145deg, #100c1c88, #100c1cc7),
+    var(--cosmetic-motion-art, var(--cosmetic-art)) center / cover !important;
+  box-shadow: inset 0 0 0 2px #bba4ff30, inset 0 0 24px #ffdc9320, 0 0 24px #bba4ff24, 0 16px 34px #0009 !important;
+}
+.battle-arena .collection-board[data-cosmetic-theme="dominion"] > .game-cell:not(.frozen):not(.locked):not(.winning):not(.valid-target):not(.selected-source):not(.shielded) {
+  border-color: #d5aa695f;
+  border-top-color: #ffedbd8c;
+  border-radius: var(--collection-cell-radius);
+  background: linear-gradient(145deg, #32243bed, #100c1cf5 65%);
+  box-shadow: inset 0 1px 0 #fff3, inset 0 -2px 0 #0008;
+}
+.collection-theme-dominion.collection-board-art .collection-marks.x,
+.collection-theme-dominion.collection-sigils .collection-marks.x {
+  color: #ffdc93;
+}
+.collection-theme-dominion.collection-board-art .collection-marks.o,
+.collection-theme-dominion.collection-sigils .collection-marks.o {
+  color: #cbb6ff;
+}
+.collection-theme-dominion.collection-sigils > .mark {
+  position: relative;
+  z-index: 1;
+}
+
+/* The frame is an open SVG; its ornamental crown never covers the portrait. */
+.collection-theme-dominion.collection-frame-art {
+  background: radial-gradient(circle, #bba4ff1c, transparent 67%);
+}
+.collection-theme-dominion.collection-frame-art > img {
+  inset: 10%;
+  width: 80%;
+  height: 80%;
+}
+
+.collection-theme-dominion.collection-banner-art {
+  border-block: 1px solid #ffdc938c;
+  background: #100c1c;
+}
+.collection-theme-dominion.collection-banner-art > img {
+  opacity: .82;
+  object-position: center;
+}
+.collection-theme-dominion.collection-banner-art::after {
+  background:
+    linear-gradient(90deg, #100c1cf0, #100c1c80 68%, #100c1c26),
+    linear-gradient(115deg, transparent 36%, #ffedbd22 49%, transparent 62%);
+  background-size: 100% 100%, 250% 100%;
+  animation: dominion-banner-light 8s ease-in-out infinite;
+}
+.collection-theme-dominion .collection-banner-crest {
+  border: 2px solid #e5ba73;
+  border-top-color: #fff0c4;
+  border-radius: 12px 3px;
+  box-shadow: inset 0 0 0 2px #bba4ff26, 0 0 20px #ffdc931a;
+  background: #100c1cd9;
+}
+.collection-theme-dominion .collection-banner-copy strong {
+  font-family: var(--font-display);
+  color: #fff0c4;
+  font-weight: 700;
+}
+.collection-profile-identity.banner-collection-dominion::before {
+  background-image: linear-gradient(0deg, #111320, #100c1c22 85%), var(--cosmetic-motion-art, var(--cosmetic-art));
+  opacity: .75;
+}
+.player-card.collection-profile-banner.banner-collection-dominion {
+  background:
+    linear-gradient(90deg, #100c1cec, #100c1c8c),
+    var(--cosmetic-motion-art, var(--cosmetic-art)) center / cover;
+  border-color: #ffdc9360;
+}
+
+.collection-theme-dominion.collection-emote-art > span {
+  position: relative;
+  border: 1px solid #ffdc9380;
+  border-top-color: #fff0c4;
+  border-radius: 14px 4px;
+  background: linear-gradient(145deg, #4b3440b3, #100c1cf0);
+  box-shadow: inset 0 1px 0 #fff3, 0 4px 0 #05040b, 0 0 16px #bba4ff1a;
+  animation: dominion-emote-light 4s ease-in-out infinite;
+}
+.collection-theme-dominion.collection-emote-art > span + span {
+  border-color: #bba4ff99;
+  animation-delay: 2s;
+}
+/* The shared collection light is an overlay, rather than a third emote tile. */
+.collection-theme-dominion.collection-emote-art > .asc-fx {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  box-shadow: none;
+  animation: none;
+  transform: none;
+}
+.collection-theme-dominion.collection-title-art > svg {
+  width: 39px;
+  height: 39px;
+  color: #ffdc93;
+}
+.collection-theme-dominion.collection-title-art > strong,
+.collection-profile-title[data-cosmetic-theme="dominion"] {
+  color: #ffdc93 !important;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-shadow: 0 2px 2px #0008, 0 0 12px #ffdc9333;
+}
+.collection-theme-dominion.collection-title-art > small {
+  color: #cbb6ff;
+  letter-spacing: 1.4px;
+}
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .collection-theme-dominion.collection-title-art > strong,
+  .collection-profile-title[data-cosmetic-theme="dominion"] {
+    background: linear-gradient(105deg, #ffdc93 20%, #fff9eb 36%, #cbb6ff 48%, #fff0c4 61%, #d7a958 80%);
+    background-size: 240% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent !important;
+    animation: dominion-title-light 7s linear infinite;
+  }
+}
+
+@keyframes dominion-aura { 0%,100% { opacity: .65; scale: .96; } 50% { opacity: 1; scale: 1.04; } }
+@keyframes dominion-portrait { 0%,100% { translate: 0 0; } 50% { translate: 0 -3px; } }
+@keyframes dominion-landscape { from { scale: 1.03; } to { scale: 1.09; } }
+@keyframes dominion-banner-light { 0%,25% { background-position: 0 0, 120% 0; } 90%,100% { background-position: 0 0, -100% 0; } }
+@keyframes dominion-emote-light { 0%,100% { box-shadow: inset 0 1px 0 #fff3, 0 4px 0 #05040b, 0 0 12px #bba4ff16; } 50% { box-shadow: inset 0 1px 0 #fff5, 0 4px 0 #05040b, 0 0 20px #ffdc9338; } }
+@keyframes dominion-title-light { to { background-position: -240% 0; } }
+
+.reduce-motion .collection-theme-dominion,
+.reduce-motion .collection-theme-dominion *,
+.reduce-motion .collection-theme-dominion::before,
+.reduce-motion .collection-theme-dominion::after,
+.reduce-motion .collection-profile-title[data-cosmetic-theme="dominion"],
+.quality-low .collection-theme-dominion,
+.quality-low .collection-theme-dominion *,
+.quality-low .collection-theme-dominion::before,
+.quality-low .collection-theme-dominion::after,
+.quality-low .collection-profile-title[data-cosmetic-theme="dominion"] { animation: none !important; }
+.reduce-motion .collection-board[data-cosmetic-theme="dominion"],
+.quality-low .collection-board[data-cosmetic-theme="dominion"],
+.reduce-motion .battle-arena .game-board.collection-board[data-cosmetic-theme="dominion"],
+.quality-low .battle-arena .game-board.collection-board[data-cosmetic-theme="dominion"] {
+  background-image: linear-gradient(145deg, #100c1c88, #100c1cc7), var(--cosmetic-art) !important;
+}
+.reduce-motion .collection-profile-identity.banner-collection-dominion::before,
+.quality-low .collection-profile-identity.banner-collection-dominion::before {
+  background-image: linear-gradient(0deg, #111320, #100c1c22 85%), var(--cosmetic-art);
+}
+.high-contrast .collection-theme-dominion.collection-title-art > strong,
+.high-contrast .collection-profile-title[data-cosmetic-theme="dominion"] {
+  color: #fff0c4 !important;
+  background: none;
+  text-shadow: none;
+}
+.high-contrast .collection-board[data-cosmetic-theme="dominion"] > .game-cell {
+  border-color: #fff0c4 !important;
+}
+@media (prefers-contrast: more) {
+  .collection-theme-dominion.collection-title-art > strong,
+  .collection-profile-title[data-cosmetic-theme="dominion"] { color: #fff0c4 !important; background: none; text-shadow: none; }
+  .collection-dominion-ambient { opacity: .08; }
+  .collection-board[data-cosmetic-theme="dominion"] > .game-cell { border-color: #fff0c4 !important; }
+}

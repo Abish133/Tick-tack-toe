@@ -13,6 +13,7 @@ import {
   LockKeyhole,
   Box,
   Crown,
+  Eye,
 } from "lucide-react";
 import {
   cosmeticTheme,
@@ -20,6 +21,7 @@ import {
   cosmeticMotion,
   COLLECTION_BUNDLES,
   COSMETIC_THEMES,
+  isCashOnlyCosmetic,
 } from "../lib/cosmetic-collection";
 import styles from "./CommercePanel.module.css";
 import { GameFrame, GameButton, RarityTile } from "./ui";
@@ -65,6 +67,7 @@ export default function CommercePanel({
   onRegister,
   ownedIds = [],
   onCollection,
+  onPreview,
   focus = "featured",
 }) {
   const [data, setData] = useState(null),
@@ -122,7 +125,9 @@ export default function CommercePanel({
     }
     if (!data?.checkoutEnabled) {
       onNotice(
-        "Payments not enabled yet. This collection can be earned with cosmetic coins.",
+        product.cosmeticIds?.some(isCashOnlyCosmetic)
+          ? "Premium checkout is not available yet. This set is real money only."
+          : "Payments are not enabled yet. Coin-purchasable styles can still be earned through play.",
       );
       return;
     }
@@ -259,24 +264,29 @@ export default function CommercePanel({
   const products = data?.products || [],
     bundles = products
       .filter((product) => product.kind === "bundle")
-      .sort(
-        (a, b) =>
-          Number(b.themeId === "ascendant" || b.id === "bundle-ascendant") -
-          Number(a.themeId === "ascendant" || a.id === "bundle-ascendant"),
-      ),
+      .sort((a, b) => {
+        const priority = (product) => product.id === "bundle-dominion" ? 2 : product.id === "bundle-ascendant" ? 1 : 0;
+        return priority(b) - priority(a);
+      }),
     extras = products.filter((product) => product.kind !== "bundle");
   const bundleIds = (product) =>
     product.cosmeticIds ||
     COLLECTION_BUNDLES.find((bundle) => bundle.id === product.id)
       ?.cosmeticIds ||
     [];
+  const premiumProduct = bundles.find((product) => product.id === "bundle-dominion"),
+    premiumItems = premiumProduct ? bundleIds(premiumProduct).map(cosmeticById).filter(Boolean) : [],
+    premiumOwned = premiumItems.filter((item) => ownedIds.includes(item.id)).length,
+    premiumComplete = premiumItems.length > 0 && premiumOwned === premiumItems.length,
+    premiumAvatar = premiumItems.find((item) => item.type === "avatar");
+  const slotNames = { avatar: "Avatar", board: "Board", marks: "X / O marks", arena: "Arena", frame: "Frame", banner: "Banner", effect: "Arrival", emote: "Two emotes", title: "Title" };
   return (
     <GameFrame
       className={styles.panel}
       aria-label="Cosmetic purchases and optional rewards"
     >
       <div className={styles.heading}>
-        <h2>{focus === "coins" ? "TREASURE VAULT" : "COLLECTIONS"}</h2>
+        <h2>{focus === "coins" ? "TREASURE VAULT" : focus === "premium" ? "SOVEREIGN COLLECTION" : "COLLECTIONS"}</h2>
         <span>
           <ShieldCheck size={18} />
           COSMETIC ONLY
@@ -295,12 +305,53 @@ export default function CommercePanel({
               <span>
                 <strong>Payments not enabled yet.</strong>
                 <span>
-                  Razorpay setup pending · Earn these styles with coins.
+                  Checkout is unavailable until Razorpay setup is complete.
+                  {focus === "premium" ? " Eternal Dominion is real money only." : " Earned coins remain available for eligible styles."}
                 </span>
               </span>
             </div>
           )}
-          {focus !== "coins" && bundles.length > 0 && (
+          {focus === "premium" && premiumProduct && (
+            <section className={styles.sovereignOffer} aria-label="Eternal Dominion premium set" data-bundle-id="bundle-dominion">
+              <div className={styles.sovereignHero}>
+                <img className={styles.sovereignBackdrop} src="/assets/collection/dominion/arena-poster.webp" alt="" />
+                <div className={styles.sovereignCopy}>
+                  <span className={styles.sovereignEyebrow}><Crown size={14} /> SOVEREIGN · PREMIUM EXCLUSIVE</span>
+                  <h3>Eternal<br />Dominion</h3>
+                  <p>Command the eclipse. Wear the crown.</p>
+                  <span className={styles.moneyOnly}><CreditCard size={13} /> REAL MONEY ONLY</span>
+                </div>
+                {premiumAvatar && <span className={styles.sovereignPortrait} aria-hidden="true"><CosmeticArt item={premiumAvatar} /></span>}
+              </div>
+              <div className={styles.sovereignDetails}>
+                <div className={styles.sovereignIntro}>
+                  <div><h4>Your complete imperial identity</h4><p>Nine coordinated styles, including two match emotes. Preview every piece.</p></div>
+                  <span><Sparkles size={14} /> ANIMATED</span>
+                </div>
+                <div className={styles.sovereignContents} aria-label="Nine included premium cosmetics">
+                  {premiumItems.map((item) => (
+                    <button key={item.id} type="button" onClick={() => onPreview?.(item)} aria-label={`Preview ${item.name}`} data-premium-slot={item.type}>
+                      <span className={styles.sovereignItemArt} aria-hidden="true"><CosmeticArt item={item} /></span>
+                      <span>{slotNames[item.type]}</span>
+                      {ownedIds.includes(item.id) ? <Check className={styles.slotOwned} size={14} aria-label="Owned" /> : <Eye className={styles.slotOwned} size={13} aria-hidden="true" />}
+                    </button>
+                  ))}
+                </div>
+                <div className={styles.sovereignCheckout}>
+                  <div className={styles.sovereignPrice}><span>COMPLETE NINE-STYLE SET</span><strong>{price(premiumProduct)}</strong><small>{premiumComplete ? "All nine styles owned" : `${premiumOwned} / ${premiumItems.length} styles owned · One-time purchase`}</small></div>
+                  <GameButton disabled={premiumComplete || !data.checkoutEnabled || Boolean(busy)} onClick={() => payment(premiumProduct)}>
+                    {busy === premiumProduct.id ? <LoaderCircle className="spin" size={18} /> : premiumComplete ? <Check size={18} /> : !data.checkoutEnabled ? <LockKeyhole size={18} /> : <CreditCard size={18} />}
+                    {premiumComplete ? "Collection owned" : !data.checkoutEnabled ? "Checkout unavailable" : "Buy Eternal Dominion"}
+                  </GameButton>
+                </div>
+                <p className={styles.sovereignTerms}><ShieldCheck size={16} /><span>Cosmetics only. Equal powers and gameplay for every player. This set cannot be purchased with coins or earned through rewards.</span></p>
+                {premiumOwned > 0 && !premiumComplete && <p className={styles.small}>The full set price applies. Owned styles are retained; duplicates do not grant coins.</p>}
+                {!premiumComplete && data.checkoutEnabled && <p className={styles.small}>Secure Razorpay checkout. Styles unlock after verified payment. A registered account is required.</p>}
+              </div>
+            </section>
+          )}
+          {focus === "premium" && !premiumProduct && <p className={styles.info}>The premium set is not available right now. Please check back later.</p>}
+          {focus !== "coins" && focus !== "premium" && bundles.length > 0 && (
             <div
               className={styles.collections}
               aria-label="Cash cosmetic collections"
@@ -319,13 +370,14 @@ export default function CommercePanel({
                     .map(cosmeticById)
                     .find((item) => item?.type === "avatar"),
                   ascendant = theme?.id === "ascendant",
+                  sovereign = theme?.id === "dominion",
                   animated = ids.some((id) => Boolean(cosmeticMotion(id)));
                 return (
                   <article
-                    className={`${styles.bundle} ${ascendant ? styles.ascendantBundle : ""} ${!data.checkoutEnabled ? styles.locked : ""}`}
+                    className={`${styles.bundle} ${ascendant ? styles.ascendantBundle : ""} ${sovereign ? styles.sovereignBundle : ""} ${!data.checkoutEnabled ? styles.locked : ""}`}
                     key={product.id}
                     data-rarity={theme?.rarity || undefined}
-                    aria-label={`${product.name}${animated ? ", animated Ascendant collection" : ""}`}
+                    aria-label={`${product.name}${animated ? ", animated collection" : ""}`}
                     style={{ "--bundle-color": theme?.primary || "#c3a1ff" }}
                   >
                     <div className={styles.bundleArt}>
@@ -341,7 +393,7 @@ export default function CommercePanel({
                         loading="lazy"
                       />
                       <div className={styles.bundleShade} />
-                      {avatar && ascendant ? (
+                      {avatar && (ascendant || sovereign) ? (
                         <span className={styles.bundleAvatar} aria-hidden="true">
                           <CosmeticArt item={avatar} />
                         </span>
@@ -353,10 +405,10 @@ export default function CommercePanel({
                           loading="lazy"
                         />
                       )}
-                      {ascendant && (
+                      {(ascendant || sovereign) && (
                         <span className={styles.premiumTier}>
-                          <span><Crown size={13} aria-hidden="true" /> ASCENDANT</span>
-                          {animated && <span><Sparkles size={12} aria-hidden="true" /> ANIMATED</span>}
+                          <span><Crown size={13} aria-hidden="true" /> {sovereign ? "SOVEREIGN" : "ASCENDANT"}</span>
+                          {sovereign ? <span><CreditCard size={12} aria-hidden="true" /> REAL MONEY ONLY</span> : animated && <span><Sparkles size={12} aria-hidden="true" /> ANIMATED</span>}
                         </span>
                       )}
                       <span className={styles.bundleLabel}>
@@ -417,7 +469,7 @@ export default function CommercePanel({
               })}
             </div>
           )}
-          {focus !== "coins" && bundles.length > 0 && (
+          {focus !== "coins" && focus !== "premium" && bundles.length > 0 && (
             <p className={styles.small}>
               The listed price covers all nine styles, including those you own.
             </p>

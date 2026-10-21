@@ -9,6 +9,7 @@ import {leaderboardPage} from './leaderboards.mjs';
 import {BOARD_SIZES,RANKED_BOT_FALLBACK_MS,RANKED_BOT_TIERS,RANKED_BOT_MESSAGE} from './matchmaking-policy.mjs';
 import {publicProfile,friendsOverview,requestFriend,respondFriend,challengeFriend,acceptChallenge,playerSelect,socialPlayer,blockedPair} from './social.mjs';
 import {RANKED_POWER_IDS,POWER_CATALOG} from '../lib/game-engine/powers.js';
+import {cosmeticPurchaseMetadata} from '../lib/cosmetic-collection.js';
 import {emailConfigured,sendEmail} from './email.mjs';
 import {checkoutConfigured,passCoinPrice,premiumTiers} from './commerce-policy.mjs';
 import {buyPassWithCoins,createCheckout,verifyCheckout,orderStatus,razorpayWebhook,listCommerceProducts} from './commerce.mjs';
@@ -60,7 +61,7 @@ async function routeAPI(request,context={}){
     }
     if(path==='leaderboard'&&method==='GET'){const viewer=await authenticate(cookie);const page=await leaderboardPage({category:url.searchParams.get('category')||'cups',scope:url.searchParams.get('scope')||undefined,region:url.searchParams.get('region'),season:url.searchParams.get('season'),offset:url.searchParams.get('offset'),limit:url.searchParams.get('limit'),userId:viewer?.id});return json({...page,divisions:await db.rankDivision.findMany({orderBy:{minCups:'asc'}})});}
     if(/^players\/[^/]+$/.test(path)&&method==='GET'&&path!=='players/search'){const viewer=await authenticate(cookie);return json(await publicProfile(path.split('/')[1],viewer?.id));}
-    if(path==='catalog'&&method==='GET'){const [powers,cosmetics]=await Promise.all([db.powerDefinition.findMany({orderBy:{sortOrder:'asc'}}),db.cosmeticItem.findMany({where:{enabled:true,id:{notIn:premiumTiers.map(t=>t.cosmeticId)}},orderBy:{price:'asc'}})]);return json({powers,cosmetics,features:features()},200,{'cache-control':'public, max-age=60, stale-while-revalidate=3600'});}
+    if(path==='catalog'&&method==='GET'){const [powers,cosmetics]=await Promise.all([db.powerDefinition.findMany({orderBy:{sortOrder:'asc'}}),db.cosmeticItem.findMany({where:{enabled:true,id:{notIn:premiumTiers.map(t=>t.cosmeticId)}},orderBy:{price:'asc'}})]);return json({powers,cosmetics:cosmetics.map(item=>({...item,...cosmeticPurchaseMetadata(item.id)})),features:features()},200,{'cache-control':'public, max-age=60, stale-while-revalidate=3600'});}
     if(path==='tournaments'&&method==='GET'){const tournaments=await db.tournament.findMany({orderBy:{startsAt:'desc'},take:50,include:{_count:{select:{participants:true}}}});return json({tournaments:tournaments.map(t=>({...t,capacity:t.maxPlayers}))});}
     if(path.startsWith('tournaments/')&&method==='GET'){const id=path.split('/')[1];const tournament=await db.tournament.findUnique({where:{id},include:{participants:{include:{user:{select:{id:true,name:true}}}},rounds:{orderBy:{number:'asc'},include:{matches:{orderBy:{position:'asc'},include:{match:{select:{id:true,status:true,result:true}}}}}}}});fail(tournament,'NOT_FOUND','Tournament not found.',404);return json({tournament});}
 

@@ -67,7 +67,7 @@ test('Razorpay HMAC checks raw UTF8 bytes rather than a reserialized JSON object
 test('Payment prices use server-side integer paise and capture must match its recorded order',()=>{
   assert.equal(checkoutConfigured(env),true);assert.equal(checkoutConfigured({RAZORPAY_KEY_ID:'public-only'}),false);
   const products=commerceProducts({});assert.equal(products.find(p=>p.id==='coins-spark').amount,4900);assert(products.every(p=>Number.isInteger(p.amount)&&p.currency==='INR'));
-  const bundles=products.filter(product=>product.kind==='bundle');assert.equal(bundles.length,COLLECTION_BUNDLES.length);assert.equal(bundles.filter(bundle=>bundle.themeId!=='ascendant').length,10);assert(bundles.every(bundle=>bundle.amount===(bundle.themeId==='ascendant'?49900:14900)&&bundle.coins===0&&bundle.cosmeticIds.length===9));
+  const bundles=products.filter(product=>product.kind==='bundle');assert.equal(bundles.length,COLLECTION_BUNDLES.length);assert.equal(bundles.filter(bundle=>!['ascendant','dominion'].includes(bundle.themeId)).length,10);assert(bundles.every(bundle=>bundle.amount===(bundle.themeId==='dominion'?249900:bundle.themeId==='ascendant'?49900:14900)&&bundle.coins===0&&bundle.cosmeticIds.length===9));
   assert.equal(commerceProducts({RAZORPAY_COLLECTION_PAISE:'19900'}).find(product=>product.kind==='bundle').amount,19900);
   assert.equal(commerceProducts({RAZORPAY_COLLECTION_PAISE:'19900'}).find(product=>product.id==='bundle-ascendant').amount,49900);
   assert.equal(commerceProducts({RAZORPAY_ASCENDANT_PAISE:'59900'}).find(product=>product.id==='bundle-ascendant').amount,59900);
@@ -178,6 +178,46 @@ test('real isolated MySQL provider settlement and cosmetic entitlements',{skip:!
     assert.equal(await db.playerPower.count({where:{userId:user.id}}),0);
     await assert.rejects(pending(user,premium.id),code('ALREADY_OWNED'));
     for(const id of premium.cosmeticIds)await equipCosmetic(user.id,id);
+  });
+
+  await t.test('Dominion stays cash-only despite edited catalog prices and verified capture/refund controls all nine slots',async()=>{
+    const user=await fixture(100000),premium=COLLECTION_BUNDLES.find(item=>item.id==='bundle-dominion');
+    const before=(await db.currencyWallet.findUnique({where:{userId:user.id}})).coins;
+    const listed=(await listCommerceProducts(user.id,env)).products.find(product=>product.id===premium.id);
+    assert.equal(listed.amount,249900);assert.equal(listed.purchaseMode,'real-money');assert.equal(listed.itemCount,9);
+    const response=await handleAPI(new Request('http://localhost/api/catalog'));
+    const catalog=await response.json();
+    for(const id of premium.cosmeticIds){
+      assert.equal(catalog.cosmetics.find(item=>item.id===id).purchaseMode,'real-money');
+      await db.cosmeticItem.update({where:{id},data:{price:1}});
+      try{
+        for(const alias of [id,id.toUpperCase(),id+' '])await assert.rejects(purchaseCosmetic(user.id,alias,'dominion-coin-'+randomUUID()),code('REAL_MONEY_ONLY'));
+      }
+      finally{await db.cosmeticItem.update({where:{id},data:{price:0}});}
+    }
+    await assert.rejects(purchaseCosmetic(user.id,'ávatar-collection-dominion','dominion-alias-'+randomUUID()),code('REAL_MONEY_ONLY'));
+    assert.equal(await db.playerInventory.count({where:{userId:user.id}}),0);
+    assert.equal(await db.shopPurchase.count({where:{userId:user.id}}),0);
+    const {order}=await pending(user,premium.id),payment=captured(order,'pay_'+run+'Dominion');
+    assert.equal(order.amount,249900);assert.deepEqual(order.cosmeticIds,premium.cosmeticIds);
+    await assert.rejects(fulfillCapturedPayment(order,{...payment,amount:1}),code('PAYMENT_MISMATCH'));
+    await assert.rejects(fulfillCapturedPayment(order,{...payment,status:'authorized'}),code('PAYMENT_PENDING'));
+    const results=await Promise.all([fulfillCapturedPayment(order,payment),fulfillCapturedPayment(order,payment)]);
+    assert.equal(results.filter(result=>result.duplicate).length,1);
+    assert.equal(await db.playerInventory.count({where:{userId:user.id,cashCreated:true}}),9);
+    assert.equal(await db.commerceCosmeticGrant.count({where:{orderId:order.id}}),9);
+    for(const id of premium.cosmeticIds)await equipCosmetic(user.id,id);
+    assert.equal((await db.currencyWallet.findUnique({where:{userId:user.id}})).coins,before);
+    assert.equal(await db.playerPower.count({where:{userId:user.id}}),0);
+    assert.equal((await db.playerRating.findUnique({where:{userId:user.id}})).cups,0);
+    await assert.rejects(pending(user,premium.id),code('ALREADY_OWNED'));
+    const refunded={...payment,status:'refunded',amount_refunded:order.amount};
+    await webhook(order,refunded);await webhook(order,refunded);
+    assert.equal(await db.playerInventory.count({where:{userId:user.id}}),0);
+    const profile=await db.playerProfile.findUnique({where:{userId:user.id}});
+    assert.equal(profile.avatar,'avatar-void');assert.equal(profile.equippedBoard,'board-void');assert.equal(profile.equippedMark,'marks-neon');assert.equal(profile.title,'Rookie Strategist');
+    for(const field of ['equippedFrame','equippedBanner','equippedArena','equippedEffect','equippedEmote'])assert.equal(profile[field],null);
+    assert.equal((await db.currencyWallet.findUnique({where:{userId:user.id}})).coins,before);
   });
 
   await t.test('Collections require enabled catalog styles, a registered player and configured checkout',async()=>{

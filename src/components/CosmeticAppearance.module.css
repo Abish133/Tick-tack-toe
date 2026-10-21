@@ -38,3 +38,33 @@
 
 :global(html.reduce-motion) .mark.ascendant,:global(html.reduce-motion) .mark.ascendant>*,:global(html.reduce-motion) .frame.ascendant::before,:global(html.reduce-motion) .frame.ascendant::after,:global(html.reduce-motion) .arrival.ascendant .arrivalRing,:global(html.reduce-motion) .arrival.ascendant .ascendantPortal{animation:none!important}
 :global(.reduce-motion) .mark.ascendant,:global(.reduce-motion) .mark.ascendant>*,:global(.reduce-motion) .frame.ascendant::before,:global(.reduce-motion) .frame.ascendant::after,:global(.reduce-motion) .arrival.ascendant .arrivalRing,:global(.reduce-motion) .arrival.ascendant .ascendantPortal{animation:none!important}
+
+/* Eternal Dominion: open ornaments preserve the avatar and the X/O silhouette. */
+.mark.dominion{stroke-width:1.8;filter:drop-shadow(0 0 3px currentColor);animation:dominion-mark-light 4s ease-in-out infinite}
+.mark.dominion>path:last-child{stroke:var(--cosmetic-primary);fill:var(--cosmetic-primary);fill-opacity:.14}
+.frame.dominion{inset:-18%;color:var(--cosmetic-primary);filter:drop-shadow(0 1px 1px #000) drop-shadow(0 0 4px #d3b87566)}
+.frame.dominion>svg{overflow:visible}
+.dominionGlint{stroke-dasharray:9 30;animation:dominion-frame-glint 5s linear infinite}
+.arrival.dominion{isolation:isolate}
+.arrival.dominion:not(.compact){width:168px;height:168px}
+.dominionPortal{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.65;pointer-events:none;animation:dominion-portal-light 5s ease-in-out infinite}
+.arrival.dominion .arrivalRing{inset:17%;border:1px solid #ffdc937d;border-radius:50%;box-shadow:0 0 20px #ffdc9325;animation:dominion-arrival-ring 4s ease-out infinite}
+.dominionOrbit{position:absolute;inset:12%;border:1px dashed #bba4ff91;border-radius:50%;transform:rotateX(58deg) rotate(-30deg);animation:dominion-orbit-light 6s ease-in-out infinite}
+.dominionGate{position:absolute;inset:26%;border:1px solid #ffdc9399;border-radius:12%;transform:rotate(45deg);box-shadow:0 0 14px #bba4ff2b;animation:dominion-gate-light 4s ease-in-out infinite}
+.arrival.dominion .arrivalCore{inset:31%;background:radial-gradient(circle,#100c1ce8,#100c1c00)}
+.arrival.dominion .arrivalCore>svg{width:85%;height:85%;filter:drop-shadow(0 0 6px #ffdc9366)}
+.arrival.dominion .particle{width:10%;height:10%;left:45%;top:45%;animation-duration:6s}
+.compact .dominionPortal{opacity:.13;inset:-3%;width:106%;height:106%}
+.compact .dominionGate{display:none}
+.arrival.dominion.compact .arrivalRing{inset:16%;box-shadow:none}
+.arrival.dominion.compact .dominionOrbit{inset:9%;opacity:.6}
+.arrival.dominion.compact .particle{opacity:.6;width:8%;height:8%;left:46%;top:46%}
+@keyframes dominion-mark-light{0%,100%{filter:drop-shadow(0 0 3px currentColor)}50%{filter:drop-shadow(0 0 6px currentColor)}}
+@keyframes dominion-frame-glint{to{stroke-dashoffset:-78}}
+@keyframes dominion-portal-light{0%,100%{opacity:.5}50%{opacity:.8}}
+@keyframes dominion-arrival-ring{0%{opacity:.1;scale:.85}35%{opacity:.85}100%{opacity:0;scale:1.2}}
+@keyframes dominion-orbit-light{0%,100%{opacity:.45}50%{opacity:.9}}
+@keyframes dominion-gate-light{0%,100%{opacity:.3;scale:.9}50%{opacity:.8;scale:1.05}}
+:global(.reduce-motion) .mark.dominion,:global(.reduce-motion) .dominionGlint,:global(.reduce-motion) .arrival.dominion .arrivalRing,:global(.reduce-motion) .dominionPortal,:global(.reduce-motion) .dominionOrbit,:global(.reduce-motion) .dominionGate,:global(.reduce-motion) .arrival.dominion .particle,:global(.quality-low) .mark.dominion,:global(.quality-low) .dominionGlint,:global(.quality-low) .arrival.dominion *{animation:none!important}
+:global(.reduce-motion) .arrival.dominion .arrivalRing{opacity:.7;scale:1}
+:global(.high-contrast) .mark.dominion,:global(.high-contrast) .frame.dominion{filter:none}

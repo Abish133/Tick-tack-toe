@@ -104,6 +104,8 @@ const EMOTE_LABELS = {
   comet: "Star streak!",
   supernova: "Supernova play!",
   infinity: "Beyond the stars!",
+  "dominion-crown": "Claim the crown!",
+  "dominion-eclipse": "An imperial play!",
 };
 
 function BattleAvatar({

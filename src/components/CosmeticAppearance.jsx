@@ -6,6 +6,9 @@ import AnimatedCosmeticImage from './AnimatedCosmeticImage';
 // All of these ornaments are presentation only. The board still exposes plain X/O marks.
 export function CosmeticMotif({name='sun',className=''}){
  const art={
+  dominion:<><path d="m24 4 5 8 9-5-3 12H13L10 7l9 5Z"/><path d="M14 21c-7-3-11 0-11 7l8-4 4 11 9 9 9-9 4-11 8 4c0-7-4-10-11-7"/><path d="m17 24 7 4 7-4-3 10-4 4-4-4Z"/><path d="m21 24 3-4 3 4M16 15h16"/></>,
+  'dominion-crown':<><path d="m5 13 10 6L24 5l9 14 10-6-5 24H10Z"/><path d="M11 31h26m-13-8 4 4-4 4-4-4Z"/><path d="M15 42h18M5 5l2 3m36-3-2 3"/><circle cx="24" cy="5" r="2" fill="currentColor"/></>,
+  'dominion-eclipse':<><circle cx="24" cy="24" r="13"/><path d="M30 12a13 13 0 0 0 0 24 13 13 0 1 1 0-24Z" fill="currentColor" fillOpacity=".18"/><path d="m24 2 2 6m-2 32-2 6M2 24l6-2m32 2 6 2M8 8l5 4m22 24 5 4M40 8l-5 4M13 36l-5 4"/><path d="m23 16 7 8-7 8"/></>,
   ascendant:<><path d="m24 3 5 13 14 8-14 5-5 16-5-16L5 24l14-8Z"/><circle cx="24" cy="24" r="7"/><path d="m7 7 7 7m20 20 7 7M41 7l-7 7M14 34l-7 7"/></>,
   supernova:<><path d="m24 2 4 15 14-9-9 14 13 2-13 5 9 12-14-8-4 13-5-13-12 8 8-14-13-3 14-5-9-12 13 9Z"/><circle cx="24" cy="24" r="5"/></>,
   infinity:<><path d="M24 24c-6-15-20-13-20 0s14 15 20 0 20-13 20 0-14 15-20 0Z"/><path d="m24 5 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/></>,
@@ -39,6 +42,7 @@ export function CosmeticMark({mark='X',cosmeticId}){
  const theme=cosmeticTheme(cosmeticId),isX=mark==='X';
  if(!theme)return <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="3.3" strokeLinecap="round" aria-hidden="true">{isX?<path d="m10 10 28 28M38 10 10 38"/>:<circle cx="24" cy="24" r="16"/>}</svg>;
  const x={
+  dominion:<><path d="m9 5 30 30 4 9-9-4L5 10ZM39 5 9 35l-4 9 9-4L43 10Z" fill="currentColor" fillOpacity=".12"/><path d="m11 7 28 31M37 7 9 38m-4-7 12 12m14 0 12-12"/><path d="m24 17 6 7-6 7-6-7Z" fill="var(--cosmetic-ink)"/><path d="m24 2 3 5 5-3-2 7H18l-2-7 5 3Z"/></>,
   ascendant:<><path d="m9 7 32 32-3 3L6 10ZM38 6 6 38l4 4L42 10Z"/><path d="m24 2 2 5 5 2-5 2-2 5-2-5-5-2 5-2ZM24 33l2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/></>,
   solar:<><path d="m9 6 33 33-3 3L6 9ZM39 6 6 39l3 3L42 9Z"/><path d="m17 5 2 5m12 28 2 5M5 17l5 2m28 12 5 2"/></>,
   abyss:<><path d="M7 7c2 14 32 20 34 34M41 7C39 21 9 27 7 41"/><path d="M8 17c8 0 6-10 12-9M28 40c6 1 4-10 12-9"/></>,
@@ -52,6 +56,7 @@ export function CosmeticMark({mark='X',cosmeticId}){
   nebula:<><path d="m11 11 26 26M37 11 11 37"/><ellipse cx="24" cy="24" rx="23" ry="9" transform="rotate(-35 24 24)"/><circle cx="41" cy="11" r="2"/></>,
  };
  const o={
+  dominion:<><circle cx="24" cy="25" r="15"/><circle cx="24" cy="25" r="11" strokeWidth="1"/><path d="M9 23 3 18l2 12 7 7m27-14 6-5-2 12-7 7M17 41l7 4 7-4"/><path d="m24 2 3 5 5-3-2 7H18l-2-7 5 3Z"/><path d="M29 16a10 10 0 0 0 0 18" strokeWidth="3"/></>,
   ascendant:<><circle cx="24" cy="24" r="12"/><ellipse cx="24" cy="24" rx="22" ry="8" transform="rotate(-35 24 24)"/><path d="m24 1 2 5 5 2-5 2-2 5-2-5-5-2 5-2ZM24 33l2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/></>,
   solar:<><circle cx="24" cy="24" r="13"/><path d="M24 3v5m0 32v5M3 24h5m32 0h5M9 9l3 3m24 24 3 3m0-30-3 3M12 36l-3 3"/></>,
   abyss:<><circle cx="24" cy="24" r="16"/><path d="M10 18c7-6 8 7 16 0s9 6 12 0M9 30c7-6 8 7 16 0s9 6 13 0"/></>,
@@ -69,6 +74,7 @@ export function CosmeticMark({mark='X',cosmeticId}){
 
 export function CosmeticFrame({cosmeticId,format='webp'}){
  const theme=cosmeticTheme(cosmeticId);if(!theme)return null;
+ if(theme.id==='dominion')return <span className={`${styles.frame} ${styles.dominion}`} style={cosmeticStyle(cosmeticId)} aria-hidden="true"><svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="50" cy="52" r="35"/><circle cx="50" cy="52" r="31" strokeWidth=".65" opacity=".65"/><path d="M20 33 6 25l5 20-7 13 13 13 8 13M80 33l14-8-5 20 7 13-13 13-8 13" fill="var(--cosmetic-ink)"/><path d="m8 35 9 8-4 15 9 10M92 35l-9 8 4 15-9 10" stroke="var(--cosmetic-secondary)"/><path d="m34 11 8 5L50 3l8 13 8-5-4 17H38Z" fill="var(--cosmetic-ink)"/><path d="M39 22h22m-11-9 3 5-3 4-3-4Z"/><path d="m41 87 9 9 9-9m-9-5 4 6-4 5-4-5Z" fill="var(--cosmetic-secondary)"/><path d="M22 31a35 35 0 0 1 20-12M78 73a35 35 0 0 1-18 12" className={styles.dominionGlint} stroke="#fff6df" strokeWidth="2.4"/></svg></span>;
  if(theme.id==='ascendant')return <span className={`${styles.frame} ${styles.ascendant}`} style={cosmeticStyle(cosmeticId)} aria-hidden="true"><AnimatedCosmeticImage cosmeticId={cosmeticId} format={format} alt=""/></span>;
  const outer={solar:'M50 3 61 13 76 10 79 25 93 31 87 46 97 59 84 67 83 83 67 84 59 97 46 87 31 93 25 79 10 76 13 61 3 50 13 39 10 24 25 21 31 7 46 13Z',abyss:'M50 5C68 0 80 18 85 30c19 3 11 27 5 40-5 15-27 20-40 25-17-2-30-13-35-25C-4 64 7 43 15 30 18 14 34 4 50 5Z',jade:'M50 7 64 12 77 23 87 36 93 50 87 64 77 77 64 87 50 93 36 87 23 77 13 64 7 50 13 36 23 23 36 13Z',storm:'M50 3 89 24 97 69 65 96 21 89 3 50 24 11Z',rose:'M50 7c12-12 29 0 27 12 17-3 30 15 16 31 14 15 0 34-16 30 2 17-18 26-27 13-10 13-29 4-27-13C6 84-7 65 7 50-7 34 6 17 23 19 22 3 40-5 50 7Z',clockwork:'M43 4h14l4 10 14 5 10-4 9 12-7 9 4 15 9 6-3 15-12 1-9 12-1 12-15 3-6-9-15-4-9 7-12-9 4-10-5-14L4 57V43l10-4 5-14-4-10 12-9 9 7 15-4Z',lunar:'M50 5C72 0 95 21 95 50S71 99 50 95C22 99 0 71 5 50 0 22 22 0 50 5Z',emberglass:'M50 3 87 15 97 50 87 87 50 97 15 87 3 50 15 15Z',arctic:'M50 2 80 10 91 35 98 50 91 65 80 90 50 98 20 90 9 65 2 50 9 35 20 10Z',nebula:'M50 7C79 7 94 31 94 50S80 94 50 94 6 79 6 50 20 7 50 7Z'};
  return <span className={`${styles.frame} ${styles[theme.id]||''}`} style={cosmeticStyle(cosmeticId)} aria-hidden="true"><svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.8"><path d={outer[theme.id]}/><circle cx="50" cy="50" r="37" strokeWidth=".7" opacity=".6"/><path d="M47 8h6M47 92h6M8 47v6M92 47v6" strokeWidth="2.8"/><circle cx="50" cy="8" r="3" fill="currentColor"/><circle cx="50" cy="92" r="3" fill="currentColor"/></svg><span className={styles.frameCrest}><CosmeticMotif name={theme.motif}/></span></span>;
@@ -76,5 +82,5 @@ export function CosmeticFrame({cosmeticId,format='webp'}){
 
 export function CosmeticArrival({cosmeticId,compact=true,format='webp'}){
  const theme=cosmeticTheme(cosmeticId);if(!theme)return null;
- return <span className={`${styles.arrival} ${styles[theme.id]||''} ${compact?styles.compact:''}`} style={cosmeticStyle(cosmeticId)} aria-hidden="true">{theme.id==='ascendant'&&<AnimatedCosmeticImage cosmeticId={cosmeticId} format={format} className={styles.ascendantPortal} alt=""/>}<span className={styles.arrivalRing}/>{[0,1,2,3,4,5].map(i=><span key={i} className={styles.particle} style={{'--particle-angle':`${i*60}deg`,'--particle-delay':`${i*.13}s`}}><CosmeticMotif name={i%2?theme.emotes[1]:theme.motif}/></span>)}{!compact&&<span className={styles.arrivalCore}><CosmeticMotif name={theme.motif}/></span>}</span>;
+ return <span className={`${styles.arrival} ${styles[theme.id]||''} ${compact?styles.compact:''}`} style={cosmeticStyle(cosmeticId)} aria-hidden="true">{theme.id==='ascendant'&&<AnimatedCosmeticImage cosmeticId={cosmeticId} format={format} className={styles.ascendantPortal} alt=""/>}{theme.id==='dominion'&&<><AnimatedCosmeticImage cosmeticId={cosmeticId} format={format} className={styles.dominionPortal} alt=""/><span className={styles.dominionOrbit}/><span className={styles.dominionGate}/></>}<span className={styles.arrivalRing}/>{[0,1,2,3,4,5].map(i=><span key={i} className={styles.particle} style={{'--particle-angle':`${i*60}deg`,'--particle-delay':`${i*.13}s`}}><CosmeticMotif name={i%2?theme.emotes[1]:theme.motif}/></span>)}{!compact&&<span className={styles.arrivalCore}><CosmeticMotif name={theme.motif}/></span>}</span>;
 }
