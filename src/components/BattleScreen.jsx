@@ -589,7 +589,8 @@ export default function BattleScreen({
     lastCast.current = game.revision;
     if (!powerCast) return;
     setCastShown(game.revision);
-    const attack = ATTACKS.has(powerCast.id) && !reduced;
+    // Screen shake is opt-in (Settings) and always off with reduced motion.
+    const attack = ATTACKS.has(powerCast.id) && !reduced && Boolean(settings.screenShake);
     if (attack) setShake(true);
     const clear = setTimeout(() => setCastShown(null), 1500),
       still = setTimeout(() => setShake(false), 700);

@@ -54,8 +54,11 @@ function outcomes(event, size) {
   const action = event.action || event,
     list = [];
   const at = (cell) => isEffectCell(cell, size);
-  for (const cell of event.destroyed || [])
+  // The engine records each loss as { cell, playerId, ... }; older events used a bare index.
+  for (const loss of event.destroyed || []) {
+    const cell = typeof loss === "object" ? loss?.cell : loss;
     if (at(cell)) list.push({ cell, text: "Destroyed", tone: "hit" });
+  }
   for (const cell of event.shieldCells || [])
     if (at(cell)) list.push({ cell, text: "Blocked!", tone: "block" });
   if (event.reflected && at(event.reflectionCell))

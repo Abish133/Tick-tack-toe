@@ -1,5 +1,6 @@
 "use client";
 
+import { displayName } from "../lib/display-name";
 import AnimatedCosmeticImage from "./AnimatedCosmeticImage";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -68,6 +69,8 @@ export default function SocialPanel({
       await task();
       if (message) onNotice(message);
       await load();
+      // The shared header and dock badges count pending requests too.
+      window.dispatchEvent(new Event("ea:rewards-changed"));
     } catch (e) {
       onError(e.message);
     } finally {
@@ -82,8 +85,12 @@ export default function SocialPanel({
         const found = await api(
           `/players/search?q=${encodeURIComponent(name.trim())}`,
         );
+        const typed = name.trim().toLowerCase();
+        // Guests are shown as "Spark #A1B2", so that shown name counts as exact too.
         const exact = found.players?.find(
-          (p) => p.name.toLowerCase() === name.trim().toLowerCase(),
+          (p) =>
+            p.name.toLowerCase() === typed ||
+            displayName(p.name).toLowerCase() === typed,
         );
         if (exact) {
           await api("/friends/request", "POST", { userId: exact.id });

@@ -90,6 +90,19 @@ export default function SettingsScreen({
     }, 600);
     return () => clearTimeout(timer);
   }, [settings]);
+  // Closing within the debounce must not drop the change: save what is still pending.
+  const latest = useRef(settings);
+  latest.current = settings;
+  useEffect(
+    () => () => {
+      const current = JSON.stringify(latest.current);
+      if (current !== saved.current) {
+        saved.current = current;
+        saveRef.current?.();
+      }
+    },
+    [],
+  );
   // The device setting no longer silences the game; it is surfaced here instead.
   const [systemReduced, setSystemReduced] = useState(false);
   useEffect(() => {

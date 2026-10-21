@@ -33,6 +33,9 @@ export default function usePendingCounts(api, user, pathname) {
   const [counts, setCounts] = useState(EMPTY),
     [tick, setTick] = useState(0),
     last = useRef({ at: 0, balance: "" }),
+    // Only the newest refresh may write counts: a slow older reply (sent before a claim)
+    // must not bring a cleared dot back.
+    latestRequest = useRef(0),
     currentUser = useRef(user?.id);
   currentUser.current = user?.id;
   const reload = useCallback(() => setTick((value) => value + 1), []);
@@ -70,12 +73,13 @@ export default function usePendingCounts(api, user, pathname) {
     const withFriends =
       pathname === "/friends" || now - (last.current.friendsAt || 0) > 60000;
     if (withFriends) last.current.friendsAt = now;
+    const request = ++latestRequest.current;
     Promise.allSettled([
       api("/missions"),
       api("/season-pass"),
       withFriends ? api("/friends") : Promise.resolve(null),
     ]).then(([missions, season, friends]) => {
-      if (currentUser.current !== requestedFor) return;
+      if (currentUser.current !== requestedFor || request !== latestRequest.current) return;
       const m = missions.status === "fulfilled" ? missions.value : null,
         s = season.status === "fulfilled" ? season.value : null,
         f = friends.status === "fulfilled" ? friends.value : null;
@@ -109,13 +113,15 @@ export default function usePendingCounts(api, user, pathname) {
   }, [api, user?.id, routeKey, balanceKey]);
   // Optimistic: clear a dot the moment its reward is claimed.
   const clear = useCallback(
-    (key) =>
+    (key) => {
+      latestRequest.current += 1;
       setCounts((current) => {
         const next = { ...current, [key]: 0 };
         next.journey = next.daily + next.missions + next.season;
         next.social = next.requests + next.invites;
         return next;
-      }),
+      });
+    },
     [],
   );
   return { ...counts, reload, clear };

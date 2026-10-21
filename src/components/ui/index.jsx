@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   AnimatePresence,
   motion,
@@ -481,6 +482,7 @@ export function CustomSelect({
   const [open, setOpen] = useState(false),
     [position, setPosition] = useState({}),
     root = useRef(null),
+    list = useRef(null),
     listId = useId(),
     selected = options.find((item) => item.value === value);
   useEffect(() => {
@@ -507,10 +509,22 @@ export function CustomSelect({
       });
     }
     const outside = (event) => {
-      if (!root.current?.contains(event.target)) setOpen(false);
+      if (!root.current?.contains(event.target) && !list.current?.contains(event.target))
+        setOpen(false);
+    };
+    // The list is placed in viewport coordinates, so it closes when the page under it
+    // moves (scrolling outside the list, resizing) instead of drifting away.
+    const moved = (event) => {
+      if (!list.current?.contains(event.target)) setOpen(false);
     };
     document.addEventListener("pointerdown", outside);
-    return () => document.removeEventListener("pointerdown", outside);
+    window.addEventListener("scroll", moved, true);
+    window.addEventListener("resize", moved);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      window.removeEventListener("scroll", moved, true);
+      window.removeEventListener("resize", moved);
+    };
   }, [open]);
   return (
     <div className={`${styles.select} ${className}`} ref={root}>
@@ -545,13 +559,23 @@ export function CustomSelect({
         {selected?.label || "Choose"}
         <ChevronDown size={18} />
       </button>
-      {open && (
+      {/* Rendered on <body>: a transformed or filtered ancestor (screen transitions,
+          dialogs) would otherwise move a fixed list or clip it. */}
+      {open && createPortal(
         <div
+          ref={list}
           className={`${styles.frame} ${styles.selectList}`}
           style={position}
           id={listId}
           role="listbox"
           aria-label={label}
+          onKeyDown={(event) => {
+            if (event.key !== "Escape") return;
+            event.preventDefault();
+            event.stopPropagation();
+            setOpen(false);
+            root.current?.querySelector('[role="combobox"]')?.focus();
+          }}
         >
           {options.map((item) => (
             <button
@@ -571,7 +595,8 @@ export function CustomSelect({
               {value === item.value && <Check size={18} />}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
