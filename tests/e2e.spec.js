@@ -309,6 +309,10 @@ test("two human accounts complete ranked play with synchronized powers, cups and
     ).toHaveAttribute("data-value", "IN");
     await b.getByRole("button", { name: "Cosmetic shop", exact: true }).click();
     await connected(b);
+    // Premium collections fill the first featured page; find the item by name.
+    await b
+      .getByLabel("Search cosmetics", { exact: true })
+      .fill("Ember Sovereign");
     const ember = b.locator(".shop-card").filter({
       has: b.getByRole("heading", { name: "Ember Sovereign", exact: true }),
     });
